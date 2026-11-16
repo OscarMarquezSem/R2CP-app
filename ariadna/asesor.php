@@ -1,0 +1,219 @@
+<?php
+/**
+ * ARIADNA · Detalle de un asesor (panel de la oficina).
+ */
+declare(strict_types=1);
+require __DIR__ . '/inc/app.php';
+
+enforce_https();
+$u = require_user();
+$office = panel_office($u);
+$qs = office_qs($office);
+$amp = $qs ? '&' . $qs : '';
+$adv = office_advisor($office, (int)($_GET['id'] ?? $_POST['id'] ?? 0));
+$self = 'asesor.php?id=' . (int)$adv['id'] . $amp;
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_check();
+    $act = post('action');
+    if ($act === 'edit') {
+        $name = post('name'); $phone = post('phone'); $email = mb_strtolower(post('email'));
+        $start = post('start_date');
+        $wd = array_map('intval', (array)($_POST['workdays'] ?? []));
+        $override = !empty($_POST['custom_days']) && $wd ? implode(',', parse_workdays(implode(',', $wd))) : null;
+        $tmode = post('training_mode');
+        $tdate = post('training_date');
+        if ($name === '' || strlen(preg_replace('/\D/', '', $phone)) < 10 || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $start)
+            || ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL))) {
+            flash('Revisa nombre, celular (10 dígitos), correo y fecha de inicio.', 'err');
+            redirect($self);
+        }
+        q('UPDATE advisors SET name = ?, phone = ?, email = ?, start_date = ?, workdays_override = ? WHERE id = ?',
+            [$name, $phone, $email ?: null, $start, $override, $adv['id']]);
+        if ($tmode === 'manual' && preg_match('/^\d{4}-\d{2}-\d{2}$/', $tdate)) {
+            q('UPDATE advisors SET training_date = ?, training_manual = 1 WHERE id = ?', [$tdate, $adv['id']]);
+        } else {
+            $a2 = one('SELECT * FROM advisors WHERE id = ?', [$adv['id']]);
+            q('UPDATE advisors SET training_date = ?, training_manual = 0 WHERE id = ?', [find_training_date($office, $a2), $adv['id']]);
+        }
+        flash('Cambios guardados.');
+    } elseif ($act === 'regen') {
+        q('UPDATE advisors SET token = ? WHERE id = ?', [new_token(), $adv['id']]);
+        flash('Se generó un enlace nuevo. El anterior ya no funciona: envíale el nuevo por WhatsApp.');
+    } elseif ($act === 'reset_pin') {
+        q('UPDATE advisors SET pin_hash = NULL WHERE id = ?', [$adv['id']]);
+        q('DELETE FROM login_attempts WHERE k = ?', ['pin:' . $adv['id']]);
+        flash('PIN restablecido. La próxima vez que entre creará uno nuevo.');
+    } elseif ($act === 'toggle') {
+        q('UPDATE advisors SET active = 1 - active WHERE id = ?', [$adv['id']]);
+        flash((int)$adv['active'] ? 'Asesor dado de baja. Su enlace deja de funcionar.' : 'Asesor reactivado.');
+    } elseif ($act === 'decision') {
+        $d = post('decision');
+        if (in_array($d, ['continua', 'no_continua', 'pendiente'], true)) {
+            q('UPDATE advisors SET decision = ?, decision_note = ?, decision_by = ?, decision_at = NOW() WHERE id = ?',
+                [$d, mb_substr(post('decision_note'), 0, 500), $u['id'], $adv['id']]);
+            flash('Decisión registrada.');
+        }
+    }
+    redirect($self);
+}
+
+$s = advisor_stats($adv, $office);
+$st = $s['status'];
+$wdOffice = parse_workdays($office['workdays']);
+$wdAdv = advisor_workdays($adv, $office);
+$reviews = [];
+foreach (all('SELECT * FROM week_reviews WHERE advisor_id = ?', [$adv['id']]) as $r) $reviews[(int)$r['week_no']] = json_decode((string)$r['answers'], true) ?: [];
+
+// Nombres de actividades para el historial
+$titles = ['CI' => 'Capacitación interna'];
+foreach (routine_items() as $r) $titles[$r['key']] = $r['title'];
+foreach (all('SELECT id, title FROM plan_activities') as $r) $titles['A' . $r['id']] = $r['title'];
+
+page_start($adv['name'], ['nav' => $u, 'office' => $office, 'active' => 'oficina', 'wide' => true]);
+?>
+<p><a href="oficina.php<?= $qs ? '?' . $qs : '' ?>">← Todos los asesores</a></p>
+<div class="page-head">
+  <div>
+    <span class="eyebrow"><?= !$s['started'] ? 'Inicia el ' . h(fecha_larga($adv['start_date'])) : ($s['finished'] ? 'Terminó el programa' : 'Semana ' . (int)$s['week'] . ' · ' . h($s['ctx'] ? ctx_label($s['ctx']) : '')) ?></span>
+    <h1><?= h($adv['name']) ?> <?= status_badge($st['color'], $st['reason']) ?></h1>
+    <p class="muted"><?= h($st['reason']) ?><?= !(int)$adv['active'] ? ' · <b>Dado de baja</b>' : '' ?></p>
+  </div>
+  <div class="actions">
+    <a class="btn btn-wa" href="<?= h(wa_link($adv, $office)) ?>" target="_blank" rel="noopener">Enviar enlace por WhatsApp</a>
+    <button class="btn" type="button" data-copy="advlink">Copiar enlace</button>
+  </div>
+</div>
+<input type="text" id="advlink" value="<?= h(advisor_link($adv)) ?>" readonly class="small" style="margin-bottom:16px">
+
+<?php if ($st['action']): ?><div class="box warn"><b>Acción sugerida:</b> <?= h($st['action']) ?></div><?php endif; ?>
+
+<?php if ($s['closed_weeks'] >= 3 || $adv['decision']): $cp = checkpoint($adv, $s); ?>
+<div class="card">
+  <h2>Punto de control (Semana 3): <?= $cp['pass'] ? '<span class="ok">Cumple</span>' : '<span style="color:var(--red)">No cumple</span>' ?></h2>
+  <ul><?php foreach ($cp['checks'] as [$l, $ok]) echo '<li>' . ($ok ? '✅' : '⬜') . ' ' . h($l) . '</li>'; ?></ul>
+  <form method="post" class="form">
+    <?= csrf_field() ?><input type="hidden" name="action" value="decision"><input type="hidden" name="id" value="<?= (int)$adv['id'] ?>">
+    <?php if (is_admin($u)): ?><input type="hidden" name="office" value="<?= (int)$office['id'] ?>"><?php endif; ?>
+    <label>¿Continúa en el programa?
+      <select name="decision">
+        <option value="pendiente" <?= ($adv['decision'] ?? 'pendiente') === 'pendiente' ? 'selected' : '' ?>>Pendiente de decidir</option>
+        <option value="continua" <?= $adv['decision'] === 'continua' ? 'selected' : '' ?>>Sí, continúa</option>
+        <option value="no_continua" <?= $adv['decision'] === 'no_continua' ? 'selected' : '' ?>>No continúa (su enlace se pausa)</option>
+      </select></label>
+    <label>Comentario<input name="decision_note" maxlength="500" value="<?= h($adv['decision_note'] ?? '') ?>"></label>
+    <button class="btn btn-main">Guardar decisión</button>
+  </form>
+</div>
+<?php endif; ?>
+
+<div class="cols">
+  <div class="card">
+    <h2>Resultados acumulados</h2>
+    <?php kpi_grid($s); ?>
+    <p class="small muted">Actividades cumplidas: <?= $s['done'] ?> de <?= $s['assigned'] ?> (<?= $s['pct'] ?>%) · Días registrados: <?= $s['workdays_logged'] ?> de <?= $s['workdays_elapsed'] ?></p>
+    <h3>Logros</h3>
+    <ul>
+      <li>Open House: <?= (int)$adv['oh_done'] ? 'Sí, ' . h(fecha_corta($adv['oh_date'])) . ' · ' . (int)$adv['oh_attendees'] . ' asistentes' : 'Aún no' ?></li>
+      <li>Calidad de la captación: precio <?= (int)$adv['cap_precio'] ? '✅' : '⬜' ?> · documentos <?= (int)$adv['cap_docs'] ? '✅' : '⬜' ?> · disponibilidad <?= (int)$adv['cap_disp'] ? '✅' : '⬜' ?></li>
+      <li>Renta cerrada: <?= (int)$adv['renta_closed'] ? 'Sí ' . h(fecha_corta($adv['renta_date'])) : 'Aún no' ?></li>
+    </ul>
+  </div>
+  <div class="card">
+    <h2>Evaluación: <?= (int)$s['evaluation']['total'] ?> / 100</h2>
+    <p class="muted"><?= h($s['evaluation']['level_text']) ?></p>
+    <div class="tbl-wrap"><?php eval_table($s['evaluation']); ?></div>
+  </div>
+</div>
+
+<h2 class="sec">Historial diario</h2>
+<div class="tbl-wrap">
+<table class="tbl">
+  <thead><tr><th>Fecha</th><th>Día</th><th>Actividades y resultados</th><th>Números</th></tr></thead>
+  <tbody>
+  <?php
+  $dates = array_keys($s['schedule']);
+  rsort($dates);
+  $shown = 0;
+  foreach ($dates as $d):
+      if ($d > $s['today']) continue;
+      $ctx = $s['schedule'][$d];
+      $l = $s['logs'][$d] ?? null;
+      if ($ctx['type'] === 'rest' && !$l) continue;
+      $shown++;
+  ?>
+    <tr>
+      <td><b><?= h(fecha_corta($d)) ?></b><br><span class="small muted"><?= h(DIAS[iso_weekday($d)]) ?></span></td>
+      <td>S<?= (int)$ctx['week'] ?> · <?= h(ctx_label($ctx)) ?></td>
+      <td>
+        <?php if (!$l): ?>
+          <span class="muted"><?= $d === $s['today'] ? 'Aún no registra hoy' : 'Sin registro' ?></span>
+        <?php else: ?>
+          <?php foreach ($l['items'] as $k => $it): if (!(int)$it['done'] && !$it['result_text'] && !$it['photo']) continue; ?>
+            <div class="small"><?= (int)$it['done'] ? '✅' : '⬜' ?> <?= h($titles[$k] ?? $k) ?>
+              <?php if ($it['result_text']): ?><br><span class="muted">“<?= h($it['result_text']) ?>”</span><?php endif; ?>
+              <?php if ($it['photo']): ?><br><a href="foto.php?id=<?= (int)$it['id'] ?>" target="_blank"><img class="photo-thumb" src="foto.php?id=<?= (int)$it['id'] ?>" alt="Foto"></a><?php endif; ?>
+            </div>
+          <?php endforeach; ?>
+          <?php if (trim((string)$l['note']) !== ''): ?><div class="small">📝 <?= h($l['note']) ?></div><?php endif; ?>
+        <?php endif; ?>
+      </td>
+      <td class="small"><?php if ($l) { $parts = []; foreach (RESULT_FIELDS as $f => $lab) if ((int)$l[$f]) $parts[] = $lab . ': ' . (int)$l[$f]; echo $parts ? h(implode(' · ', $parts)) : '—'; } ?></td>
+    </tr>
+  <?php endforeach; ?>
+  <?php if (!$shown): ?><tr><td colspan="4" class="muted">Todavía no hay días que mostrar.</td></tr><?php endif; ?>
+  </tbody>
+</table>
+</div>
+
+<?php if ($reviews): ?>
+<h2 class="sec">Repasos semanales</h2>
+<div class="cols">
+<?php foreach ($reviews as $w => $ans):
+    $qs2 = array_values(array_filter(array_map('trim', explode("\n", (string)(plan_weeks()[$w]['review_questions'] ?? ''))))); ?>
+  <div class="card"><h3>Semana <?= (int)$w ?></h3>
+    <?php foreach ($qs2 as $i => $qq): ?><p class="small"><b><?= h($qq) ?></b><br><?= h($ans[$i] ?? '—') ?></p><?php endforeach; ?>
+  </div>
+<?php endforeach; ?>
+</div>
+<?php endif; ?>
+
+<div class="card">
+  <h2>Datos del asesor</h2>
+  <form method="post" class="form">
+    <?= csrf_field() ?><input type="hidden" name="action" value="edit"><input type="hidden" name="id" value="<?= (int)$adv['id'] ?>">
+    <?php if (is_admin($u)): ?><input type="hidden" name="office" value="<?= (int)$office['id'] ?>"><?php endif; ?>
+    <div class="grid2">
+      <label>Nombre<input name="name" required value="<?= h($adv['name']) ?>"></label>
+      <label>Celular<input type="tel" name="phone" required value="<?= h($adv['phone']) ?>"></label>
+      <label>Correo<input type="email" name="email" value="<?= h($adv['email'] ?? '') ?>"></label>
+      <label>Fecha de inicio<input type="date" name="start_date" required value="<?= h($adv['start_date']) ?>"></label>
+    </div>
+    <label class="check"><input type="checkbox" name="custom_days" value="1" <?= $adv['workdays_override'] ? 'checked' : '' ?>> Este asesor tiene días laborables distintos a los de la oficina (<?= h(workdays_label($wdOffice)) ?>)</label>
+    <div class="days-pick">
+      <?php foreach (DIAS as $n => $dn): ?><label><input type="checkbox" name="workdays[]" value="<?= $n ?>" <?= in_array($n, $wdAdv, true) ? 'checked' : '' ?>> <?= h(ucfirst(mb_substr($dn, 0, 3))) ?></label><?php endforeach; ?>
+    </div>
+    <label>Capacitación interna
+      <select name="training_mode">
+        <option value="auto" <?= !(int)$adv['training_manual'] ? 'selected' : '' ?>>Automática: siguiente fecha de la oficina<?= $adv['training_date'] && !(int)$adv['training_manual'] ? ' (' . h(fecha_larga($adv['training_date'])) . ')' : '' ?></option>
+        <option value="manual" <?= (int)$adv['training_manual'] ? 'selected' : '' ?>>Elegir fecha a mano</option>
+      </select></label>
+    <label>Fecha (si eliges a mano)<input type="date" name="training_date" value="<?= h($adv['training_date'] ?? '') ?>"></label>
+    <?php if (!$adv['training_date']): ?><p class="small" style="color:var(--terra-d)">Sin fecha de capacitación interna. Prográmala en Configuración.</p><?php endif; ?>
+    <button class="btn btn-main">Guardar cambios</button>
+  </form>
+  <hr style="border:0;border-top:1px solid var(--line);margin:20px 0">
+  <div class="actions">
+    <?php foreach ([['regen', 'Generar enlace nuevo', '¿Generar un enlace nuevo? El anterior dejará de funcionar.'],
+                    ['reset_pin', 'Restablecer PIN', '¿Restablecer el PIN de este asesor?'],
+                    ['toggle', (int)$adv['active'] ? 'Dar de baja' : 'Reactivar', (int)$adv['active'] ? '¿Dar de baja a este asesor? Su enlace dejará de funcionar.' : '¿Reactivar a este asesor?']] as [$a, $label, $conf]):
+        if ($a === 'reset_pin' && !(int)$office['pin_enabled']) continue; ?>
+      <form method="post" class="inline-form" data-confirm="<?= h($conf) ?>">
+        <?= csrf_field() ?><input type="hidden" name="action" value="<?= $a ?>"><input type="hidden" name="id" value="<?= (int)$adv['id'] ?>">
+        <?php if (is_admin($u)): ?><input type="hidden" name="office" value="<?= (int)$office['id'] ?>"><?php endif; ?>
+        <button class="btn btn-sm <?= $a === 'toggle' && (int)$adv['active'] ? 'btn-danger' : 'btn-ghost' ?>"><?= h($label) ?></button>
+      </form>
+    <?php endforeach; ?>
+  </div>
+</div>
+<?php page_end();
