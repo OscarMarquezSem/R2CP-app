@@ -1,6 +1,6 @@
 <?php
 /**
- * ARIADNA · Configuración de la oficina: días laborables, PIN y capacitación interna.
+ * ARIADNA · Configuración de la oficina: días hábiles, PIN y capacitación interna.
  */
 declare(strict_types=1);
 require __DIR__ . '/inc/app.php';
@@ -16,10 +16,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $act = post('action');
     if ($act === 'general') {
         $wd = parse_workdays(implode(',', array_map('intval', (array)($_POST['workdays'] ?? []))));
-        if (!$wd) { flash('Elige al menos un día laborable.', 'err'); redirect($self); }
+        if (!$wd) { flash('Elige al menos un día hábil.', 'err'); redirect($self); }
         $tw = (int)post('training_weekday');
-        q('UPDATE offices SET workdays = ?, pin_enabled = ?, training_weekday = ? WHERE id = ?',
-            [implode(',', $wd), !empty($_POST['pin_enabled']) ? 1 : 0, ($tw >= 1 && $tw <= 7) ? $tw : null, $office['id']]);
+        $hm = max(5, min(13, (int)post('remind_morning_hour')));
+        $hn = max(14, min(23, (int)post('remind_night_hour')));
+        q('UPDATE offices SET workdays = ?, pin_enabled = ?, training_weekday = ?, remind_morning = ?, remind_morning_hour = ?, remind_night = ?, remind_night_hour = ? WHERE id = ?',
+            [implode(',', $wd), !empty($_POST['pin_enabled']) ? 1 : 0, ($tw >= 1 && $tw <= 7) ? $tw : null,
+             !empty($_POST['remind_morning']) ? 1 : 0, $hm, !empty($_POST['remind_night']) ? 1 : 0, $hn, $office['id']]);
         flash('Configuración guardada.');
     } elseif ($act === 'add_date') {
         $d = post('tdate');
@@ -50,18 +53,27 @@ $hidden = is_admin($u) ? '<input type="hidden" name="office" value="' . (int)$of
 <div class="card">
   <form method="post" class="form">
     <?= csrf_field() . $hidden ?><input type="hidden" name="action" value="general">
-    <h2>Días laborables</h2>
+    <h2>Días hábiles</h2>
     <p class="small muted">Los días que no marques son de descanso: Ariadna no muestra actividades ni envía recordatorios. Puedes ajustar los días de un asesor en su detalle.</p>
     <div class="days-pick">
       <?php foreach (DIAS as $n => $dn): ?><label><input type="checkbox" name="workdays[]" value="<?= $n ?>" <?= in_array($n, $wd, true) ? 'checked' : '' ?>> <?= h(ucfirst($dn)) ?></label><?php endforeach; ?>
     </div>
     <h2>Capacitación interna</h2>
-    <p class="small muted">Ariadna asigna a cada asesor nuevo la siguiente fecha disponible después de su arranque. Ese día ve «Capacitación interna: políticas y documentos de la oficina» y sus actividades se recorren al siguiente día laborable.</p>
+    <p class="small muted">Ariadna asigna a cada asesor nuevo la siguiente fecha disponible después de su arranque. Ese día ve «Capacitación interna: políticas y documentos de la oficina» y sus actividades se recorren al siguiente día hábil.</p>
     <label>Día fijo cada semana
       <select name="training_weekday">
         <option value="0">Sin día fijo</option>
         <?php foreach (DIAS as $n => $dn): ?><option value="<?= $n ?>" <?= (int)$office['training_weekday'] === $n ? 'selected' : '' ?>>Todos los <?= h($dn) ?></option><?php endforeach; ?>
       </select></label>
+    <h2>Avisos a los asesores</h2>
+    <p class="small muted">Solo en días hábiles. Llegan como notificación del celular o, si el asesor no la activó, por correo.</p>
+    <div class="grid2">
+      <label class="check"><input type="checkbox" name="remind_morning" value="1" <?= (int)$office['remind_morning'] ? 'checked' : '' ?>> Aviso de la mañana: qué le toca hoy</label>
+      <label>Hora<select name="remind_morning_hour"><?php for ($i = 6; $i <= 12; $i++) echo '<option value="' . $i . '"' . ((int)$office['remind_morning_hour'] === $i ? ' selected' : '') . '>' . $i . ':00</option>'; ?></select></label>
+      <label class="check"><input type="checkbox" name="remind_night" value="1" <?= (int)$office['remind_night'] ? 'checked' : '' ?>> Aviso de la noche: solo si aún no guardó su día</label>
+      <label>Hora<select name="remind_night_hour"><?php for ($i = 17; $i <= 22; $i++) echo '<option value="' . $i . '"' . ((int)$office['remind_night_hour'] === $i ? ' selected' : '') . '>' . $i . ':00</option>'; ?></select></label>
+    </div>
+    <p class="small muted">Si se le olvida, a la mañana siguiente Ariadna le propone registrar el día anterior, hasta las <?= (int)setting('ayer_until_hour') ?>:00.</p>
     <h2>Seguridad</h2>
     <label class="check"><input type="checkbox" name="pin_enabled" value="1" <?= (int)$office['pin_enabled'] ? 'checked' : '' ?>> Pedir a los asesores un PIN de 4 dígitos además de su enlace</label>
     <button class="btn btn-main">Guardar</button>

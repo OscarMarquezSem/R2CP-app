@@ -13,6 +13,11 @@ CREATE TABLE IF NOT EXISTS offices (
   workdays VARCHAR(20) NOT NULL DEFAULT '1,2,3,4,5',
   pin_enabled TINYINT(1) NOT NULL DEFAULT 0,
   training_weekday TINYINT NULL,
+  oh_mode VARCHAR(20) NOT NULL DEFAULT 'open_house',
+  remind_morning TINYINT(1) NOT NULL DEFAULT 1,
+  remind_morning_hour TINYINT NOT NULL DEFAULT 9,
+  remind_night TINYINT(1) NOT NULL DEFAULT 1,
+  remind_night_hour TINYINT NOT NULL DEFAULT 20,
   last_report_date DATE NULL,
   active TINYINT(1) NOT NULL DEFAULT 1,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -24,6 +29,21 @@ CREATE TABLE IF NOT EXISTS office_training_dates (
   tdate DATE NOT NULL,
   UNIQUE KEY uq_office_date (office_id, tdate),
   CONSTRAINT fk_otd_office FOREIGN KEY (office_id) REFERENCES offices(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Sesiones en la oficina: la oficina pone fecha y hora a cada tema del plan.
+CREATE TABLE IF NOT EXISTS office_sessions (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  office_id INT UNSIGNED NOT NULL,
+  activity_id INT UNSIGNED NOT NULL,
+  sdate DATE NOT NULL,
+  stime TIME NULL,
+  who VARCHAR(150) NULL,
+  place VARCHAR(150) NULL,
+  repeat_weekly TINYINT(1) NOT NULL DEFAULT 0,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY idx_office_act (office_id, activity_id),
+  CONSTRAINT fk_os_office FOREIGN KEY (office_id) REFERENCES offices(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS users (
@@ -72,7 +92,8 @@ CREATE TABLE IF NOT EXISTS advisors (
   status_color ENUM('verde','amarillo','rojo') NOT NULL DEFAULT 'verde',
   status_reason VARCHAR(255) NULL,
   closed_weeks TINYINT NOT NULL DEFAULT 0,
-  last_reminder_date DATE NULL,
+  last_morning_reminder DATE NULL,
+  last_night_reminder DATE NULL,
   decision ENUM('pendiente','continua','no_continua') NULL,
   decision_note VARCHAR(500) NULL,
   decision_by INT UNSIGNED NULL,
@@ -82,6 +103,34 @@ CREATE TABLE IF NOT EXISTS advisors (
   UNIQUE KEY uq_token (token),
   KEY idx_office (office_id),
   CONSTRAINT fk_adv_office FOREIGN KEY (office_id) REFERENCES offices(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Metas propias del asesor por semana (contactos al día; lo demás por semana).
+CREATE TABLE IF NOT EXISTS advisor_goals (
+  advisor_id INT UNSIGNED NOT NULL,
+  week_no TINYINT NOT NULL,
+  contactos INT NOT NULL DEFAULT 0,
+  tratos INT NOT NULL DEFAULT 0,
+  analizadas INT NOT NULL DEFAULT 0,
+  promovidas INT NOT NULL DEFAULT 0,
+  citas INT NOT NULL DEFAULT 0,
+  captaciones INT NOT NULL DEFAULT 0,
+  low_accepted TINYINT(1) NOT NULL DEFAULT 0,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (advisor_id, week_no),
+  CONSTRAINT fk_goal_adv FOREIGN KEY (advisor_id) REFERENCES advisors(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS push_subscriptions (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  advisor_id INT UNSIGNED NOT NULL,
+  endpoint VARCHAR(600) NOT NULL,
+  endpoint_hash CHAR(64) NOT NULL,
+  p256dh VARCHAR(200) NOT NULL,
+  auth VARCHAR(100) NOT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_endpoint (endpoint_hash),
+  CONSTRAINT fk_push_adv FOREIGN KEY (advisor_id) REFERENCES advisors(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS plan_weeks (
@@ -108,7 +157,9 @@ CREATE TABLE IF NOT EXISTS plan_activities (
   title VARCHAR(255) NOT NULL,
   guide TEXT NULL,
   minutes INT NULL,
-  kind ENUM('check','foto','agenda','repaso') NOT NULL DEFAULT 'check',
+  kind VARCHAR(12) NOT NULL DEFAULT 'check',
+  video_url VARCHAR(500) NULL,
+  help_links TEXT NULL,
   active TINYINT(1) NOT NULL DEFAULT 1,
   KEY idx_wd (week_no, day_no, sort)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -126,6 +177,7 @@ CREATE TABLE IF NOT EXISTS daily_logs (
   promovidas INT NOT NULL DEFAULT 0,
   citas INT NOT NULL DEFAULT 0,
   captaciones INT NOT NULL DEFAULT 0,
+  analisis TEXT NULL,
   note TEXT NULL,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -151,6 +203,12 @@ CREATE TABLE IF NOT EXISTS week_reviews (
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (advisor_id, week_no),
   CONSTRAINT fk_rev_adv FOREIGN KEY (advisor_id) REFERENCES advisors(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Avisos que solo se envían una vez (metas bajas, temas sin fecha…).
+CREATE TABLE IF NOT EXISTS notices (
+  k VARCHAR(190) NOT NULL PRIMARY KEY,
+  at DATETIME NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS email_log (

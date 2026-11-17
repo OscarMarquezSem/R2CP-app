@@ -86,9 +86,9 @@ page_start($adv['name'], ['nav' => $u, 'office' => $office, 'active' => 'oficina
 </div>
 <input type="text" id="advlink" value="<?= h(advisor_link($adv)) ?>" readonly class="small" style="margin-bottom:16px">
 
-<?php if ($st['action']): ?><div class="box warn"><b>Acción sugerida:</b> <?= h($st['action']) ?></div><?php endif; ?>
+<?php if ($st['action']): ?><div class="box warn"><b>Ariadna te sugiere:</b> <?= h($st['action']) ?></div><?php endif; ?>
 
-<?php if ($s['closed_weeks'] >= 3 || $adv['decision']): $cp = checkpoint($adv, $s); ?>
+<?php if ($s['closed_weeks'] >= 3 || $adv['decision']): $cp = checkpoint($adv, $s, $office); ?>
 <div class="card">
   <h2>Punto de control (Semana 3): <?= $cp['pass'] ? '<span class="ok">Cumple</span>' : '<span style="color:var(--red)">No cumple</span>' ?></h2>
   <ul><?php foreach ($cp['checks'] as [$l, $ok]) echo '<li>' . ($ok ? '✅' : '⬜') . ' ' . h($l) . '</li>'; ?></ul>
@@ -114,7 +114,7 @@ page_start($adv['name'], ['nav' => $u, 'office' => $office, 'active' => 'oficina
     <p class="small muted">Actividades cumplidas: <?= $s['done'] ?> de <?= $s['assigned'] ?> (<?= $s['pct'] ?>%) · Días registrados: <?= $s['workdays_logged'] ?> de <?= $s['workdays_elapsed'] ?></p>
     <h3>Logros</h3>
     <ul>
-      <li>Open House: <?= (int)$adv['oh_done'] ? 'Sí, ' . h(fecha_corta($adv['oh_date'])) . ' · ' . (int)$adv['oh_attendees'] . ' asistentes' : 'Aún no' ?></li>
+      <li><?= h(oh_label($office)) ?>: <?= (int)$adv['oh_done'] ? 'Sí, ' . h(fecha_corta($adv['oh_date'])) . ' · ' . (int)$adv['oh_attendees'] . ' asistentes' : 'Aún no' ?></li>
       <li>Calidad de la captación: precio <?= (int)$adv['cap_precio'] ? '✅' : '⬜' ?> · documentos <?= (int)$adv['cap_docs'] ? '✅' : '⬜' ?> · disponibilidad <?= (int)$adv['cap_disp'] ? '✅' : '⬜' ?></li>
       <li>Renta cerrada: <?= (int)$adv['renta_closed'] ? 'Sí ' . h(fecha_corta($adv['renta_date'])) : 'Aún no' ?></li>
     </ul>
@@ -124,6 +124,22 @@ page_start($adv['name'], ['nav' => $u, 'office' => $office, 'active' => 'oficina
     <p class="muted"><?= h($s['evaluation']['level_text']) ?></p>
     <div class="tbl-wrap"><?php eval_table($s['evaluation']); ?></div>
   </div>
+</div>
+
+<h2 class="sec">Metas de cada semana</h2>
+<div class="tbl-wrap">
+<table class="tbl">
+  <thead><tr><th>Semana</th><?php foreach (RESULT_FIELDS as $f => $l) echo '<th>' . h($f === 'contactos' ? 'Contactos al día' : $l) . '</th>'; ?><th></th></tr></thead>
+  <tbody>
+  <?php for ($w = 2; $w <= PROGRAM_WEEKS; $w++): $g = $s['goals'][$w] ?? null; ?>
+    <tr><td><b>S<?= $w ?></b></td>
+      <?php foreach (RESULT_FIELDS as $f => $l): $min = goal_minimum($w, $f); ?>
+        <td class="n"><?php if ($g): ?><span style="<?= (int)$g[$f] < $min ? 'color:var(--terra-d);font-weight:700' : '' ?>"><?= (int)$g[$f] ?></span><?php else: ?><span class="muted">—</span><?php endif; ?><span class="small muted"> / mín. <?= $min ?></span></td>
+      <?php endforeach; ?>
+      <td class="small"><?= $g && (int)$g['low_accepted'] ? '<b style="color:var(--terra-d)">Metas bajas</b>' : ($g ? '' : '<span class="muted">Aún no las pone</span>') ?></td></tr>
+  <?php endfor; ?>
+  </tbody>
+</table>
 </div>
 
 <h2 class="sec">Historial diario</h2>
@@ -155,6 +171,7 @@ page_start($adv['name'], ['nav' => $u, 'office' => $office, 'active' => 'oficina
               <?php if ($it['photo']): ?><br><a href="foto.php?id=<?= (int)$it['id'] ?>" target="_blank"><img class="photo-thumb" src="foto.php?id=<?= (int)$it['id'] ?>" alt="Foto"></a><?php endif; ?>
             </div>
           <?php endforeach; ?>
+          <?php if (trim((string)($l['analisis'] ?? '')) !== ''): ?><div class="small">🏠 <b>Propiedades analizadas:</b> <?= h($l['analisis']) ?></div><?php endif; ?>
           <?php if (trim((string)$l['note']) !== ''): ?><div class="small">📝 <?= h($l['note']) ?></div><?php endif; ?>
         <?php endif; ?>
       </td>
@@ -189,7 +206,7 @@ page_start($adv['name'], ['nav' => $u, 'office' => $office, 'active' => 'oficina
       <label>Correo<input type="email" name="email" value="<?= h($adv['email'] ?? '') ?>"></label>
       <label>Fecha de inicio<input type="date" name="start_date" required value="<?= h($adv['start_date']) ?>"></label>
     </div>
-    <label class="check"><input type="checkbox" name="custom_days" value="1" <?= $adv['workdays_override'] ? 'checked' : '' ?>> Este asesor tiene días laborables distintos a los de la oficina (<?= h(workdays_label($wdOffice)) ?>)</label>
+    <label class="check"><input type="checkbox" name="custom_days" value="1" <?= $adv['workdays_override'] ? 'checked' : '' ?>> Este asesor tiene días hábiles distintos a los de la oficina (<?= h(workdays_label($wdOffice)) ?>)</label>
     <div class="days-pick">
       <?php foreach (DIAS as $n => $dn): ?><label><input type="checkbox" name="workdays[]" value="<?= $n ?>" <?= in_array($n, $wdAdv, true) ? 'checked' : '' ?>> <?= h(ucfirst(mb_substr($dn, 0, 3))) ?></label><?php endforeach; ?>
     </div>

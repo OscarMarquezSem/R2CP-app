@@ -23,6 +23,7 @@ mb_internal_encoding('UTF-8');
 
 require_once __DIR__ . '/engine.php';
 require_once __DIR__ . '/mailer.php';
+require_once __DIR__ . '/push.php';
 require_once __DIR__ . '/layout.php';
 
 // ---------------------------------------------------------------------------
@@ -100,25 +101,30 @@ function val(string $sql, array $params = [])
 function setting_defaults(): array
 {
     return [
-        'yellow_days'          => '2',   // días laborables seguidos sin registrar => amarillo
-        'red_s1_enabled'       => '1',   // rojo al cierre S1 sin actividad
-        's2_min_contactos'     => '20',  // mínimo acumulado S1+S2
-        's2_min_promovidas'    => '5',   // mínimo acumulado S1+S2
-        's3_red_enabled'       => '1',   // rojo al cierre S3 con 0 citas y 0 captaciones
-        'checkpoint_min_score' => '50',  // puntos mínimos punto de control S3
-        'oh_min_attendees'     => '5',
-        'registro_min_pct'     => '80',  // % de días registrados para "registro ordenado"
-        'report_weekday'       => '5',   // 1=lunes ... 7=domingo
-        'report_hour'          => '18',
-        'report_timezone'      => 'America/Cancun',
-        'reminder_enabled'     => '1',
-        'reminder_hour'        => '9',
-        'admin_email'          => '',
-        'routine_items'        => json_encode([
-            ['key' => 'R1', 'title' => 'Haz 2 contactos de tu Impulsor de Memoria',
-             'guide' => 'Antes de hacer cualquier otra cosa, haz 2 contactos de tu Impulsor de Memoria. Contactar todos los días, aunque sea poco, es lo que mantiene tu semana en movimiento.'],
-            ['key' => 'R2', 'title' => 'Anota tus contactos en tu registro',
-             'guide' => 'Al terminar el día, anota tus contactos en tu registro con lo que te respondieron y el siguiente paso. Súmalos en el campo «Contactos».'],
+        'yellow_days'            => '2',   // días hábiles seguidos sin registrar => amarillo
+        'red_s1_enabled'         => '1',   // rojo al cierre S1 sin actividad
+        's2_min_contactos'       => '100', // mínimo acumulado S1+S2
+        's2_min_promovidas'      => '5',   // mínimo acumulado S1+S2
+        's3_red_enabled'         => '1',   // rojo al cierre S3 con 0 citas y 0 captaciones
+        'checkpoint_min_score'   => '50',  // puntos mínimos punto de control S3
+        'oh_min_attendees'       => '5',
+        'registro_min_pct'       => '80',  // % de días registrados para "registro ordenado"
+        'arranque_dias'          => '5',   // días hábiles seguidos de llamadas de arranque
+        'arranque_llamadas'      => '20',  // llamadas diarias de arranque
+        'goal_min_contactos_dia' => '20',  // mínimo de contactos al día para las metas propias
+        'r1_arranque_title'      => 'Haz tus {n} llamadas a tu Impulsor de Memoria',
+        'r1_title'               => 'Haz tus contactos del día (tu meta: {meta})',
+        'report_weekday'         => '5',   // 1=lunes ... 7=domingo
+        'report_hour'            => '18',
+        'report_timezone'        => 'America/Cancun',
+        'reminder_enabled'       => '1',   // interruptor general de recordatorios a asesores
+        'ayer_until_hour'        => '12',  // hasta qué hora se puede registrar el día anterior
+        'admin_email'            => '',
+        'routine_items'          => json_encode([
+            ['key' => 'R1', 'title' => 'Haz tus contactos del día',
+             'guide' => 'Antes de hacer cualquier otra cosa, haz tus llamadas. Cada llamada cuenta como contacto. Contactar todos los días es lo que mantiene tu semana en movimiento. Súmalos en «Contactos».'],
+            ['key' => 'R2', 'title' => 'Anota cada contacto en tu agenda, la lista de tu celular o el CRM de tu oficina',
+             'guide' => 'Con lo que te respondió y el siguiente paso. Tus registros detallados viven ahí; en Ariadna solo me cuentas cuántos fueron.'],
         ], JSON_UNESCAPED_UNICODE),
     ];
 }
@@ -171,8 +177,8 @@ function security_headers(): void
     if (headers_sent()) return;
     header('X-Content-Type-Options: nosniff');
     header('X-Frame-Options: DENY');
-    header('Referrer-Policy: no-referrer');
-    header('Permissions-Policy: geolocation=(), microphone=(), camera=(self)');
+    header('Referrer-Policy: strict-origin-when-cross-origin'); // Bunny necesita saber desde qué dominio se ve el video
+    header('Permissions-Policy: geolocation=(), microphone=(), camera=(self), fullscreen=*');
     if (is_https()) header('Strict-Transport-Security: max-age=31536000');
 }
 

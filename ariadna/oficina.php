@@ -34,6 +34,8 @@ foreach ($rows as $r) { $counts[$r['stats']['status']['color']]++; if (!$r['stat
 $noTraining = advisors_without_training($office);
 $reminder = daily_reminder_text($office);
 $attention = array_values(array_filter($rows, fn($r) => $r['stats']['status']['action'] !== ''));
+$unscheduled = office_unscheduled($office, $rows);
+$waReport = weekly_report_text($office, $rows);
 
 page_start('Asesores', ['nav' => $u, 'office' => $office, 'active' => 'oficina', 'wide' => true]);
 ?>
@@ -41,10 +43,16 @@ page_start('Asesores', ['nav' => $u, 'office' => $office, 'active' => 'oficina',
   <div><span class="eyebrow">Panel de la oficina</span><h1>Tus asesores</h1></div>
   <div class="actions">
     <button class="btn" type="button" data-copy="recordatorio">Copiar recordatorio del día</button>
+    <button class="btn" type="button" data-copy="reporteWa">Copiar reporte para WhatsApp</button>
     <a class="btn btn-main" href="#alta">+ Alta de asesor</a>
   </div>
 </div>
 
+<?php if ($unscheduled): ?>
+  <div class="box warn"><b><?= count($unscheduled) ?> <?= count($unscheduled) === 1 ? 'tema de oficina sin fecha' : 'temas de oficina sin fecha' ?></b> que tus asesores ya necesitan:
+    <?= h(implode(' · ', array_map(fn($n) => $n['activity']['title'] . ' (' . implode(', ', $n['names']) . ')', $unscheduled))) ?>.
+    <a href="sesiones.php<?= $qs ? '?' . $qs : '' ?>">Prográmalos aquí</a>.</div>
+<?php endif; ?>
 <?php if ($noTraining > 0): ?>
   <div class="box warn">Tienes <b><?= $noTraining ?></b> <?= $noTraining === 1 ? 'asesor nuevo' : 'asesores nuevos' ?> sin día de capacitación interna.
     <a href="config_oficina.php<?= $qs ? '?' . $qs : '' ?>">Prográmala aquí</a>.</div>
@@ -59,7 +67,7 @@ page_start('Asesores', ['nav' => $u, 'office' => $office, 'active' => 'oficina',
 
 <?php if ($attention): ?>
   <div class="card">
-    <h2>A quién atender hoy</h2>
+    <h2>Ariadna te sugiere atender hoy a</h2>
     <ul class="attn">
       <?php foreach ($attention as $r): ?>
         <li><?= status_badge($r['stats']['status']['color']) ?> <a href="asesor.php?id=<?= (int)$r['adv']['id'] . $amp ?>"><?= h($r['stats']['status']['action']) ?></a></li>
@@ -118,6 +126,10 @@ if ($inactive): ?>
     <p class="small muted">Cópialo y pégalo en el grupo de WhatsApp de la oficina. Los asesores en descanso no aparecen.</p>
     <textarea id="recordatorio" class="copyarea" readonly><?= h($reminder) ?></textarea>
     <p><button class="btn" type="button" data-copy="recordatorio">Copiar recordatorio</button></p>
+    <h2>Reporte para WhatsApp</h2>
+    <p class="small muted">El mismo resumen del correo del viernes, en texto, para mandarlo a tu Team Leader o a tu gerente.</p>
+    <textarea id="reporteWa" class="copyarea" readonly><?= h($waReport) ?></textarea>
+    <p><button class="btn" type="button" data-copy="reporteWa">Copiar reporte</button></p>
   </div>
 </div>
 <?php page_end();

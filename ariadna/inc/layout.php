@@ -38,7 +38,7 @@ function page_end(): void
 
 function brand_mark(): string
 {
-    return '<span class="brand"><svg class="brand-thread" viewBox="0 0 40 24" aria-hidden="true"><path d="M2 18 C 10 2, 18 22, 26 8 S 36 6, 38 4" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><circle cx="38" cy="4" r="2.6" fill="#C75D3A"/></svg><b>ARIADNA</b></span>';
+    return '<span class="brand"><svg class="brand-thread" viewBox="0 0 40 24" aria-hidden="true"><path d="M2 18 C 10 2, 18 22, 26 8 S 36 6, 38 4" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><circle cx="38" cy="4" r="2.6" fill="#C75D3A"/></svg><span class="brand-txt"><b>ARIADNA</b><small>by Oscar Márquez Seminars</small></span></span>';
 }
 
 function panel_nav(array $u, ?array $office, string $active): void
@@ -49,15 +49,18 @@ function panel_nav(array $u, ?array $office, string $active): void
     echo '<nav>';
     if ($office) {
         echo '<a class="' . ($active === 'oficina' ? 'on' : '') . '" href="oficina.php' . $qs . '">Asesores</a>';
+        echo '<a class="' . ($active === 'sesiones' ? 'on' : '') . '" href="sesiones.php' . $qs . '">Sesiones</a>';
         echo '<a class="' . ($active === 'config' ? 'on' : '') . '" href="config_oficina.php' . $qs . '">Configuración</a>';
     }
     if (is_admin($u)) {
         echo '<a class="' . ($active === 'admin' ? 'on' : '') . '" href="admin.php">Oficinas</a>';
         echo '<a class="' . ($active === 'plan' ? 'on' : '') . '" href="admin_plan.php">Plan</a>';
+        echo '<a class="' . ($active === 'preview' ? 'on' : '') . '" href="admin_preview.php">Ver como asesor</a>';
         echo '<a class="' . ($active === 'ajustes' ? 'on' : '') . '" href="admin_ajustes.php">Ajustes</a>';
     }
     echo '<a class="' . ($active === 'cuenta' ? 'on' : '') . '" href="cuenta.php">Mi cuenta</a>';
     echo '<a href="logout.php">Salir</a>';
+    echo '<span class="r2cp">R²CP ELITE</span>';
     echo '</nav></div></header>';
     if ($office) {
         echo '<div class="subbar"><div class="topbar-in"><span>' . h($office['name']) . '</span><span class="muted">'

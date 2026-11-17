@@ -24,9 +24,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         redirect('admin_ajustes.php');
     }
     $ints = ['yellow_days' => [1, 30], 's2_min_contactos' => [0, 999], 's2_min_promovidas' => [0, 999], 'checkpoint_min_score' => [0, 100],
-             'oh_min_attendees' => [1, 999], 'registro_min_pct' => [0, 100], 'report_weekday' => [1, 7], 'report_hour' => [0, 23], 'reminder_hour' => [0, 23]];
+             'oh_min_attendees' => [1, 999], 'registro_min_pct' => [0, 100], 'report_weekday' => [1, 7], 'report_hour' => [0, 23], 'arranque_dias' => [0, 15], 'arranque_llamadas' => [1, 200],
+             'goal_min_contactos_dia' => [0, 200], 'ayer_until_hour' => [8, 23]];
     foreach ($ints as $k => [$lo, $hi]) set_setting($k, (string)max($lo, min($hi, (int)post($k))));
     foreach (['red_s1_enabled', 's3_red_enabled', 'reminder_enabled'] as $k) set_setting($k, !empty($_POST[$k]) ? '1' : '0');
+    foreach (['r1_arranque_title', 'r1_title'] as $k) if (trim((string)post($k)) !== '') set_setting($k, mb_substr(post($k), 0, 200));
     $tz = post('report_timezone');
     set_setting('report_timezone', in_array($tz, DateTimeZone::listIdentifiers(), true) ? $tz : 'America/Cancun');
     $ae = post('admin_email');
@@ -53,7 +55,7 @@ page_start('Ajustes', ['nav' => $u, 'active' => 'ajustes']);
 <div class="card">
   <h2>Semáforo</h2>
   <p class="small muted">El amarillo se revisa todos los días. El rojo se evalúa al cierre de la semana personal de cada asesor.</p>
-  <label>Amarillo: días laborables seguidos sin registrar<input type="number" name="yellow_days" min="1" value="<?= $s('yellow_days') ?>"></label>
+  <label>Amarillo: días hábiles seguidos sin registrar<input type="number" name="yellow_days" min="1" value="<?= $s('yellow_days') ?>"></label>
   <label class="check"><input type="checkbox" name="red_s1_enabled" value="1" <?= setting('red_s1_enabled') === '1' ? 'checked' : '' ?>> Rojo al cerrar la Semana 1 sin actividad registrada</label>
   <p><b>Rojo al cerrar la Semana 2</b> si no cumple los mínimos acumulados:</p>
   <div class="grid2">
@@ -69,7 +71,7 @@ page_start('Ajustes', ['nav' => $u, 'active' => 'ajustes']);
     <label>Asistentes mínimos al Open House<input type="number" name="oh_min_attendees" min="1" value="<?= $s('oh_min_attendees') ?>"></label>
     <label>«Registro ordenado»: % mínimo de días registrados<input type="number" name="registro_min_pct" min="0" max="100" value="<?= $s('registro_min_pct') ?>"></label>
   </div>
-  <p class="small muted">Puntos de actividad: proporcionales a la meta, con tope en el máximo de cada renglón. Las metas se editan en Plan, semana por semana. Calidad de captación: 3 de 3 criterios = Alta (10), 2 = Media (5), 1 = Baja (0).</p>
+  <p class="small muted">Puntos de actividad: proporcionales a la suma de los mínimos semanales, con tope en el máximo de cada renglón. Las metas se editan en Plan, semana por semana. Calidad de captación: 3 de 3 criterios = Alta (10), 2 = Media (5), 1 = Baja (0).</p>
 </div>
 <div class="card">
   <h2>Correos</h2>
@@ -81,12 +83,23 @@ page_start('Ajustes', ['nav' => $u, 'active' => 'ajustes']);
       <select name="report_timezone"><?php foreach (['America/Cancun', 'America/Merida', 'America/Mexico_City', 'America/Chihuahua', 'America/Mazatlan', 'America/Hermosillo', 'America/Tijuana'] as $tz): ?><option <?= setting('report_timezone') === $tz ? 'selected' : '' ?>><?= h($tz) ?></option><?php endforeach; ?></select></label>
     <label>Correo del administrador (copia de reportes y alertas)<input type="email" name="admin_email" value="<?= $s('admin_email') ?>"></label>
   </div>
-  <label class="check"><input type="checkbox" name="reminder_enabled" value="1" <?= setting('reminder_enabled') === '1' ? 'checked' : '' ?>> Enviar recordatorio por correo al asesor en sus días laborables si aún no registra su día</label>
-  <label>Hora del recordatorio (hora de su oficina)<input type="number" name="reminder_hour" min="0" max="23" value="<?= $s('reminder_hour') ?>"></label>
+  <label class="check"><input type="checkbox" name="reminder_enabled" value="1" <?= setting('reminder_enabled') === '1' ? 'checked' : '' ?>> Avisos a los asesores activados (las horas de la mañana y de la noche las elige cada oficina)</label>
+  <label>Hasta qué hora puede registrar el día anterior<input type="number" name="ayer_until_hour" min="8" max="23" value="<?= $s('ayer_until_hour') ?>"></label>
+</div>
+<div class="card">
+  <h2>Llamadas y metas</h2>
+  <div class="grid2">
+    <label>Llamadas diarias de arranque<input type="number" name="arranque_llamadas" min="1" value="<?= $s('arranque_llamadas') ?>"></label>
+    <label>Días hábiles seguidos de arranque<input type="number" name="arranque_dias" min="0" value="<?= $s('arranque_dias') ?>"></label>
+    <label>Mínimo de contactos al día en las metas propias<input type="number" name="goal_min_contactos_dia" min="0" value="<?= $s('goal_min_contactos_dia') ?>"></label>
+  </div>
+  <p class="small muted">El arranque empieza el día en que inicia la rutina en la Semana 1 y sigue aunque cruce a la Semana 2. Después, el asesor pone su propia meta diaria.</p>
+  <label>Texto de la rutina durante el arranque ({n} = llamadas)<input name="r1_arranque_title" value="<?= $s('r1_arranque_title') ?>"></label>
+  <label>Texto de la rutina después del arranque ({meta} = su meta diaria)<input name="r1_title" value="<?= $s('r1_title') ?>"></label>
 </div>
 <div class="card">
   <h2>Rutina diaria</h2>
-  <p class="small muted">Aparece todos los días laborables (en la Semana 1, desde el día que indiques en Plan).</p>
+  <p class="small muted">Aparece todos los días hábiles (en la Semana 1, desde el día que indiques en Plan).</p>
   <?php foreach ($routine as $i => $r): ?>
     <div class="plan-act">
       <label>Actividad<input name="routine[<?= $i ?>][title]" value="<?= h($r['title']) ?>"></label>

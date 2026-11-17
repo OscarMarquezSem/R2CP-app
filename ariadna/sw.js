@@ -1,5 +1,5 @@
-/* ARIADNA · Service worker mínimo: guarda estilos e íconos; las páginas siempre van a la red. */
-const CACHE = 'ariadna-v1';
+/* ARIADNA · Service worker: guarda estilos e íconos y muestra los avisos de Ariadna. */
+const CACHE = 'ariadna-v2';
 const ASSETS = ['assets/style.css', 'assets/app.js', 'assets/icon-192.png', 'assets/icon-512.png'];
 self.addEventListener('install', e => e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting())));
 self.addEventListener('activate', e => e.waitUntil(
@@ -11,4 +11,19 @@ self.addEventListener('fetch', e => {
   if (url.pathname.includes('/assets/')) {
     e.respondWith(caches.match(e.request, { ignoreSearch: true }).then(r => r || fetch(e.request)));
   }
+});
+self.addEventListener('push', e => {
+  let d = {};
+  try { d = e.data ? e.data.json() : {}; } catch (err) { d = { body: e.data ? e.data.text() : '' }; }
+  e.waitUntil(self.registration.showNotification(d.title || 'Ariadna', {
+    body: d.body || '', icon: 'assets/icon-192.png', badge: 'assets/icon-192.png', data: { url: d.url || './' }, tag: 'ariadna'
+  }));
+});
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  const url = (e.notification.data && e.notification.data.url) || './';
+  e.waitUntil(clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+    for (const c of list) { if (c.url === url && 'focus' in c) return c.focus(); }
+    return clients.openWindow(url);
+  }));
 });

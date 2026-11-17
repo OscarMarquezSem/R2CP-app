@@ -44,6 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!$errors) {
         install_schema();
         seed_plan();
+        vapid_keys();
         create_user(null, $name, $email, $pass, 'admin');
         set_setting('admin_email', $email);
         $demo = !empty($_POST['demo']) ? seed_demo() : null;

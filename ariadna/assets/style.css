@@ -223,3 +223,57 @@ details.card[open] > summary::after { content: "－"; }
   .st-btn { width: 40px; height: 40px; }
   .stepper input { width: 54px; }
 }
+
+/* ---- Versión 2: Ariadna Team Leader del Fast Track Residencial ---- */
+.brand-txt { display: inline-flex; flex-direction: column; line-height: 1.1; }
+.brand-txt small { font-size: .62rem; color: var(--muted); letter-spacing: .01em; font-weight: 500; }
+.adv-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin: 0 4px 14px; }
+.adv-head-r { text-align: right; line-height: 1.25; }
+.adv-head-r b { display: block; font-size: .8rem; letter-spacing: .06em; color: #7A6235; }
+.adv-head-r span { display: block; font-size: .78rem; color: var(--muted); }
+.adv-head-r .tagline { margin: 0; font-style: italic; color: #7A6235; }
+.r2cp { padding: 8px 4px 8px 14px; margin-left: 6px; border-left: 1px solid var(--line); font-weight: 800; letter-spacing: .06em; color: #7A6235; font-size: .9rem; }
+.subbar .muted { color: #D5D9E3; }
+
+.bubble { display: flex; gap: 12px; align-items: flex-start; background: #fff; border: 1.5px solid var(--gold-l); border-radius: var(--radius); padding: 14px 16px; margin: 0 0 16px; }
+.bubble p { margin: 0; font-size: 1rem; }
+.bubble-av { flex: 0 0 40px; height: 40px; border-radius: 50%; background: var(--navy); display: flex; align-items: center; justify-content: center; }
+.card.ayer { border: 2px solid var(--gold); display: flex; flex-direction: column; gap: 10px; }
+.card.ayer .bubble { border: 0; padding: 0; margin: 0; }
+
+.act-office { border: 2px solid var(--navy); }
+.act-band { background: var(--navy); color: #fff; font-size: .72rem; letter-spacing: .12em; font-weight: 700; padding: 6px 16px; }
+.act-meta { display: block; font-size: .92rem; color: var(--navy-2); margin-top: 4px; }
+.act-pend { margin: 0 16px 12px; background: #FBE9DF; border-radius: 12px; padding: 10px 12px; font-size: .95rem; }
+.act-video { padding: 0 16px 12px; }
+.video-wrap { position: relative; padding-top: 56.25%; border-radius: 12px; overflow: hidden; background: var(--navy); }
+.video-wrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.video-soon { background: var(--cream); border-radius: 12px; padding: 14px; text-align: center; color: var(--navy-2); font-weight: 600; }
+.help-links { border: 1px solid var(--gold-l); border-radius: 12px; padding: 12px 14px; margin: 0 0 12px; display: flex; flex-direction: column; gap: 8px; }
+.help-links a { display: flex; gap: 10px; align-items: center; font-weight: 600; font-size: .95rem; text-decoration: none; }
+.help-links .play { flex: 0 0 30px; height: 30px; border-radius: 8px; background: var(--cream); color: var(--terra); display: flex; align-items: center; justify-content: center; font-size: .75rem; }
+.num-goal { display: block; font-size: .78rem; color: #7A6235; font-weight: 700; margin-top: 2px; }
+.goals .goal-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.goals .goal-row.is-low input { border-color: var(--terra); color: var(--terra-d); }
+.goal-warn { background: #FBE9DF; border-radius: 12px; padding: 12px 14px; margin: 12px 0; font-size: .95rem; }
+.goal-warn .check { margin: 10px 0 0; }
+.analisis { display: none; }
+.analisis.show { display: block; }
+.analisis textarea { margin-top: 8px; }
+.push-card { border: 1.5px dashed var(--gold); }
+
+.welcome h1 { font-size: 1.6rem; margin-top: 6px; }
+.myth { border: 1.5px solid var(--gold-l); border-radius: 14px; padding: 16px; margin: 0 0 16px; }
+.myth-h { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.myth-h h2 { margin: 0; font-size: 1.1rem; }
+.myth p { font-size: 1rem; }
+.myth-end { font-weight: 700; color: var(--terra-d); margin: 0; }
+
+.preview-bar { background: var(--navy); color: #fff; border-radius: var(--radius); padding: 12px 14px; margin: 0 0 16px; }
+.preview-bar form { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; }
+.preview-bar label { color: #D5D9E3; font-size: .8rem; font-weight: 600; }
+.preview-bar select { min-height: 42px; padding: 6px 10px; margin-top: 4px; }
+.preview-bar .btn { min-height: 42px; background: #fff; }
+.preview-bar .pv-nav { display: flex; gap: 8px; margin-top: 10px; }
+.preview-bar .pv-nav a { color: #fff; font-weight: 700; }
+.wa-box { white-space: pre-line; }

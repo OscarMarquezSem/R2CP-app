@@ -117,11 +117,12 @@ function email_wrap(string $title, string $content): string
     return '<!doctype html><html><body style="margin:0;background:#FBF8F1;font-family:Arial,Helvetica,sans-serif;color:#1F2A44">'
         . '<table width="100%" cellpadding="0" cellspacing="0" style="background:#FBF8F1;padding:24px 0"><tr><td align="center">'
         . '<table width="680" cellpadding="0" cellspacing="0" style="max-width:680px;width:100%;background:#ffffff;border:1px solid #E6DECB;border-radius:12px">'
-        . '<tr><td style="padding:22px 28px;border-bottom:3px solid #B89860">'
-        . '<div style="font-size:22px;font-weight:bold;letter-spacing:2px;color:#1F2A44">ARIADNA</div>'
-        . '<div style="font-size:13px;color:#B89860">Sigue el hilo · R²CP Elite</div></td></tr>'
+        . '<tr><td style="padding:20px 28px;border-bottom:3px solid #B89860"><table width="100%" cellpadding="0" cellspacing="0"><tr>'
+        . '<td><div style="font-size:22px;font-weight:bold;letter-spacing:2px;color:#1F2A44">ARIADNA</div><div style="font-size:12px;color:#5F6576">by Oscar Márquez Seminars</div></td>'
+        . '<td align="right"><div style="font-size:14px;font-weight:bold;letter-spacing:1px;color:#7A6235">R²CP ELITE</div><div style="font-size:12px;color:#7A6235;font-style:italic">Sigue el hilo</div></td>'
+        . '</tr></table></td></tr>'
         . '<tr><td style="padding:24px 28px"><h1 style="font-size:20px;margin:0 0 14px;color:#1F2A44">' . h($title) . '</h1>' . $content . '</td></tr>'
-        . '<tr><td style="padding:16px 28px;font-size:12px;color:#7A7F8C;border-top:1px solid #E6DECB">Ariadna · Programa R²CP Elite de Oscar Márquez · Acompañamiento Fast Track</td></tr>'
+        . '<tr><td style="padding:16px 28px;font-size:12px;color:#5F6576;border-top:1px solid #E6DECB">Ariadna · Team Leader del curso Fast Track Residencial · R²CP Elite de Oscar Márquez</td></tr>'
         . '</table></td></tr></table></body></html>';
 }
 
