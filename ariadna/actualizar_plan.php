@@ -177,26 +177,11 @@ Escribe aquí en qué horarios quedaron tus bloques.',
 );
 
 $REMEMBER = array (
-  1 => 'Ir a tu oficina es parte del programa: esta semana tu Team Leader te espera los días 1, 2, 4 y 5. Cada vez que veas un video del curso, ve a tu oficina a platicar con tu Team Leader lo que aprendiste.
-Tu negocio es de actividad: sin contactos no hay citas.
-Mi Mapa te dice cuántos contactos necesitas cada día para tu meta.
-Después de ver cada módulo empiezas la tarea de inmediato.',
-  2 => 'Esta semana tienes 2 citas con tu Team Leader en la oficina: el repaso del video y el cierre de semana.
-Tus redes y tus contenidos deben estar terminados antes de avanzar.
-Solo promueves propiedades del inventario de la oficina.
-Cada contacto queda anotado con su siguiente paso en tu agenda, celular o CRM.',
-  3 => 'Esta semana tienes 4 citas con tu Team Leader en la oficina: una después de cada video (días 1, 2 y 3) y tu punto de control.
-Contacta a posibles compradores, no a otros asesores.
-Perfila al comprador antes de enseñarle propiedades.
-Registra a cada asistente de tu {OH} y dale seguimiento.',
-  4 => 'Esta semana tienes 2 citas con tu Team Leader en la oficina: el repaso del video y el cierre de semana.
-La tarea de la semana es recorrer tu zona y buscar vendedores por trato directo.
-Cada trato directo queda en tu agenda, celular o CRM con su siguiente paso.
-Una captación necesita ficha completa y acuerdo de promoción firmado.',
-  5 => 'Esta semana tienes 2 citas con tu Team Leader en la oficina: el repaso de cada video (Módulos 6 y 7) y el cierre del curso.
-Nunca dejes pasar más de una semana sin contactar a un prospecto activo.
-Antes de cualquier operación, valida lo legal con tu oficina.
-Tu plan de los próximos 30 días lo armamos el último día.',
+  1 => 'Ir a tu oficina es parte del programa: esta semana tu Team Leader te espera los días 1, 2, 4 y 5. Cada vez que veas un video del curso, ve a tu oficina a platicar con tu Team Leader lo que aprendiste.',
+  2 => 'Esta semana tienes 2 citas con tu Team Leader en la oficina: el repaso del video y el cierre de semana.',
+  3 => 'Esta semana tienes 4 citas con tu Team Leader en la oficina: una después de cada video (días 1, 2 y 3) y tu punto de control.',
+  4 => 'Esta semana tienes 2 citas con tu Team Leader en la oficina: el repaso del video y el cierre de semana.',
+  5 => 'Esta semana tienes 3 citas con tu Team Leader en la oficina: una después de cada video (Módulos 6 y 7) y el cierre del curso.',
 );
 
 $changes = [];
@@ -236,11 +221,22 @@ foreach ($ACTS as $a) {
 }
 
 // «Recuerda» de cada semana: se agrega al principio la línea de las citas con el TL.
+// Líneas de borradores anteriores de esta actualización (por si ya se había subido la Actualización 5).
+$OLDREM = [
+    'Ir a tu oficina es parte del programa: esta semana tu Team Leader te espera los días 1, 3 y 5.',
+    'Ir a tu oficina es parte del programa: esta semana tu Team Leader te espera los días 1, 2 y 5. Cada semana, después de ver el video del curso, ve a tu oficina a platicar con tu Team Leader lo que aprendiste.',
+    'Esta semana tienes 2 citas con tu Team Leader en la oficina: el repaso de los videos y tu punto de control.',
+    'Esta semana tienes 2 citas con tu Team Leader en la oficina: el repaso del video y tu punto de control.',
+    'Esta semana tienes 2 citas con tu Team Leader en la oficina: el repaso del video y el cierre del curso.',
+    'Esta semana tienes 2 citas con tu Team Leader en la oficina: el repaso de cada video (Módulos 6 y 7) y el cierre del curso.',
+];
 foreach ($REMEMBER as $w => $txt) {
     $first = strtok($txt, "\n");
     $cur = (string)val('SELECT remember FROM plan_weeks WHERE week_no = ?', [$w]);
     if (strpos($cur, $first) !== false) continue;
-    q('UPDATE plan_weeks SET remember = ? WHERE week_no = ?', [trim($first . "\n" . $cur), $w]);
+    $new = null;
+    foreach ($OLDREM as $o) if (strpos($cur, $o) !== false) { $new = str_replace($o, $first, $cur); break; }
+    q('UPDATE plan_weeks SET remember = ? WHERE week_no = ?', [$new ?? trim($first . "\n" . $cur), $w]);
     $changes[] = 'Semana ' . $w . ' · «Recuerda»: ' . $first;
 }
 $OHCH = array (
@@ -300,6 +296,226 @@ foreach ($OHCH['weeks'] as $c) {
     if (strpos($cur, $c['o']) === false) continue;
     q("UPDATE plan_weeks SET $f = ? WHERE week_no = ?", [str_replace($c['o'], $c['n'], $cur), $c['w']]);
     $changes[] = 'Semana ' . $c['w'] . ' · ' . ($f === 'remember' ? '«Recuerda»' : 'preguntas del repaso') . ' para la Jornada de opinión de valor';
+}
+
+$ALIGN = array (
+  'upd' => 
+  array (
+    0 => 
+    array (
+      'w' => 1,
+      'd' => 5,
+      'ot' => 'Abre y adapta con tu marca tus páginas de Facebook e Instagram (TikTok es opcional)',
+      'nt' => 'Abre y adapta con tu marca tus páginas de Facebook e Instagram, y descarga WhatsApp Business (TikTok es opcional)',
+      'ng' => 'Tus redes son tu oficina pública. Pasa tu WhatsApp a WhatsApp Business: respalda tu historial y lo migras sin perder nada. Escribe aquí los enlaces de tus páginas para que tu oficina los vea.',
+      'k' => 'check',
+      'm' => NULL,
+    ),
+    1 => 
+    array (
+      'w' => 1,
+      'd' => 5,
+      'ot' => 'Crea mínimo 3 contenidos',
+      'nt' => 'Publica tus 3 propiedades en todas tus redes y en mínimo 5 grupos, con la fórmula del post perfecto',
+      'ng' => 'Publícalas en Facebook (tu perfil, tu página de negocios y grupos), Instagram, TikTok y tu estatus de WhatsApp Business. Usa las 4 partes: gancho, descripción que haga soñar, precio y llamado a la acción («Comenta me interesa»). Busca de 20 a 25 grupos de tu zona y publica en mínimo 5. Contesta de inmediato a quien te escriba. Súmalas en «Propiedades promovidas» y escribe aquí los enlaces.',
+      'k' => 'check',
+      'm' => NULL,
+    ),
+    2 => 
+    array (
+      'w' => 2,
+      'd' => 3,
+      'ot' => 'Haz el trabajo que indica el video y súbelo a Ariadna',
+      'nt' => 'Pon tu foto profesional y tu biografía en todas tus redes',
+      'ng' => 'La misma foto en Facebook, Instagram, TikTok y WhatsApp: ropa de negocios, buena luz, sonrisa y fondo limpio. Tu biografía responde 3 preguntas: quién eres, a quién ayudas y cómo te contactan (tu WhatsApp). Sube una captura y escribe aquí los enlaces de tus perfiles.',
+      'k' => 'foto',
+      'm' => NULL,
+    ),
+    3 => 
+    array (
+      'w' => 2,
+      'd' => 5,
+      'ot' => 'Publica 5 propiedades de la oficina en 20 grupos de Facebook y en tus redes',
+      'nt' => 'Publica 3 propiedades y 1 contenido de valor en todas tus redes y en mínimo 5 grupos',
+      'ng' => 'Es tu ritmo de cada semana (regla 3 + 1): 3 propiedades de la oficina, con al menos 1 renta, y 1 contenido de valor, con la fórmula del post perfecto. Súmalas en «Propiedades promovidas».',
+      'k' => 'check',
+      'm' => NULL,
+    ),
+    4 => 
+    array (
+      'w' => 3,
+      'd' => 4,
+      'ot' => 'Promueve 3 propiedades en tus redes y en grupos',
+      'nt' => 'Promueve 3 propiedades en todas tus redes y en mínimo 5 grupos',
+      'ng' => 'Con la fórmula del post perfecto: gancho, descripción, precio y llamado a la acción. Súmalas en «Propiedades promovidas».',
+      'k' => 'check',
+      'm' => 120,
+    ),
+    5 => 
+    array (
+      'w' => 3,
+      'd' => 5,
+      'ot' => 'Publica 3 de las 5 propiedades en tus redes y en 10 grupos; contacta compradores, no a otros asesores',
+      'nt' => 'Publica tu contenido de valor de la semana y contesta de inmediato a los interesados',
+      'ng' => 'Regla 3 + 1: con tus 3 propiedades de la semana va 1 contenido de valor. Contesta a posibles compradores, no a otros asesores. Escribe aquí qué publicaste.',
+      'k' => 'check',
+      'm' => NULL,
+    ),
+    6 => 
+    array (
+      'w' => 4,
+      'd' => 1,
+      'ot' => 'Elige una zona y recórrela buscando propietarios que vendan por trato directo',
+      'nt' => 'Identifica 20 propiedades de trato directo',
+      'ng' => 'Búscalas en letreros y lonas de tu zona, en portales (usa el filtro «trato directo»), en Facebook Marketplace, en grupos de compraventa y en tu propio vecindario. Algunos serán asesores que se anuncian como dueños: anótalos de todas formas. Escribe aquí en qué zona buscaste.',
+      'k' => 'check',
+      'm' => NULL,
+    ),
+    7 => 
+    array (
+      'w' => 4,
+      'd' => 2,
+      'ot' => 'Continúa con tus tratos directos',
+      'nt' => 'Llama a tus tratos directos con el diálogo de tu Mi Mapa',
+      'ng' => 'Sigue los 5 pasos en orden: confirma que es el dueño, preséntate, «tengo una pregunta», «¿te interesaría mostrar tu propiedad a un cliente de mi inmobiliaria?» y propón tú el día y la hora. Si te pone condiciones: «No hay problema, nos vemos hoy a las 5». Anota qué te dijo cada uno, súmalos en «Tratos directos» y avísale a tu Team Leader de cada cita.',
+      'k' => 'check',
+      'm' => NULL,
+    ),
+    8 => 
+    array (
+      'w' => 5,
+      'd' => 1,
+      'ot' => 'Da seguimiento a tus tratos directos y prospectos',
+      'nt' => 'Organiza todos tus contactos en una sola lista y clasifícalos',
+      'ng' => 'Junta a todos en un solo lugar (WhatsApp Business con etiquetas, una hoja de Google o el CRM de tu oficina): tu Impulsor de Memoria, tus redes, tu {OH} y tus tratos directos. De cada uno: nombre, teléfono, de dónde lo conociste, qué busca, último contacto y fechas especiales. Clasifícalos como caliente, tibio o frío.',
+      'k' => 'check',
+      'm' => NULL,
+    ),
+  ),
+  'ins' => 
+  array (
+    0 => 
+    array (
+      'w' => 1,
+      'd' => 5,
+      'after' => 'Abre y adapta con tu marca tus páginas de Facebook e Instagram, y descarga WhatsApp Business (TikTok es opcional)',
+      'k' => 'check',
+      't' => 'Pide a tu oficina 3 propiedades para promover: 2 en venta y 1 en renta',
+      'g' => 'Solo promueves propiedades del inventario de la oficina. La renta es tu anzuelo: quien renta decide más rápido y te da práctica real con clientes. Escribe aquí cuáles te asignaron.',
+      'm' => NULL,
+      'h' => '',
+    ),
+    1 => 
+    array (
+      'w' => 1,
+      'd' => 5,
+      'after' => 'Publica tus 3 propiedades en todas tus redes y en mínimo 5 grupos, con la fórmula del post perfecto',
+      'k' => 'check',
+      't' => 'Publica 1 contenido de valor (regla 3 + 1)',
+      'g' => 'Por cada 3 propiedades, 1 contenido que le sirva a tu cliente. Por ejemplo: qué impuestos se pagan al comprar una casa o los 5 riesgos más grandes al rentar. Escribe aquí cuál publicaste.',
+      'm' => NULL,
+      'h' => 'Cómo crear contenido | https://youtu.be/11XYCHJFeJU',
+    ),
+    2 => 
+    array (
+      'w' => 5,
+      'd' => 1,
+      'after' => 'Organiza todos tus contactos en una sola lista y clasifícalos',
+      'k' => 'check',
+      't' => 'Manda un mensaje con pretexto de valor a 10 contactos',
+      'g' => 'Nada de «¿ya se decidieron?». Comparte algo útil: una propiedad nueva que le queda, cómo se movieron los precios en su zona o un dato de impuestos. Corto, con su nombre y que termine con una pregunta. Manda las capturas a tu Team Leader.',
+      'm' => NULL,
+      'h' => '',
+    ),
+    3 => 
+    array (
+      'w' => 5,
+      'd' => 1,
+      'after' => 'Manda un mensaje con pretexto de valor a 10 contactos',
+      'k' => 'check',
+      't' => 'Agenda 3 citas con propietarios esta semana',
+      'g' => 'Desde esta semana, tu meta son 3 citas con propietarios cada semana. Súmalas en «Citas agendadas».',
+      'm' => NULL,
+      'h' => '',
+    ),
+    4 => 
+    array (
+      'w' => 5,
+      'd' => 4,
+      'after' => 'Sigue dando seguimiento a tus prospectos',
+      'k' => 'check',
+      't' => 'Practica las 5 objeciones en roleplay con un compañero',
+      'g' => 'Uno hace de cliente y el otro de asesor; luego cambian. Practiquen «lo voy a pensar», «está muy caro», «ya tengo asesor», «no es el momento» y «lo tengo que platicar con mi pareja». Grábense si pueden. Escribe aquí con quién practicaste, qué objeciones y qué aprendiste.',
+      'm' => NULL,
+      'h' => '',
+    ),
+  ),
+  'metas' => 
+  array (
+    1 => 
+    array (
+      'promovidas' => 3,
+    ),
+    2 => 
+    array (
+      'promovidas' => 3,
+    ),
+    4 => 
+    array (
+      'tratos' => 20,
+    ),
+    5 => 
+    array (
+      'citas' => 3,
+    ),
+  ),
+  'remember' => 
+  array (
+    0 => 
+    array (
+      0 => 1,
+      1 => 'En el Módulo 1 te pido mínimo 5 contactos al día; en tu arranque conmigo haces 20 llamadas diarias durante 5 días hábiles para agarrar ritmo.',
+    ),
+  ),
+);
+
+// Que el plan diga lo mismo que los videos del curso.
+foreach ($ALIGN['upd'] as $c) {
+    foreach (all('SELECT id, title, guide FROM plan_activities WHERE active = 1 AND week_no = ? AND day_no = ? AND title IN (?, ?)', [$c['w'], $c['d'], $c['ot'], $c['nt']]) as $r) {
+        if ($r['title'] === $c['nt'] && $r['guide'] === $c['ng']) continue;
+        q('UPDATE plan_activities SET title = ?, guide = ?, kind = ?, minutes = ? WHERE id = ?', [$c['nt'], $c['ng'], $c['k'], $c['m'], $r['id']]);
+        $changes[] = 'S' . $c['w'] . ' D' . $c['d'] . ' · ' . $c['nt'] . ' (igual que el video)';
+    }
+}
+foreach ($ALIGN['ins'] as $c) {
+    if (one('SELECT id FROM plan_activities WHERE active = 1 AND week_no = ? AND day_no = ? AND title = ?', [$c['w'], $c['d'], $c['t']])) continue;
+    $vsort = val('SELECT sort FROM plan_activities WHERE active = 1 AND week_no = ? AND day_no = ? AND title = ?', [$c['w'], $c['d'], $c['after']]);
+    if ($vsort !== null) {
+        $sort = (int)$vsort + 1;
+        q('UPDATE plan_activities SET sort = sort + 2 WHERE week_no = ? AND day_no = ? AND sort > ?', [$c['w'], $c['d'], (int)$vsort]);
+    } else {
+        $sort = (int)val('SELECT COALESCE(MAX(sort), 0) FROM plan_activities WHERE week_no = ? AND day_no = ?', [$c['w'], $c['d']]) + 10;
+    }
+    q('INSERT INTO plan_activities (week_no, day_no, sort, title, guide, minutes, kind, help_links) VALUES (?,?,?,?,?,?,?,?)',
+        [$c['w'], $c['d'], $sort, $c['t'], $c['g'], $c['m'], $c['k'], $c['h'] !== '' ? $c['h'] : null]);
+    $changes[] = 'S' . $c['w'] . ' D' . $c['d'] . ' · ' . $c['t'] . ' (nueva, igual que el video)';
+}
+foreach ($ALIGN['metas'] as $w => $m) {
+    foreach ($m as $f => $v) {
+        if ((int)val("SELECT meta_$f FROM plan_weeks WHERE week_no = ?", [$w]) === (int)$v) continue;
+        q("UPDATE plan_weeks SET meta_$f = ? WHERE week_no = ?", [(int)$v, $w]);
+        $changes[] = 'Semana ' . $w . ' · mínimo de ' . RESULT_FIELDS[$f] . ': ' . $v;
+    }
+}
+foreach ($ALIGN['remember'] as [$w, $line]) {
+    $cur = (string)val('SELECT remember FROM plan_weeks WHERE week_no = ?', [$w]);
+    if (strpos($cur, $line) !== false) continue;
+    q('UPDATE plan_weeks SET remember = ? WHERE week_no = ?', [trim($line . "\n" . $cur), $w]);
+    $changes[] = 'Semana ' . $w . ' · «Recuerda»: ' . $line;
+}
+if ((int)setting('s2_min_promovidas') === 5) {
+    set_setting('s2_min_promovidas', '6');
+    $changes[] = 'Semáforo · mínimo de propiedades promovidas al cerrar la Semana 2: 6 (3 por semana)';
 }
 
 // Las citas con el TL cuentan para el semáforo a partir de hoy (no se marcan faltas de días anteriores).

@@ -104,7 +104,7 @@ function setting_defaults(): array
         'yellow_days'            => '2',   // días hábiles seguidos sin registrar => amarillo
         'red_s1_enabled'         => '1',   // rojo al cierre S1 sin actividad
         's2_min_contactos'       => '100', // mínimo acumulado S1+S2
-        's2_min_promovidas'      => '5',   // mínimo acumulado S1+S2
+        's2_min_promovidas'      => '6',   // mínimo acumulado S1+S2 (3 por semana)
         's3_red_enabled'         => '1',   // rojo al cierre S3 con 0 citas y 0 captaciones
         'checkpoint_min_score'   => '50',  // puntos mínimos punto de control S3
         'oh_min_attendees'       => '5',

@@ -58,7 +58,7 @@ El repaso es el mismo día del video: el asesor lo ve y después va a la oficina
 | **Citas con TL** | Citas con su Team Leader a las que fue, de las que ya le tocaban |
 | **Contactos / Citas / Captaciones** | Acumulado del curso |
 
-**Rojo:** al cerrar su Semana 1 sin actividad; al cerrar su Semana 2 sin los mínimos (100 contactos y 5 propiedades promovidas); al cerrar su Semana 3 sin citas ni captaciones.
+**Rojo:** al cerrar su Semana 1 sin actividad; al cerrar su Semana 2 sin los mínimos (100 contactos y 6 propiedades promovidas: 3 por semana); al cerrar su Semana 3 sin citas ni captaciones.
 
 **«Ariadna te sugiere atender hoy a»** te dice con quién hablar y por qué. Botones útiles: **Copiar recordatorio del día** (para el grupo de WhatsApp) y **Copiar reporte para WhatsApp** (el resumen semanal en texto).
 
