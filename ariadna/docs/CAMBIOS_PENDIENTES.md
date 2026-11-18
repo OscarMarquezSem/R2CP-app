@@ -19,3 +19,9 @@
 3. Borra `actualizar_plan.php` y el zip.
 
 `ariadna_hostinger.zip` (instalación nueva) ya trae todo incluido.
+
+## Actualización 4 (`ariadna_actualizacion_4.zip`)
+
+**Qué cambia:** las imágenes de Ariadna nunca se salen de su recuadro (aunque el navegador tenga estilos viejos guardados) y la app busca siempre primero los estilos más recientes.
+
+**Archivos:** `inc/hoy_view.php` (va dentro de `inc`) y `sw.js` (va suelto en la carpeta de Ariadna).

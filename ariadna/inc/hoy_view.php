@@ -6,7 +6,7 @@ declare(strict_types=1);
 
 function ariadna_bubble(string $html): string
 {
-    return '<div class="bubble"><img class="bubble-av" src="assets/ariadna-avatar.jpg" alt="" width="48" height="48"><p><b>Ariadna:</b> ' . $html . '</p></div>';
+    return '<div class="bubble"><img class="bubble-av" style="width:48px;height:48px;border-radius:50%;object-fit:cover;flex:0 0 48px" src="assets/ariadna-avatar.jpg" alt="" width="48" height="48"><p><b>Ariadna:</b> ' . $html . '</p></div>';
 }
 
 function advisor_header(string $dateLabel): void
@@ -52,7 +52,7 @@ function render_hoy(array $V): void
     echo '<svg class="thread" viewBox="0 0 400 30" preserveAspectRatio="none" aria-hidden="true"><path d="M0 20 C 60 0, 110 30, 170 14 S 280 4, 330 18 S 390 22, 400 10" fill="none" stroke="#B89860" stroke-width="2"/></svg></header>';
 
     if (!empty($V['celebrate'])) {
-        echo '<div class="card celebrate"><img src="assets/ariadna-celebra.jpg" alt="Ariadna celebra contigo" width="600" height="600"><p>' . h($V['celebrate']) . '</p></div>';
+        echo '<div class="card celebrate"><img style="display:block;width:70%;max-width:280px;height:auto;border-radius:50%;margin:0 auto 10px" src="assets/ariadna-celebra.jpg" alt="Ariadna celebra contigo" width="600" height="600"><p>' . h($V['celebrate']) . '</p></div>';
     }
     if (!empty($V['ayer_offer'])) {
         $o = $V['ayer_offer'];
@@ -66,7 +66,7 @@ function render_hoy(array $V): void
     if (!$stats['started']) { echo '<div class="card"><p>Cuando llegue tu primer día, aquí verás tus actividades. Guarda este enlace en tu pantalla de inicio.</p></div>'; install_hint(); return; }
     if ($stats['finished'] && empty($V['ayer_mode'])) {
         $ev = $stats['evaluation'];
-        echo '<div class="card"><img class="welcome-img" src="assets/ariadna-graduacion.jpg" alt="Ariadna te felicita por terminar el curso" width="600" height="600">'
+        echo '<div class="card"><img class="welcome-img" style="display:block;width:100%;max-width:100%;height:auto" src="assets/ariadna-graduacion.jpg" alt="Ariadna te felicita por terminar el curso" width="600" height="600">'
             . ariadna_bubble('<b>¡Saliste del laberinto!</b> Terminaste el curso Fast Track Residencial. Estoy muy orgullosa de ti.')
             . '<h2>Tu evaluación final: ' . (int)$ev['total'] . ' puntos</h2><p class="lead">' . h($ev['level_text']) . '</p>';
         echo '<div class="tbl-wrap">';
@@ -94,7 +94,7 @@ function render_hoy(array $V): void
     if (!empty($V['ayer_mode'])) echo '<input type="hidden" name="d" value="ayer">';
 
     if ($ctx['type'] === 'rest') {
-        echo '<div class="card rest"><img class="welcome-img" src="assets/ariadna-descanso.jpg" alt="Ariadna descansando con un café" width="600" height="600"><h2>Hoy descansas, pero no sueltes el hilo.</h2><p>Si conoces a alguien que quiera comprar, vender o rentar, anótalo aquí.</p>';
+        echo '<div class="card rest"><img class="welcome-img" style="display:block;width:100%;max-width:100%;height:auto" src="assets/ariadna-descanso.jpg" alt="Ariadna descansando con un café" width="600" height="600"><h2>Hoy descansas, pero no sueltes el hilo.</h2><p>Si conoces a alguien que quiera comprar, vender o rentar, anótalo aquí.</p>';
         num_field('contactos', 'Contactos', (int)($log['contactos'] ?? 0), '¿A cuántas personas detectaste?', '');
         foreach (['tratos', 'analizadas', 'promovidas', 'citas', 'captaciones'] as $f) echo '<input type="hidden" name="n[' . $f . ']" value="' . (int)($log[$f] ?? 0) . '">';
         echo '<label class="lbl">¿Quién es y qué busca? (opcional)<textarea name="note" rows="3" placeholder="Ej. Mi primo quiere vender su casa en la Región 15">' . h($log['note'] ?? '') . '</textarea></label>';
@@ -294,7 +294,7 @@ function render_welcome(string $name, string $officeName, string $token, bool $p
 {
     echo '<div class="card narrow welcome">';
     echo '<div class="adv-head">' . brand_mark() . '<span class="adv-head-r"><b>R²CP ELITE</b><span class="tagline">Sigue el hilo</span></span></div>';
-    echo '<img class="welcome-img" src="assets/ariadna.jpg" alt="Ariadna, tu Team Leader del curso Fast Track Residencial" width="720" height="720">';
+    echo '<img class="welcome-img" style="display:block;width:100%;max-width:100%;height:auto" src="assets/ariadna.jpg" alt="Ariadna, tu Team Leader del curso Fast Track Residencial" width="720" height="720">';
     echo '<h1>Hola, ' . h($name) . '. Soy Ariadna.</h1>';
     echo '<p>Soy tu Team Leader en el curso <b>Fast Track Residencial</b> y <b>te voy a acompañar en el arranque de esta carrera</b> durante sus 5 semanas en <b>' . h($officeName) . '</b>.</p>';
     echo '<p>Cada día te digo qué te toca hacer, te explico cómo hacerlo y te comparto los videos del curso. Tú me cuentas cómo te fue, en menos de 2 minutos. Los temas internos te los da tu oficina, y tu director ve tu avance para apoyarte.</p>';
