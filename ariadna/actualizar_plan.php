@@ -127,10 +127,20 @@ Escribe aquí en qué horarios quedaron tus bloques.',
   11 => 
   array (
     'w' => 5,
+    'd' => 4,
+    'k' => 'tl',
+    't' => 'Revisa con tu Team Leader lo que aprendiste del Módulo 7',
+    'g' => 'En cuanto termines el video, ve a tu oficina. Tu Team Leader te pregunta qué aprendiste del Módulo 7 y practican juntos cómo responder las objeciones que más te han hecho. Escribe aquí qué te preguntó y en qué te pidió reforzar.',
+    'm' => 30,
+    'after' => 'Ve el Módulo 7: Manejo de objeciones básicas',
+  ),
+  12 => 
+  array (
+    'w' => 5,
     'd' => 5,
     'k' => 'tl',
     't' => 'Cierre del curso con tu Team Leader',
-    'g' => 'Ve a tu oficina y siéntate con tu Team Leader. Revisen juntos tus actividades y tus números de la semana, tu repaso conmigo y lo que aprendiste en el Módulo 7, tu evaluación final y tu plan de los próximos 30 días. Escribe aquí los acuerdos a los que llegaron.',
+    'g' => 'Ve a tu oficina y siéntate con tu Team Leader. Revisen juntos tus actividades y tus números de la semana, tu repaso conmigo y tu evaluación final y tu plan de los próximos 30 días. Escribe aquí los acuerdos a los que llegaron.',
     'm' => 45,
     'after' => NULL,
   ),
@@ -153,7 +163,7 @@ Registra a cada asistente de tu {OH} y dale seguimiento.',
 La tarea de la semana es recorrer tu zona y buscar vendedores por trato directo.
 Cada trato directo queda en tu agenda, celular o CRM con su siguiente paso.
 Una captación necesita ficha completa y acuerdo de promoción firmado.',
-  5 => 'Esta semana tienes 2 citas con tu Team Leader en la oficina: el repaso del video y el cierre del curso.
+  5 => 'Esta semana tienes 2 citas con tu Team Leader en la oficina: el repaso de cada video (Módulos 6 y 7) y el cierre del curso.
 Nunca dejes pasar más de una semana sin contactar a un prospecto activo.
 Antes de cualquier operación, valida lo legal con tu oficina.
 Tu plan de los próximos 30 días lo armamos el último día.',
