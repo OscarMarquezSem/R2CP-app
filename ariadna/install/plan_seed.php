@@ -64,7 +64,7 @@ return [
         'remember' => "Tus redes y tus contenidos deben estar terminados antes de avanzar.\nSolo promueves propiedades del inventario de la oficina.\nCada contacto queda anotado con su siguiente paso en tu agenda, celular o CRM.",
         'questions' => "¿Qué publicaste esta semana y qué reacciones tuviste?\n¿Qué documentos te faltaban conocer y ya entiendes?\n¿A cuántas personas contactaste y qué aprendiste?",
         'routine_start_day' => 1,
-        'metas' => ['contactos' => 100, 'tratos' => 0, 'analizadas' => 2, 'promovidas' => 5, 'citas' => 0],
+        'metas' => ['contactos' => 100, 'tratos' => 0, 'analizadas' => 3, 'promovidas' => 5, 'citas' => 0],
         'acts' => [
             ['d' => 1] + $AG,
             ['d' => 1] + $MT,
@@ -73,7 +73,7 @@ return [
             ['d' => 3, 'k' => 'video', 't' => 'Ve el Módulo 3: Marca personal desde el día 1', 'm' => 180, 'v' => $B . 'd660d59b-ae2e-4fea-9a75-e3b3f2f221aa'],
             ['d' => 3, 'k' => 'foto', 't' => 'Haz el trabajo que indica el video y súbelo a Ariadna', 'g' => 'Sube una foto o escribe el enlace de tu trabajo antes de terminar el día.'],
             ['d' => 4, 'k' => 'oficina', 't' => 'Documentación de la propiedad e impuestos', 'm' => 180, 'g' => 'Escribe aquí lo más importante que aprendiste.'],
-            ['d' => 4, 'k' => 'check', 't' => 'Analiza 2 propiedades y cuéntame qué opinas de su valor', 'g' => 'Súmalas en «Propiedades analizadas» y cuéntame qué propiedad es, qué opinas de su valor y por qué.'],
+            ['d' => 4, 'k' => 'check', 't' => 'Analiza 3 propiedades de la oficina y cuéntame qué opinas de cada una', 'g' => 'Entra a las propiedades de la oficina y elige 3 que te llamen la atención. Revisa su ficha y, si puedes, ve a verlas en persona. Analiza el precio, la condición y la zona de cada una. Súmalas en «Propiedades analizadas» y escríbeme qué opinas de cada una: qué propiedad es, qué opinas de su valor y por qué.'],
             ['d' => 5, 'k' => 'check', 't' => 'Pide a tu oficina las propiedades que vas a promover', 'g' => 'Solo promueves propiedades del inventario de la oficina. Escribe aquí cuáles te asignaron.'],
             ['d' => 5, 'k' => 'check', 't' => 'Publica 5 propiedades de la oficina en 20 grupos de Facebook y en tus redes', 'g' => 'Súmalas en «Propiedades promovidas».'],
             ['d' => 5, 'k' => 'check', 't' => 'Acuerda con tu oficina la fecha de tu {OH}', 'g' => 'Escribe aquí la fecha que acordaron.'],

@@ -14,3 +14,5 @@ Se suben todos juntos al terminar la revisión. Al subir, reemplaza solo estos a
 | B | Mencionar los diálogos en «Llena Mi Mapa» (S1 D2) y en la sesión de llamadas (S1 D3). | Plan → Semana 1 → Días 2 y 3 |
 
 (Estos textos ya están también en el código para instalaciones nuevas.)
+| C | S2 D4: «Analiza 3 propiedades de la oficina y cuéntame qué opinas de cada una», con su nueva guía; mínimo de propiedades analizadas de la Semana 2: 3. | Plan → Semana 2 → Día 4 y «Mínimos del programa» |
+| D | Rutina diaria: «Usa 1 de los 3 diálogos para llamar…» (reemplaza el texto del cambio A). | Ajustes → Rutina diaria |
