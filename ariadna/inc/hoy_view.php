@@ -6,7 +6,7 @@ declare(strict_types=1);
 
 function ariadna_bubble(string $html): string
 {
-    return '<div class="bubble"><span class="bubble-av" aria-hidden="true"><svg width="26" height="16" viewBox="0 0 40 24"><path d="M2 18 C 10 2, 18 22, 26 8 S 36 6, 38 4" fill="none" stroke="#B89860" stroke-width="3" stroke-linecap="round"/><circle cx="38" cy="4" r="3" fill="#C75D3A"/></svg></span><p><b>Ariadna:</b> ' . $html . '</p></div>';
+    return '<div class="bubble"><img class="bubble-av" src="assets/ariadna-avatar.jpg" alt="" width="48" height="48"><p><b>Ariadna:</b> ' . $html . '</p></div>';
 }
 
 function advisor_header(string $dateLabel): void
@@ -287,6 +287,7 @@ function render_welcome(string $name, string $officeName, string $token, bool $p
 {
     echo '<div class="card narrow welcome">';
     echo '<div class="adv-head">' . brand_mark() . '<span class="adv-head-r"><b>R²CP ELITE</b><span class="tagline">Sigue el hilo</span></span></div>';
+    echo '<img class="welcome-img" src="assets/ariadna.jpg" alt="Ariadna, tu Team Leader del curso Fast Track Residencial" width="720" height="720">';
     echo '<h1>Hola, ' . h($name) . '. Soy Ariadna.</h1>';
     echo '<p>Soy tu Team Leader en el curso <b>Fast Track Residencial</b> y <b>te voy a acompañar en el arranque de esta carrera</b> durante sus 5 semanas en <b>' . h($officeName) . '</b>.</p>';
     echo '<p>Cada día te digo qué te toca hacer, te explico cómo hacerlo y te comparto los videos del curso. Tú me cuentas cómo te fue, en menos de 2 minutos. Los temas internos te los da tu oficina, y tu director ve tu avance para apoyarte.</p>';

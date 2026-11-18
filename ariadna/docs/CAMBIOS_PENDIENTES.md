@@ -19,3 +19,14 @@
 3. Borra `actualizar_plan.php` y el zip.
 
 `ariadna_hostinger.zip` (instalación nueva) ya trae todo esto incluido.
+
+## Actualización 2 (`ariadna_actualizacion_2.zip`) · acumulada (incluye la 1)
+
+**Qué cambia además de la Actualización 1:**
+1. La imagen de Ariadna: su rostro en cada mensaje de «Hoy», su imagen completa en la bienvenida y como ícono de la pantalla de inicio y de las notificaciones.
+
+**Archivos:** `inc/hoy_view.php`, `inc/app.php`, `assets/style.css`, `assets/ariadna-avatar.jpg`, `assets/ariadna.jpg`, `assets/icon-192.png`, `assets/icon-512.png`, `sw.js` y `actualizar_plan.php` (de un solo uso).
+
+**Cómo aplicarla:** igual que la 1 (extraer con «Overwrite existing files», abrir `actualizar_plan.php` como administrador y borrarlo). Si la 1 ya estaba aplicada, `actualizar_plan.php` dirá «Todo ya estaba actualizado».
+
+**Nota:** quien ya agregó Ariadna a su pantalla de inicio verá el ícono nuevo hasta que la quite y la vuelva a agregar.
