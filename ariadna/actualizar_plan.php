@@ -1,10 +1,10 @@
 <?php
 /**
- * ARIADNA · Actualización de textos del plan (archivo de UN SOLO USO).
+ * ARIADNA · Actualización 5 del plan: citas con el Team Leader en la oficina (archivo de UN SOLO USO).
  * 1) Súbelo junto con los demás archivos.
  * 2) Entra como administrador y abre https://ariadna.oscarmarquez.com/actualizar_plan.php
  * 3) Revisa el resultado y BORRA este archivo.
- * Solo cambia textos del plan: no toca asesores, registros ni oficinas.
+ * Solo agrega y cambia actividades del plan: no toca asesores, registros ni oficinas.
  */
 declare(strict_types=1);
 require __DIR__ . '/inc/app.php';
@@ -12,608 +12,183 @@ require __DIR__ . '/inc/app.php';
 enforce_https();
 $u = require_user(['admin']);
 
-$ROWS = array (
+$ACTS = array (
   0 => 
   array (
     'w' => 1,
     'd' => 1,
-    't' => 'Agenda en tu calendario los horarios de esta semana',
-    'g' => 'Antes de empezar tu semana, aparta en el calendario de tu celular un bloque de tiempo para cada actividad. Abajo tienes la lista de la semana con el tiempo que pide cada una y la fecha de tus sesiones en la oficina. Incluye todos los días tu bloque de prospección.
-Escribe aquí en qué horarios quedaron tus bloques.',
-    'force' => false,
+    'k' => 'tl',
+    't' => 'Bienvenida: conoce tu oficina con tu Team Leader',
+    'g' => 'Ve a tu oficina. Tu Team Leader te presenta la oficina y a tu equipo, y te da la introducción al negocio. Ahí mismo agendan juntos tus horarios de trabajo. Escribe aquí lo más importante que aprendiste.',
+    'm' => 90,
   ),
   1 => 
   array (
     'w' => 1,
     'd' => 1,
-    't' => 'Bienvenida e introducción al negocio',
-    'g' => 'Sesión con el Team Leader o el gerente de tu oficina. Escribe aquí lo más importante que aprendiste.',
-    'force' => false,
+    'k' => 'agenda',
+    't' => 'Agenda con tu Team Leader tus horarios de trabajo',
+    'g' => 'En tu bienvenida, aparta con tu Team Leader en el calendario de tu celular un bloque de tiempo para cada actividad de la semana. Abajo tienes la lista con el tiempo que pide cada una. Incluye todos los días tu bloque de prospección y tus citas con tu Team Leader de los días 3 y 5.
+Escribe aquí en qué horarios quedaron tus bloques.',
+    'm' => NULL,
   ),
   2 => 
   array (
     'w' => 1,
-    'd' => 1,
-    't' => 'Aparta 2 horas en tu agenda para el Módulo 1',
-    'g' => 'Mañana ves el Módulo 1. Escribe aquí a qué hora lo vas a ver.',
-    'force' => false,
+    'd' => 3,
+    'k' => 'tl',
+    't' => 'Revisa con tu Team Leader lo que aprendiste del Módulo 1',
+    'g' => 'Ya que hoy estás en la oficina, tu Team Leader te pregunta qué aprendiste del Módulo 1 y revisa tu Mi Mapa y tu Impulsor de Memoria. Llévalos llenos. Escribe aquí qué te preguntó y en qué te pidió reforzar.',
+    'm' => 30,
   ),
   3 => 
   array (
     'w' => 1,
-    'd' => 2,
-    't' => 'Ve el Módulo 1: Matemática de tu éxito',
-    'g' => 'Al terminar, empieza de inmediato la tarea: llenar Mi Mapa.',
-    'force' => false,
+    'd' => 5,
+    'k' => 'tl',
+    't' => 'Cierre de semana con tu Team Leader',
+    'g' => 'Ve a tu oficina y siéntate con tu Team Leader. Revisen juntos tus actividades y tus números de la semana, tu repaso conmigo y lo que aprendiste en el Módulo 2 y en el video de conceptos básicos. Escribe aquí los acuerdos a los que llegaron.',
+    'm' => 45,
   ),
   4 => 
   array (
-    'w' => 1,
-    'd' => 2,
-    't' => 'Llena Mi Mapa (tu meta real de ingresos)',
-    'g' => 'Mi Mapa se llena a mano. Ahí defines tu meta real de ingresos y te dice cuántos contactos necesitas cada día. Escribe aquí cuántos contactos diarios te marca (renglón H) y sube la foto. En tu Mi Mapa también vienen los 3 diálogos para tus llamadas: léelos antes de tu sesión de llamadas de mañana.',
-    'force' => true,
+    'w' => 2,
+    'd' => 4,
+    'k' => 'tl',
+    't' => 'Revisa con tu Team Leader lo que aprendiste del Módulo 3',
+    'g' => 'Ya que hoy estás en la oficina, tu Team Leader te pregunta qué aprendiste del Módulo 3 y revisa el trabajo que subiste. Escribe aquí qué te preguntó y en qué te pidió reforzar.',
+    'm' => 30,
   ),
   5 => 
   array (
-    'w' => 1,
-    'd' => 2,
-    't' => 'Llena a mano tu Impulsor de Memoria lo más que puedas',
-    'g' => 'Pídele la hoja a tu oficina. Llénala a mano y apóyate en los contactos de tu celular para recordar a más personas. De aquí salen tus 20 llamadas diarias. Escribe cuántos nombres anotaste; si quieres, sube una foto.',
-    'force' => false,
+    'w' => 2,
+    'd' => 5,
+    'k' => 'tl',
+    't' => 'Cierre de semana con tu Team Leader',
+    'g' => 'Ve a tu oficina y siéntate con tu Team Leader. Revisen juntos tus actividades y tus números de la semana, tu repaso conmigo y si cumpliste tus mínimos de las semanas 1 y 2. Platiquen también de lo que aprendiste en el Módulo 3 y en tus sesiones de documentación. Escribe aquí los acuerdos a los que llegaron.',
+    'm' => 45,
   ),
   6 => 
   array (
-    'w' => 1,
-    'd' => 2,
-    't' => 'Confirma con tu oficina tu sesión de llamadas de mañana',
-    'g' => 'Mañana haces tus primeras llamadas acompañado. Escribe aquí la hora.',
-    'force' => false,
+    'w' => 3,
+    'd' => 3,
+    'k' => 'tl',
+    't' => 'Revisa con tu Team Leader lo que aprendiste de los videos de esta semana',
+    'g' => 'Ya que hoy estás en la oficina, tu Team Leader te pregunta qué aprendiste del Módulo 4 y de los videos de opinión de valor y perfilamiento, y revisa cómo va la organización de tu {OH}. Escribe aquí qué te preguntó y en qué te pidió reforzar.',
+    'm' => 30,
   ),
   7 => 
   array (
-    'w' => 1,
-    'd' => 3,
-    't' => 'Llamadas a tu Impulsor de Memoria (acompañado)',
-    'g' => 'Haces tus primeras llamadas acompañado por el Team Leader o el gerente de tu oficina. Ten a la mano los 3 diálogos de tu Mi Mapa. Anota cada respuesta y su siguiente paso en tu agenda, celular o CRM.',
-    'force' => true,
+    'w' => 3,
+    'd' => 5,
+    'k' => 'tl',
+    't' => 'Punto de control con tu Team Leader',
+    'g' => 'Ve a tu oficina y siéntate con tu Team Leader. Revisen juntos tus actividades y tus números de la semana, tu repaso conmigo y cómo te fue en tu {OH}, tus citas y tus captaciones. Con eso deciden juntos cómo sigues en las semanas 4 y 5. Escribe aquí los acuerdos a los que llegaron.',
+    'm' => 45,
   ),
   8 => 
   array (
-    'w' => 1,
-    'd' => 4,
-    't' => 'Ve el video: conceptos básicos de bienes raíces',
-    'g' => 'Repasa los conceptos básicos del negocio.',
-    'force' => false,
+    'w' => 4,
+    'd' => 2,
+    'k' => 'tl',
+    't' => 'Revisa con tu Team Leader lo que aprendiste del Módulo 5',
+    'g' => 'Ya que hoy estás en la oficina, tu Team Leader te pregunta qué aprendiste del Módulo 5 y revisa los propietarios que anotaste en tu recorrido. Escribe aquí qué te preguntó y en qué te pidió reforzar.',
+    'm' => 30,
   ),
   9 => 
   array (
-    'w' => 1,
-    'd' => 4,
-    't' => 'Prepárate para el examen de terminología',
-    'g' => 'Repasa los conceptos básicos del video.',
-    'force' => false,
+    'w' => 4,
+    'd' => 5,
+    'k' => 'tl',
+    't' => 'Cierre de semana con tu Team Leader',
+    'g' => 'Ve a tu oficina y siéntate con tu Team Leader. Revisen juntos tus actividades y tus números de la semana, tu repaso conmigo y lo que aprendiste en el Módulo 5, tus tratos directos y tus citas. Escribe aquí los acuerdos a los que llegaron.',
+    'm' => 45,
   ),
   10 => 
   array (
-    'w' => 1,
-    'd' => 5,
-    't' => 'Ve el Módulo 2: Tu vitrina digital',
-    'g' => 'Al terminar, empieza de inmediato a trabajar en tus páginas.',
-    'force' => false,
+    'w' => 5,
+    'd' => 2,
+    'k' => 'tl',
+    't' => 'Revisa con tu Team Leader lo que aprendiste del Módulo 6',
+    'g' => 'Ya que hoy estás en la oficina, tu Team Leader te pregunta qué aprendiste del Módulo 6 y revisa el seguimiento que les estás dando a tus prospectos. Escribe aquí qué te preguntó y en qué te pidió reforzar.',
+    'm' => 30,
   ),
   11 => 
   array (
-    'w' => 1,
-    'd' => 5,
-    't' => 'Abre y adapta con tu marca tus páginas de Facebook e Instagram (TikTok es opcional)',
-    'g' => 'Escribe aquí los enlaces de tus páginas para que tu oficina los vea.',
-    'force' => false,
-  ),
-  12 => 
-  array (
-    'w' => 1,
-    'd' => 5,
-    't' => 'Crea mínimo 3 contenidos',
-    'g' => 'Publica al menos 3 contenidos en tus páginas. Escribe aquí cuáles fueron.',
-    'force' => false,
-  ),
-  13 => 
-  array (
-    'w' => 1,
-    'd' => 5,
-    't' => 'Sube la foto de tus páginas llenas de Mi Mapa',
-    'g' => 'Toma foto de tus páginas llenas de Mi Mapa y súbela aquí. Tu oficina la ve en Ariadna. Tus registros detallados (contactos, tratos, propiedades) guárdalos en tu agenda, la lista de tu celular o el CRM de tu oficina.',
-    'force' => false,
-  ),
-  14 => 
-  array (
-    'w' => 1,
-    'd' => 5,
-    't' => 'Revisión semanal conmigo: responde tu repaso',
-    'g' => 'Responde con tus palabras. Tu oficina lo ve en Ariadna.',
-    'force' => false,
-  ),
-  15 => 
-  array (
-    'w' => 2,
-    'd' => 1,
-    't' => 'Agenda en tu calendario los horarios de esta semana',
-    'g' => 'Antes de empezar tu semana, aparta en el calendario de tu celular un bloque de tiempo para cada actividad. Abajo tienes la lista de la semana con el tiempo que pide cada una y la fecha de tus sesiones en la oficina. Incluye todos los días tu bloque de prospección.
-Escribe aquí en qué horarios quedaron tus bloques.',
-    'force' => false,
-  ),
-  16 => 
-  array (
-    'w' => 2,
-    'd' => 1,
-    't' => 'Pon tus metas de la semana',
-    'g' => 'Usa tu Mi Mapa: te dice cuántos contactos necesitas cada día para llegar a tu meta de ingresos. Tus metas aparecen en tu pantalla de cada día. El semáforo y la evaluación se miden con los mínimos del programa.',
-    'force' => false,
-  ),
-  17 => 
-  array (
-    'w' => 2,
-    'd' => 1,
-    't' => 'Revisa que tus páginas en redes y tus contenidos estén terminados',
-    'g' => 'Si no están terminados, no avanzas a la siguiente tarea. Escribe aquí los enlaces.',
-    'force' => false,
-  ),
-  18 => 
-  array (
-    'w' => 2,
-    'd' => 2,
-    't' => 'Documentación de personas físicas y morales',
-    'g' => 'Lleva libreta y pregunta todo. Escribe aquí qué documentos no conocías.',
-    'force' => false,
-  ),
-  19 => 
-  array (
-    'w' => 2,
-    'd' => 3,
-    't' => 'Ve el Módulo 3: Marca personal desde el día 1',
-    'g' => 'Al terminar, haz de inmediato el trabajo que pide el video; lo subes en la siguiente actividad.',
-    'force' => false,
-  ),
-  20 => 
-  array (
-    'w' => 2,
-    'd' => 3,
-    't' => 'Haz el trabajo que indica el video y súbelo a Ariadna',
-    'g' => 'Sube una foto o escribe el enlace de tu trabajo antes de terminar el día.',
-    'force' => false,
-  ),
-  21 => 
-  array (
-    'w' => 2,
-    'd' => 4,
-    't' => 'Documentación de la propiedad e impuestos',
-    'g' => 'Escribe aquí lo más importante que aprendiste.',
-    'force' => false,
-  ),
-  22 => 
-  array (
-    'w' => 2,
-    'd' => 4,
-    't' => 'Analiza 3 propiedades de la oficina y cuéntame qué opinas de cada una',
-    'g' => 'Entra a las propiedades de la oficina y elige 3 que te llamen la atención. Revisa su ficha y, si puedes, ve a verlas en persona. Analiza el precio, la condición y la zona de cada una. Súmalas en «Propiedades analizadas» y escríbeme qué opinas de cada una: qué propiedad es, qué opinas de su valor y por qué.',
-    'force' => true,
-  ),
-  23 => 
-  array (
-    'w' => 2,
-    'd' => 5,
-    't' => 'Pide a tu oficina las propiedades que vas a promover',
-    'g' => 'Solo promueves propiedades del inventario de la oficina. Escribe aquí cuáles te asignaron.',
-    'force' => false,
-  ),
-  24 => 
-  array (
-    'w' => 2,
-    'd' => 5,
-    't' => 'Publica 5 propiedades de la oficina en 20 grupos de Facebook y en tus redes',
-    'g' => 'Súmalas en «Propiedades promovidas».',
-    'force' => false,
-  ),
-  25 => 
-  array (
-    'w' => 2,
-    'd' => 5,
-    't' => 'Acuerda con tu oficina la fecha de tu {OH}',
-    'g' => 'Escribe aquí la fecha que acordaron.',
-    'force' => false,
-  ),
-  26 => 
-  array (
-    'w' => 2,
-    'd' => 5,
-    't' => 'Sube la foto de tus páginas llenas de Mi Mapa',
-    'g' => 'Toma foto de tus páginas llenas de Mi Mapa y súbela aquí. Tu oficina la ve en Ariadna. Tus registros detallados (contactos, tratos, propiedades) guárdalos en tu agenda, la lista de tu celular o el CRM de tu oficina.',
-    'force' => false,
-  ),
-  27 => 
-  array (
-    'w' => 2,
-    'd' => 5,
-    't' => 'Revisa tus mínimos conmigo y responde tu repaso',
-    'g' => 'Para continuar debes cumplir los mínimos de las semanas 1 y 2.',
-    'force' => false,
-  ),
-  28 => 
-  array (
-    'w' => 3,
-    'd' => 1,
-    't' => 'Agenda en tu calendario los horarios de esta semana',
-    'g' => 'Antes de empezar tu semana, aparta en el calendario de tu celular un bloque de tiempo para cada actividad. Abajo tienes la lista de la semana con el tiempo que pide cada una y la fecha de tus sesiones en la oficina. Incluye todos los días tu bloque de prospección.
-Escribe aquí en qué horarios quedaron tus bloques.',
-    'force' => false,
-  ),
-  29 => 
-  array (
-    'w' => 3,
-    'd' => 1,
-    't' => 'Pon tus metas de la semana',
-    'g' => 'Usa tu Mi Mapa: te dice cuántos contactos necesitas cada día para llegar a tu meta de ingresos. Tus metas aparecen en tu pantalla de cada día. El semáforo y la evaluación se miden con los mínimos del programa.',
-    'force' => false,
-  ),
-  30 => 
-  array (
-    'w' => 3,
-    'd' => 1,
-    't' => 'Ve el Módulo 4: Open House',
-    'g' => 'Pon atención a cómo se organiza y se promueve; esta semana harás el tuyo.',
-    'force' => false,
-  ),
-  31 => 
-  array (
-    'w' => 3,
-    'd' => 1,
-    't' => 'Organiza y promueve tu {OH} con la supervisión del Team Leader o gerente de tu oficina',
-    'g' => 'Cuando lo realices, regístralo en «Mis logros» con el número de asistentes reales (mínimo 5).',
-    'force' => false,
-  ),
-  32 => 
-  array (
-    'w' => 3,
-    'd' => 2,
-    't' => 'Ve el video: opinión de valor',
-    'g' => 'Aprende a comparar una propiedad con otras parecidas de la zona; hoy mismo lo aplicas al analizar tus propiedades.',
-    'force' => false,
-  ),
-  33 => 
-  array (
-    'w' => 3,
-    'd' => 2,
-    't' => 'Analiza 2 propiedades y cuéntame qué opinas de su valor',
-    'g' => 'Súmalas en «Propiedades analizadas».',
-    'force' => false,
-  ),
-  34 => 
-  array (
-    'w' => 3,
-    'd' => 3,
-    't' => 'Inventario de la oficina',
-    'g' => 'Siéntate con el Team Leader o el gerente de tu oficina a analizar el inventario: qué propiedades hay, en qué zonas, sus precios y lo más importante de cada una. Así, cuando un cliente te pregunte por algo, vas a poder responderle bien. Escribe aquí qué propiedades te llamaron más la atención y por qué.',
-    'force' => true,
-  ),
-  35 => 
-  array (
-    'w' => 3,
-    'd' => 3,
-    't' => 'Ve el video: perfilamiento de compradores',
-    'g' => 'Aprende qué preguntarle a un comprador antes de enseñarle propiedades: presupuesto, motivo, tiempos, quién decide y tipo de crédito.',
-    'force' => false,
-  ),
-  36 => 
-  array (
-    'w' => 3,
-    'd' => 3,
-    't' => 'Analiza 3 propiedades y cuéntame qué opinas de su valor',
-    'g' => 'Súmalas en «Propiedades analizadas».',
-    'force' => false,
-  ),
-  37 => 
-  array (
-    'w' => 3,
-    'd' => 4,
-    't' => 'Invita y prospecta para tu {OH}',
-    'g' => 'Invita a las personas con las que has hablado. También puedes crear una invitación y llevársela a los vecinos de dos cuadras a la redonda: muchos de ellos quizá estén pensando en vender y quieren saber cómo se compara su casa. Anota a cada asistente con su celular, qué le interesó y el siguiente paso.',
-    'force' => true,
-  ),
-  38 => 
-  array (
-    'w' => 3,
-    'd' => 4,
-    't' => 'Promueve 3 propiedades en tus redes y en grupos',
-    'g' => 'Súmalas en «Propiedades promovidas».',
-    'force' => false,
-  ),
-  39 => 
-  array (
-    'w' => 3,
-    'd' => 4,
-    't' => 'Agenda tu primera cita',
-    'g' => 'Súmala en «Citas agendadas».',
-    'force' => false,
-  ),
-  40 => 
-  array (
-    'w' => 3,
-    'd' => 5,
-    't' => 'Publica 3 de las 5 propiedades en tus redes y en 10 grupos; contacta compradores, no a otros asesores',
-    'g' => 'Publícalas en tus redes y en 10 grupos. Contesta a posibles compradores, no a otros asesores. Súmalas en «Propiedades promovidas».',
-    'force' => false,
-  ),
-  41 => 
-  array (
-    'w' => 3,
-    'd' => 5,
-    't' => 'Analiza una ficha técnica y practica el teatro de ventas con un compañero',
-    'g' => 'Escribe aquí qué aprendiste.',
-    'force' => false,
-  ),
-  42 => 
-  array (
-    'w' => 3,
-    'd' => 5,
-    't' => 'Sube la foto de tus páginas llenas de Mi Mapa',
-    'g' => 'Toma foto de tus páginas llenas de Mi Mapa y súbela aquí. Tu oficina la ve en Ariadna. Tus registros detallados (contactos, tratos, propiedades) guárdalos en tu agenda, la lista de tu celular o el CRM de tu oficina.',
-    'force' => false,
-  ),
-  43 => 
-  array (
-    'w' => 3,
-    'd' => 5,
-    't' => 'Punto de control conmigo: responde tu repaso',
-    'g' => 'Al cerrar tu Semana 3 le envío a tu oficina tu punto de control.',
-    'force' => false,
-  ),
-  44 => 
-  array (
-    'w' => 4,
-    'd' => 1,
-    't' => 'Agenda en tu calendario los horarios de esta semana',
-    'g' => 'Antes de empezar tu semana, aparta en el calendario de tu celular un bloque de tiempo para cada actividad. Abajo tienes la lista de la semana con el tiempo que pide cada una y la fecha de tus sesiones en la oficina. Incluye todos los días tu bloque de prospección.
-Escribe aquí en qué horarios quedaron tus bloques.',
-    'force' => false,
-  ),
-  45 => 
-  array (
-    'w' => 4,
-    'd' => 1,
-    't' => 'Pon tus metas de la semana',
-    'g' => 'Usa tu Mi Mapa: te dice cuántos contactos necesitas cada día para llegar a tu meta de ingresos. Tus metas aparecen en tu pantalla de cada día. El semáforo y la evaluación se miden con los mínimos del programa.',
-    'force' => false,
-  ),
-  46 => 
-  array (
-    'w' => 4,
-    'd' => 1,
-    't' => 'Ve el Módulo 5: Tratos directos y la primera cita',
-    'g' => 'Al terminar, elige tu zona y sal a recorrerla.',
-    'force' => false,
-  ),
-  47 => 
-  array (
-    'w' => 4,
-    'd' => 1,
-    't' => 'Elige una zona y recórrela buscando propietarios que vendan por trato directo',
-    'g' => 'Escribe aquí qué zona elegiste.',
-    'force' => false,
-  ),
-  48 => 
-  array (
-    'w' => 4,
-    'd' => 1,
-    't' => 'Anota cada propietario en tu agenda, celular o CRM de la oficina',
-    'g' => 'Fecha, dirección, contacto, qué dijo y siguiente paso. Súmalos en «Tratos directos».',
-    'force' => false,
-  ),
-  49 => 
-  array (
-    'w' => 4,
-    'd' => 2,
-    't' => 'Formatos internos de la oficina',
-    'g' => 'Pide los formatos que usa tu oficina y aprende cuándo se usa cada uno. Escribe aquí cuál te costó más entender.',
-    'force' => false,
-  ),
-  50 => 
-  array (
-    'w' => 4,
-    'd' => 2,
-    't' => 'Continúa con tus tratos directos',
-    'g' => 'Súmalos en «Tratos directos».',
-    'force' => false,
-  ),
-  51 => 
-  array (
-    'w' => 4,
-    'd' => 3,
-    't' => 'Procesos de la oficina',
-    'g' => 'Aprende paso a paso cómo se lleva una operación en tu oficina, desde la captación hasta el cierre. Escribe aquí tus dudas.',
-    'force' => false,
-  ),
-  52 => 
-  array (
-    'w' => 4,
-    'd' => 3,
-    't' => 'Analiza 3 propiedades y cuéntame qué opinas de su valor',
-    'g' => 'Súmalas en «Propiedades analizadas».',
-    'force' => false,
-  ),
-  53 => 
-  array (
-    'w' => 4,
-    'd' => 4,
-    't' => 'Llamadas a tus tratos directos (acompañado)',
-    'g' => 'Llama a los propietarios que encontraste, acompañado por el Team Leader o el gerente de tu oficina. Anota qué te dijo cada uno y el siguiente paso.',
-    'force' => false,
-  ),
-  54 => 
-  array (
-    'w' => 4,
-    'd' => 4,
-    't' => 'Agenda tus citas',
-    'g' => 'Súmalas en «Citas agendadas». Si captas una propiedad, regístrala en «Mis logros».',
-    'force' => false,
-  ),
-  55 => 
-  array (
-    'w' => 4,
-    'd' => 5,
-    't' => 'Reforzamiento en lo que más necesites',
-    'g' => 'Lleva anotado en qué te sientes menos seguro; el Team Leader o el gerente de tu oficina te refuerza en eso.',
-    'force' => false,
-  ),
-  56 => 
-  array (
-    'w' => 4,
-    'd' => 5,
-    't' => 'Sube la foto de tus páginas llenas de Mi Mapa',
-    'g' => 'Toma foto de tus páginas llenas de Mi Mapa y súbela aquí. Tu oficina la ve en Ariadna. Tus registros detallados (contactos, tratos, propiedades) guárdalos en tu agenda, la lista de tu celular o el CRM de tu oficina.',
-    'force' => false,
-  ),
-  57 => 
-  array (
-    'w' => 4,
-    'd' => 5,
-    't' => 'Revisión semanal conmigo: responde tu repaso',
-    'g' => 'Responde con tus palabras. Tu oficina lo ve en Ariadna.',
-    'force' => false,
-  ),
-  58 => 
-  array (
-    'w' => 5,
-    'd' => 1,
-    't' => 'Agenda en tu calendario los horarios de esta semana',
-    'g' => 'Antes de empezar tu semana, aparta en el calendario de tu celular un bloque de tiempo para cada actividad. Abajo tienes la lista de la semana con el tiempo que pide cada una y la fecha de tus sesiones en la oficina. Incluye todos los días tu bloque de prospección.
-Escribe aquí en qué horarios quedaron tus bloques.',
-    'force' => false,
-  ),
-  59 => 
-  array (
-    'w' => 5,
-    'd' => 1,
-    't' => 'Pon tus metas de la semana',
-    'g' => 'Usa tu Mi Mapa: te dice cuántos contactos necesitas cada día para llegar a tu meta de ingresos. Tus metas aparecen en tu pantalla de cada día. El semáforo y la evaluación se miden con los mínimos del programa.',
-    'force' => false,
-  ),
-  60 => 
-  array (
-    'w' => 5,
-    'd' => 1,
-    't' => 'Ve el Módulo 6: Seguimiento sin parecer desesperado',
-    'g' => 'Al terminar, da seguimiento de inmediato a tus prospectos y tratos directos.',
-    'force' => false,
-  ),
-  61 => 
-  array (
-    'w' => 5,
-    'd' => 1,
-    't' => 'Da seguimiento a tus tratos directos y prospectos',
-    'g' => 'Anota cada seguimiento en tu agenda, celular o CRM: con quién hablaste, qué se acordó y siguiente paso.',
-    'force' => false,
-  ),
-  62 => 
-  array (
-    'w' => 5,
-    'd' => 2,
-    't' => 'Marco legal y antilavado',
-    'g' => 'Tu oficina te explica lo legal y la ley antilavado según sus políticas. Escribe aquí tus dudas.',
-    'force' => false,
-  ),
-  63 => 
-  array (
-    'w' => 5,
-    'd' => 3,
-    't' => 'Llamadas a prospectos y tratos pendientes (acompañado)',
-    'g' => 'Llama, acompañado, a los prospectos y tratos que dejaste pendientes. Anota el siguiente paso de cada uno.',
-    'force' => false,
-  ),
-  64 => 
-  array (
-    'w' => 5,
-    'd' => 4,
-    't' => 'Ve el Módulo 7: Manejo de objeciones básicas',
-    'g' => 'Anota las objeciones que más te han hecho y cómo las vas a responder.',
-    'force' => false,
-  ),
-  65 => 
-  array (
-    'w' => 5,
-    'd' => 4,
-    't' => 'Sigue dando seguimiento a tus prospectos',
-    'g' => 'Nunca dejes pasar más de una semana sin contactar a un prospecto activo.',
-    'force' => false,
-  ),
-  66 => 
-  array (
     'w' => 5,
     'd' => 5,
-    't' => 'Simulacro de venta',
-    'g' => 'Practicas una venta completa con el Team Leader o el gerente de tu oficina como si fuera real. Escribe aquí qué te salió bien y qué vas a mejorar.',
-    'force' => false,
+    'k' => 'tl',
+    't' => 'Cierre del curso con tu Team Leader',
+    'g' => 'Ve a tu oficina y siéntate con tu Team Leader. Revisen juntos tus actividades y tus números de la semana, tu repaso conmigo y lo que aprendiste en el Módulo 7, tu evaluación final y tu plan de los próximos 30 días. Escribe aquí los acuerdos a los que llegaron.',
+    'm' => 45,
   ),
-  67 => 
-  array (
-    'w' => 5,
-    'd' => 5,
-    't' => 'Sube la foto de tus páginas llenas de Mi Mapa',
-    'g' => 'Toma foto de tus páginas llenas de Mi Mapa y súbela aquí. Tu oficina la ve en Ariadna. Tus registros detallados (contactos, tratos, propiedades) guárdalos en tu agenda, la lista de tu celular o el CRM de tu oficina.',
-    'force' => false,
-  ),
-  68 => 
-  array (
-    'w' => 5,
-    'd' => 5,
-    't' => 'Arma conmigo tu plan de los próximos 30 días',
-    'g' => 'Escribe aquí tu plan. Tu oficina lo revisa y lo aprueba.',
-    'force' => false,
-  ),
-  69 => 
-  array (
-    'w' => 5,
-    'd' => 5,
-    't' => 'Evaluación final: responde tu repaso y revisa tu evaluación',
-    'g' => 'Calculo tu evaluación con todo lo que registraste en las 5 semanas.',
-    'force' => false,
-  ),
+);
+
+$REMEMBER = array (
+  1 => 'Ir a tu oficina es parte del programa: esta semana tu Team Leader te espera los días 1, 3 y 5.
+Tu negocio es de actividad: sin contactos no hay citas.
+Mi Mapa te dice cuántos contactos necesitas cada día para tu meta.
+Después de ver cada módulo empiezas la tarea de inmediato.',
+  2 => 'Esta semana tienes 2 citas con tu Team Leader en la oficina: el repaso del video y el cierre de semana.
+Tus redes y tus contenidos deben estar terminados antes de avanzar.
+Solo promueves propiedades del inventario de la oficina.
+Cada contacto queda anotado con su siguiente paso en tu agenda, celular o CRM.',
+  3 => 'Esta semana tienes 2 citas con tu Team Leader en la oficina: el repaso de los videos y tu punto de control.
+Contacta a posibles compradores, no a otros asesores.
+Perfila al comprador antes de enseñarle propiedades.
+Registra a cada asistente de tu {OH} y dale seguimiento.',
+  4 => 'Esta semana tienes 2 citas con tu Team Leader en la oficina: el repaso del video y el cierre de semana.
+La tarea de la semana es recorrer tu zona y buscar vendedores por trato directo.
+Cada trato directo queda en tu agenda, celular o CRM con su siguiente paso.
+Una captación necesita ficha completa y acuerdo de promoción firmado.',
+  5 => 'Esta semana tienes 2 citas con tu Team Leader en la oficina: el repaso del video y el cierre del curso.
+Nunca dejes pasar más de una semana sin contactar a un prospecto activo.
+Antes de cualquier operación, valida lo legal con tu oficina.
+Tu plan de los próximos 30 días lo armamos el último día.',
 );
 
 $changes = [];
 db()->beginTransaction();
 
-// 1) Guías del plan: se escriben las que están vacías y las que cambiaron en la revisión.
-foreach ($ROWS as $r) {
-    if (trim($r['g']) === '') continue;
-    $titles = [$r['t']];
-    if ($r['t'] === 'Analiza 3 propiedades de la oficina y cuéntame qué opinas de cada una') $titles[] = 'Analiza 2 propiedades y cuéntame qué opinas de su valor';
-    foreach ($titles as $t) {
-        foreach (all('SELECT id, title, guide FROM plan_activities WHERE active = 1 AND week_no = ? AND day_no = ? AND title = ?', [$r['w'], $r['d'], $t]) as $a) {
-            $needTitle = $a['title'] !== $r['t'];
-            $needGuide = trim((string)$a['guide']) === '' || ($r['force'] && $a['guide'] !== $r['g']);
-            if (!$needTitle && !$needGuide) continue;
-            q('UPDATE plan_activities SET title = ?, guide = ? WHERE id = ?', [$r['t'], $needGuide ? $r['g'] : $a['guide'], $a['id']]);
-            $changes[] = 'S' . $r['w'] . ' D' . $r['d'] . ' · ' . $r['t'] . ($needTitle ? ' (nuevo título)' : '') . ($needGuide ? ' (guía)' : '');
+foreach ($ACTS as $a) {
+    $label = 'S' . $a['w'] . ' D' . $a['d'] . ' · ' . $a['t'];
+    if ($a['k'] === 'agenda') {
+        $row = one("SELECT * FROM plan_activities WHERE active = 1 AND week_no = 1 AND day_no = 1 AND kind = 'agenda' ORDER BY sort LIMIT 1");
+        if ($row && ($row['title'] !== $a['t'] || $row['guide'] !== $a['g'])) {
+            q('UPDATE plan_activities SET title = ?, guide = ? WHERE id = ?', [$a['t'], $a['g'], $row['id']]);
+            $changes[] = $label . ' (texto nuevo)';
+        }
+        continue;
+    }
+    if (one('SELECT id FROM plan_activities WHERE active = 1 AND week_no = ? AND day_no = ? AND title = ?', [$a['w'], $a['d'], $a['t']])) continue;
+    if ($a['w'] === 1 && $a['d'] === 1) {
+        // La bienvenida de la Semana 1 deja de ser un tema que programa la oficina: ahora es la cita con el TL.
+        $old = one("SELECT id FROM plan_activities WHERE active = 1 AND week_no = 1 AND day_no = 1 AND title = 'Bienvenida e introducción al negocio'");
+        if ($old) {
+            q("UPDATE plan_activities SET title = ?, guide = ?, minutes = ?, kind = 'tl' WHERE id = ?", [$a['t'], $a['g'], $a['m'], $old['id']]);
+            $changes[] = $label . ' (antes «Bienvenida e introducción al negocio»)';
+            continue;
         }
     }
+    $sort = (int)val('SELECT COALESCE(MAX(sort), 0) FROM plan_activities WHERE week_no = ? AND day_no = ?', [$a['w'], $a['d']]) + 10;
+    q('INSERT INTO plan_activities (week_no, day_no, sort, title, guide, minutes, kind) VALUES (?,?,?,?,?,?,?)',
+        [$a['w'], $a['d'], $sort, $a['t'], $a['g'], $a['m'], $a['k']]);
+    $changes[] = $label . ' (nueva)';
 }
 
-// 2) Mínimo de propiedades analizadas de la Semana 2: 3
-if ((int)val('SELECT meta_analizadas FROM plan_weeks WHERE week_no = 2') < 3) {
-    q('UPDATE plan_weeks SET meta_analizadas = 3 WHERE week_no = 2');
-    $changes[] = 'Semana 2 · mínimo de propiedades analizadas: 3';
+// «Recuerda» de cada semana: se agrega al principio la línea de las citas con el TL.
+foreach ($REMEMBER as $w => $txt) {
+    $first = strtok($txt, "\n");
+    $cur = (string)val('SELECT remember FROM plan_weeks WHERE week_no = ?', [$w]);
+    if (strpos($cur, $first) !== false) continue;
+    q('UPDATE plan_weeks SET remember = ? WHERE week_no = ?', [trim($first . "\n" . $cur), $w]);
+    $changes[] = 'Semana ' . $w . ' · «Recuerda»: ' . $first;
 }
-
-// 3) Rutina diaria: «Usa 1 de los 3 diálogos para llamar…»
-$routine = routine_items();
-foreach ($routine as $i => $r) {
-    if (($r['key'] ?? '') === 'R1' && strpos((string)$r['guide'], '3 diálogos') === false) {
-        $routine[$i]['guide'] = 'Antes de hacer cualquier otra cosa, haz tus llamadas. Usa 1 de los 3 diálogos para llamar que vienen en tu hoja de Mi Mapa. Cada llamada cuenta como contacto. Contactar todos los días es lo que mantiene tu semana en movimiento. Súmalos en «Contactos».';
-        $changes[] = 'Rutina diaria · «Usa 1 de los 3 diálogos para llamar…»';
-    }
+// Las citas con el TL cuentan para el semáforo a partir de hoy (no se marcan faltas de días anteriores).
+if (val("SELECT v FROM settings WHERE k = 'tl_since'") === null) {
+    set_setting('tl_since', date('Y-m-d'));
+    $changes[] = 'Las citas con el Team Leader cuentan a partir de hoy';
 }
-set_setting('routine_items', json_encode($routine, JSON_UNESCAPED_UNICODE));
 db()->commit();
 
 page_start('Actualización del plan', ['nav' => $u, 'active' => 'plan']);

@@ -65,6 +65,25 @@ page_start('Asesores', ['nav' => $u, 'office' => $office, 'active' => 'oficina',
   <div class="kpi"><span class="kpi-v"><?= $counts['rojo'] ?></span><span class="kpi-l"><?= status_badge('rojo') ?></span></div>
 </div>
 
+<?php $tlToday = [];
+foreach ($rows as $r) {
+    $ctx = $r['stats']['ctx'];
+    if (!$ctx || $r['adv']['decision'] === 'no_continua') continue;
+    foreach (day_items($ctx, ['office' => $office, 'sessions' => $r['stats']['sessions'], 'done_elsewhere' => $ctx['type'] === 'catchup' ? done_keys($r['stats']['logs'], $r['stats']['today']) : []]) as $it) {
+        if ($it['kind'] === 'tl') $tlToday[] = [$r['adv'], $it];
+    }
+}
+if ($tlToday): ?>
+  <div class="card">
+    <h2>Hoy vienen a la oficina con su Team Leader</h2>
+    <ul class="attn">
+      <?php foreach ($tlToday as [$x, $it]): ?>
+        <li><a href="asesor.php?id=<?= (int)$x['id'] . $amp ?>"><b><?= h($x['name']) ?></b></a> · <?= h($it['title']) ?><?= $it['origin'] ? ' <span class="small muted">(' . h(mb_strtolower($it['origin'])) . ')</span>' : '' ?></li>
+      <?php endforeach; ?>
+    </ul>
+  </div>
+<?php endif; ?>
+
 <?php if ($attention): ?>
   <div class="card">
     <h2>Ariadna te sugiere atender hoy a</h2>
@@ -80,10 +99,10 @@ page_start('Asesores', ['nav' => $u, 'office' => $office, 'active' => 'oficina',
 <table class="tbl responsive">
   <thead><tr>
     <th>Asesor</th><th>Semáforo</th><th>Semana</th><th>Actividades</th>
-    <th>Contactos</th><th>Citas</th><th>Captaciones</th><th>Último registro</th><th></th>
+    <th>Citas con TL</th><th>Contactos</th><th>Citas</th><th>Captaciones</th><th>Último registro</th><th></th>
   </tr></thead>
   <tbody>
-  <?php if (!$rows): ?><tr><td colspan="9" class="muted">Aún no tienes asesores. Da de alta al primero abajo.</td></tr><?php endif; ?>
+  <?php if (!$rows): ?><tr><td colspan="10" class="muted">Aún no tienes asesores. Da de alta al primero abajo.</td></tr><?php endif; ?>
   <?php foreach ($rows as $r): $a = $r['adv']; $s = $r['stats']; $st = $s['status']; ?>
     <tr>
       <td class="first"><a href="asesor.php?id=<?= (int)$a['id'] . $amp ?>"><b><?= h($a['name']) ?></b></a>
@@ -92,6 +111,7 @@ page_start('Asesores', ['nav' => $u, 'office' => $office, 'active' => 'oficina',
       <td data-l="Semáforo"><?= status_badge($st['color'], $st['reason']) ?></td>
       <td data-l="Semana"><?= !$s['started'] ? 'Inicia ' . h(fecha_corta($a['start_date'])) : ($s['finished'] ? 'Terminó' : 'S' . (int)$s['week'] . ' · ' . h($s['ctx'] ? ctx_label($s['ctx']) : '')) ?></td>
       <td data-l="Actividades" class="n"><?= (int)$s['pct'] ?>%</td>
+      <td data-l="Citas con TL" class="n"><?= $s['tl']['due'] ? (int)$s['tl']['done'] . ' de ' . (int)$s['tl']['due'] : '—' ?></td>
       <td data-l="Contactos" class="n"><?= (int)$s['totals']['contactos'] ?></td>
       <td data-l="Citas" class="n"><?= (int)$s['totals']['citas'] ?></td>
       <td data-l="Captaciones" class="n"><?= (int)$s['totals']['captaciones'] ?></td>

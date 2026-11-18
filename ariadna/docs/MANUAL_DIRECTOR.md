@@ -32,16 +32,30 @@ Los temas internos los da el Team Leader o el gerente de tu oficina. En **Sesion
 
 Ariadna le asigna a cada asesor la siguiente fecha cuando llega a esa semana y se la muestra ese día con la hora y quién la da. Si un tema no tiene fecha, Ariadna le dice al asesor que te la pida y **te avisa por correo**.
 
-**Temas de la oficina:** Bienvenida · Llamadas a su Impulsor (acompañado) · Documentación de personas físicas y morales · Documentación de la propiedad e impuestos · Inventario de la oficina · Formatos internos · Procesos · Llamadas a tratos directos (acompañado) · Reforzamiento · Marco legal y antilavado · Llamadas a prospectos pendientes (acompañado) · Simulacro de venta.
+**Temas de la oficina (11):** Llamadas a su Impulsor (acompañado) · Documentación de personas físicas y morales · Documentación de la propiedad e impuestos · Inventario de la oficina · Formatos internos · Procesos · Llamadas a tratos directos (acompañado) · Reforzamiento · Marco legal y antilavado · Llamadas a prospectos pendientes (acompañado) · Simulacro de venta.
 
 En la misma pantalla eliges si tu oficina hace **Open House** o **Recorrido en vivo** (transmisión o recorrido de una propiedad del inventario, con mínimo 5 interesados que dejan sus datos). Ambos valen lo mismo en la evaluación.
+
+### Citas con el Team Leader (no se programan en Sesiones)
+Ariadna acompaña al asesor todos los días, pero **quien va a su oficina es quien se queda en el negocio**. Por eso cada semana tiene citas con su Team Leader en la oficina. La hora la acuerdan el asesor y su TL.
+
+| Semana | Repaso de lo que aprendió | Cierre de semana |
+|---|---|---|
+| 1 | Día 1: bienvenida, conoce la oficina y agenda sus horarios con su TL · Día 3: Módulo 1, Mi Mapa e Impulsor | Día 5 |
+| 2 | Día 4: Módulo 3 | Día 5: revisan sus mínimos |
+| 3 | Día 3: Módulo 4, opinión de valor y perfilamiento | Día 5: punto de control |
+| 4 | Día 2: Módulo 5 y sus tratos directos | Día 5 |
+| 5 | Día 2: Módulo 6 | Día 5: cierre del curso y plan de 30 días |
+
+Casi todas caen el mismo día que una sesión en la oficina, así que es la misma visita. En tu panel ves **«Hoy vienen a la oficina con su Team Leader»** y la columna **Citas con TL**. Si un asesor falta a una cita, Ariadna te lo sugiere; si falta a 2, se pone en **amarillo**.
 
 ## 5. Tu tabla de asesores
 | Columna | Qué significa |
 |---|---|
-| **Semáforo** | 🟢 registra y avanza · 🟡 2 días hábiles sin registrar · 🔴 ver abajo |
+| **Semáforo** | 🟢 registra y avanza · 🟡 2 días hábiles sin registrar o faltó a 2 citas con su TL · 🔴 ver abajo |
 | **Semana** | Semana y día en que va |
 | **Actividades** | % de actividades cumplidas hasta hoy |
+| **Citas con TL** | Citas con su Team Leader a las que fue, de las que ya le tocaban |
 | **Contactos / Citas / Captaciones** | Acumulado del curso |
 
 **Rojo:** al cerrar su Semana 1 sin actividad; al cerrar su Semana 2 sin los mínimos (100 contactos y 5 propiedades promovidas); al cerrar su Semana 3 sin citas ni captaciones.

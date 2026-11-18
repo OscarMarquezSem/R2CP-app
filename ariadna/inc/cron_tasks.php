@@ -91,7 +91,7 @@ function send_morning_reminder(array $adv, array $office, array $s): string
     $list = '';
     foreach ($items as $it) {
         $extra = $it['session'] ? ' (' . time_label($it['session']['stime']) . ')' : '';
-        $txt = $it['pending_session'] ? 'Pide a tu oficina tu sesión de: ' . $it['title'] : (($it['kind'] === 'oficina' ? 'Sesión en tu oficina: ' : '') . $it['title'] . $extra);
+        $txt = $it['pending_session'] ? 'Pide a tu oficina tu sesión de: ' . $it['title'] : (kind_prefix($it['kind']) . $it['title'] . $extra);
         $list .= '<li>' . h($txt) . '</li>';
     }
     $html = '<p>Buen día, ' . h($name) . '. Soy Ariadna. Hoy es tu Semana ' . (int)$s['ctx']['week'] . ' · ' . h(ctx_label($s['ctx'])) . ' y esto te toca:</p><ul>' . $list . '</ul>'

@@ -118,6 +118,7 @@ function setting_defaults(): array
         'report_hour'            => '18',
         'report_timezone'        => 'America/Cancun',
         'reminder_enabled'       => '1',   // interruptor general de recordatorios a asesores
+        'tl_since'               => '2000-01-01', // desde qué fecha cuentan las citas con el TL (para el semáforo)
         'ayer_until_hour'        => '12',  // hasta qué hora se puede registrar el día anterior
         'admin_email'            => '',
         'routine_items'          => json_encode([

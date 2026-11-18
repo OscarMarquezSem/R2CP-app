@@ -121,6 +121,7 @@ html { scroll-behavior: smooth; }
     <a href="#entrar">Cómo entrar</a>
     <a href="#antes">Antes de arrancar</a>
     <a href="#alta">Alta de un asesor</a>
+    <a href="#citas">Citas con el TL</a>
     <a href="#ritmo">Tu ritmo</a>
     <a href="#semaforo">Semáforo</a>
     <a href="#correos">Correos</a>
@@ -133,7 +134,7 @@ html { scroll-behavior: smooth; }
     <div class="grid2">
       <div class="card role"><h3>Director</h3><p>Da de alta asesores, configura la oficina, revisa el reporte del viernes y decide en el punto de control. Puede dar de baja.</p></div>
       <div class="card role"><h3>Gerente</h3><p>Igual que el director. Da las sesiones de oficina que le toquen. Puede dar de baja.</p></div>
-      <div class="card role"><h3>Team Leader de la oficina</h3><p>Da las sesiones acompañadas (llamadas, inventario), atiende a quien Ariadna sugiere y puede registrar el punto de control. No da de baja.</p></div>
+      <div class="card role"><h3>Team Leader de la oficina</h3><p>Recibe a cada asesor en sus <b>citas semanales en la oficina</b>, da las sesiones acompañadas (llamadas, inventario), atiende a quien Ariadna sugiere y puede registrar el punto de control. No da de baja.</p></div>
       <div class="card role"><h3>Asesor</h3><p>Entra con su enlace, sigue «Esto te toca hoy» y registra su día en menos de 2 minutos. Lleva sus contactos en su agenda, celular o CRM.</p></div>
     </div>
   </section>
@@ -160,7 +161,7 @@ html { scroll-behavior: smooth; }
         <li><input type="checkbox" id="c2"><label for="c2">Marcar los <b>días hábiles</b> de la oficina. <span class="where">Configuración</span></label></li>
         <li><input type="checkbox" id="c3"><label for="c3">Poner el día de <b>capacitación interna</b> (políticas y documentos). <span class="where">Configuración</span></label></li>
         <li><input type="checkbox" id="c4"><label for="c4">Revisar la hora de los <b>avisos</b> a los asesores (9 am y 8 pm). <span class="where">Configuración</span></label></li>
-        <li><input type="checkbox" id="c5"><label for="c5">Programar los <b>12 temas de oficina</b> con fecha, hora y quién los da, marcando «Repetir cada semana». <span class="where">Sesiones</span></label></li>
+        <li><input type="checkbox" id="c5"><label for="c5">Programar los <b>11 temas de oficina</b> con fecha, hora y quién los da, marcando «Repetir cada semana». <span class="where">Sesiones</span></label></li>
         <li><input type="checkbox" id="c6"><label for="c6">Elegir <b>Open House</b> o <b>Recorrido en vivo</b>. <span class="where">Sesiones</span></label></li>
         <li><input type="checkbox" id="c7"><label for="c7">Tener impresas las hojas de <b>Mi Mapa</b> y del <b>Impulsor de Memoria</b> para entregarlas.</label></li>
       </ul>
@@ -180,11 +181,36 @@ html { scroll-behavior: smooth; }
     </div>
   </section>
 
+  <section id="citas">
+    <h2>5. Citas con el Team Leader en la oficina</h2>
+    <div class="note" style="margin-bottom:12px"><b>Por qué importan:</b> Ariadna acompaña al asesor todos los días, pero <b>quien va a su oficina es quien se queda en el negocio</b>. Por eso cada semana tiene citas con su Team Leader.</div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Semana</th><th>Repaso de lo que aprendió</th><th>Cierre de semana</th></tr></thead>
+        <tbody>
+          <tr><td><b>1</b></td><td>Día 1: bienvenida, conoce la oficina y agenda sus horarios contigo<br>Día 3: Módulo 1, Mi Mapa e Impulsor</td><td>Día 5</td></tr>
+          <tr><td><b>2</b></td><td>Día 4: Módulo 3</td><td>Día 5: revisen sus mínimos</td></tr>
+          <tr><td><b>3</b></td><td>Día 3: Módulo 4, opinión de valor y perfilamiento</td><td>Día 5: punto de control</td></tr>
+          <tr><td><b>4</b></td><td>Día 2: Módulo 5 y sus tratos directos</td><td>Día 5</td></tr>
+          <tr><td><b>5</b></td><td>Día 2: Módulo 6</td><td>Día 5: cierre del curso y plan de 30 días</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <ol class="list">
+        <li>La hora la <b>acuerdan el asesor y su Team Leader</b>. La oficina no tiene que programarla en Sesiones.</li>
+        <li>Casi todas caen el mismo día que una sesión en la oficina: es <b>la misma visita</b>.</li>
+        <li>En tu panel verás <b>«Hoy vienen a la oficina con su Team Leader»</b> y la columna <b>Citas con TL</b>.</li>
+        <li>Si un asesor falta a una cita, Ariadna te lo sugiere; si falta a <b>2</b>, se pone en <b>amarillo</b>.</li>
+      </ol>
+    </div>
+  </section>
+
   <section id="ritmo">
-    <h2>5. Tu ritmo con Ariadna</h2>
+    <h2>6. Tu ritmo con Ariadna</h2>
     <div class="rhythm">
       <div class="when">Cada mañana<small>5 minutos</small></div>
-      <div>Abre tu panel y lee <b>«Ariadna te sugiere atender hoy a»</b>. Llama primero a los rojos y luego a los amarillos. Si quieres, toca <b>Copiar recordatorio del día</b> y pégalo en el grupo de WhatsApp.</div>
+      <div>Abre tu panel: revisa quién <b>viene hoy a su cita con el Team Leader</b> y lee <b>«Ariadna te sugiere atender hoy a»</b>. Llama primero a los rojos y luego a los amarillos. Si quieres, toca <b>Copiar recordatorio del día</b> y pégalo en el grupo de WhatsApp.</div>
       <div class="when">Cada semana<small>lunes</small></div>
       <div>Revisa en <b>Sesiones</b> que ningún tema diga «Sin fecha». Si un asesor necesita un tema sin programar, Ariadna te avisa por correo.</div>
       <div class="when">Viernes<small>6 pm</small></div>
@@ -197,7 +223,7 @@ html { scroll-behavior: smooth; }
   </section>
 
   <section id="semaforo">
-    <h2>6. El semáforo</h2>
+    <h2>7. El semáforo</h2>
     <div class="sem">
       <div class="card"><h3><span class="dot v"></span>Verde</h3><p>Registra y avanza. <b>Reconócelo.</b> Un mensaje de «vas muy bien» vale mucho.</p></div>
       <div class="card"><h3><span class="dot a"></span>Amarillo</h3><p>Lleva <b>2 días hábiles sin registrar</b>. Llámale hoy: casi siempre es un olvido o una duda.</p></div>
@@ -206,7 +232,7 @@ html { scroll-behavior: smooth; }
   </section>
 
   <section id="correos">
-    <h2>7. Correos que vas a recibir</h2>
+    <h2>8. Correos que vas a recibir</h2>
     <div class="tablewrap">
       <table>
         <thead><tr><th>Correo</th><th>Cuándo llega</th><th>Qué haces</th></tr></thead>
@@ -222,8 +248,9 @@ html { scroll-behavior: smooth; }
   </section>
 
   <section id="reglas">
-    <h2>8. Reglas de oro</h2>
+    <h2>9. Reglas de oro</h2>
     <ul class="rules">
+      <li><b>Que vengan a la oficina.</b> Cada semana el asesor tiene citas con su Team Leader: no las canceles ni dejes que las salte.</li>
       <li><b>Acompaña, no vigiles.</b> Ariadna te dice a quién ayudar, no a quién regañar.</li>
       <li><b>Da las sesiones a tiempo.</b> Si un tema no tiene fecha, el asesor se atora.</li>
       <li><b>Los registros detallados no van en Ariadna.</b> Nombres, teléfonos y seguimiento van en la agenda, el celular o el CRM de la oficina.</li>
@@ -233,7 +260,7 @@ html { scroll-behavior: smooth; }
   </section>
 
   <section id="dudas">
-    <h2>9. Dudas comunes</h2>
+    <h2>10. Dudas comunes</h2>
     <div>
       <details><summary>El asesor perdió su enlace</summary><p>En su detalle toca <b>Enviar enlace por WhatsApp</b>. Si crees que alguien más lo tiene, usa <b>Generar enlace nuevo</b>; el anterior deja de funcionar.</p></details>
       <details><summary>Se le olvidó su PIN</summary><p>En su detalle toca <b>Restablecer PIN</b>. La próxima vez que entre, Ariadna le pide crear uno nuevo. Lo puede hacer el director, el gerente o el team leader.</p></details>

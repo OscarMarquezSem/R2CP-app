@@ -19,6 +19,7 @@ function ariadna_message(array $ctx, array $items, ?array $office): string
 {
     if ($ctx['type'] === 'training') return 'Hoy te toca tu capacitación interna en la oficina. Pon mucha atención a sus políticas y documentos. Mañana seguimos juntos.';
     if ($ctx['type'] === 'catchup') return 'Hoy es un buen día para ponerte al corriente con lo que te quedó pendiente de la semana.';
+    foreach ($items as $it) if ($it['kind'] === 'tl') return 'Hoy te espera tu Team Leader en la oficina. Yo te acompaño todos los días, pero tu equipo está allá: no faltes. Antes, tus contactos del día.';
     foreach ($items as $it) if ($it['kind'] === 'oficina' && $it['session']) return 'Hoy tienes un tema con tu oficina. Lleva libreta y pregunta todo lo que no te quede claro. Antes, tus contactos del día.';
     if (!empty($ctx['arranque'])) return 'Hoy tus ' . h((string)setting('arranque_llamadas')) . ' llamadas van primero. Cada llamada te quita un poco de miedo: haz de esto un hábito.';
     if (($ctx['days'][0] ?? 0) === 1) {
@@ -161,8 +162,10 @@ function render_item(array $it, array $V): void
     $checked = $li && (int)$li['done'] === 1;
     $k = h($it['key']);
     $isSession = $it['kind'] === 'oficina';
-    echo '<li class="act' . ($checked ? ' is-done' : '') . ($isSession ? ' act-office' : '') . '">';
+    echo '<li class="act' . ($checked ? ' is-done' : '') . ($isSession || $it['kind'] === 'tl' ? ' act-office' : '') . '">';
+    $isTl = $it['kind'] === 'tl';
     if ($isSession) echo '<div class="act-band">SESIÓN EN TU OFICINA</div>';
+    if ($isTl) echo '<div class="act-band">CITA CON TU TEAM LEADER · EN LA OFICINA</div>';
     echo '<label class="act-main"><input type="checkbox" name="done[' . $k . ']" value="1"' . ($checked ? ' checked' : '') . '><span class="tick" aria-hidden="true"></span><span class="act-text">';
     $origin = $it['origin'] ?: ($it['kind'] === 'video' ? 'VIDEO DEL CURSO' : null);
     if ($origin) echo '<span class="eyebrow">' . h($origin) . '</span>';
@@ -174,6 +177,7 @@ function render_item(array $it, array $V): void
     } elseif ($isSession && $preview) {
         echo '<span class="act-meta">La fecha y la hora las programa tu oficina</span>';
     }
+    if ($isTl) echo '<span class="act-meta">Acuerda la hora con tu Team Leader. Márcala cuando vayas.</span>';
     if ($it['minutes']) echo '<span class="chip">' . h(time_chip($it['kind'], $it['minutes'])) . '</span>';
     echo '</span></label>';
 
@@ -233,7 +237,7 @@ function agenda_list(int $week, array $sessions, ?array $office): void
     if (!$list) return;
     echo '<ul class="agenda">';
     foreach ($list as $a) {
-        echo '<li><span class="eyebrow">Día ' . (int)$a['day'] . '</span> ' . ($a['kind'] === 'oficina' ? 'Sesión en tu oficina: ' : '') . h($a['title'])
+        echo '<li><span class="eyebrow">Día ' . (int)$a['day'] . '</span> ' . h(kind_prefix($a['kind'])) . h($a['title'])
             . ($a['minutes'] ? ' <span class="chip">' . h(time_chip($a['kind'], $a['minutes'])) . '</span>' : '')
             . ($a['when'] ? ' <span class="small muted">(' . h($a['when']) . ')</span>' : '') . '</li>';
     }
@@ -298,6 +302,7 @@ function render_welcome(string $name, string $officeName, string $token, bool $p
     echo '<h1>Hola, ' . h($name) . '. Soy Ariadna.</h1>';
     echo '<p>Soy tu Team Leader en el curso <b>Fast Track Residencial</b> y <b>te voy a acompañar en el arranque de esta carrera</b> durante sus 5 semanas en <b>' . h($officeName) . '</b>.</p>';
     echo '<p>Cada día te digo qué te toca hacer, te explico cómo hacerlo y te comparto los videos del curso. Tú me cuentas cómo te fue, en menos de 2 minutos. Los temas internos te los da tu oficina, y tu director ve tu avance para apoyarte.</p>';
+    echo '<p><b>Yo te acompaño todos los días, pero tu equipo está en la oficina.</b> Cada semana tienes citas con tu Team Leader de la oficina para repasar lo que aprendiste en los videos y cerrar tu semana. No faltes: quienes van a su oficina son quienes se quedan en el negocio.</p>';
     echo '<div class="myth"><div class="myth-h"><svg width="44" height="44" viewBox="0 0 48 48" aria-hidden="true"><rect x="4" y="4" width="40" height="40" rx="4" fill="none" stroke="#1F2A44" stroke-width="2"/><path d="M4 16 H30 M18 16 V30 M30 30 H44 M10 30 V44 M30 16 V24" fill="none" stroke="#1F2A44" stroke-width="2"/><path d="M8 10 C 20 10, 26 12, 24 22 S 14 36, 26 37 S 40 40, 40 40" fill="none" stroke="#C75D3A" stroke-width="2" stroke-dasharray="3 3"/></svg><h2>¿Por qué me llamo Ariadna?</h2></div>'
         . '<p>En la mitología griega, Ariadna, hija del rey Minos de Creta, le dio a Teseo un ovillo de hilo antes de que entrara al laberinto del Minotauro. Teseo lo fue desenrollando a su paso y, siguiendo ese hilo, encontró la salida.</p>'
         . '<p>Los primeros meses en bienes raíces pueden sentirse como un laberinto. Yo soy tu hilo: cada día te doy el siguiente paso. Si lo sigues todos los días, vas a encontrar el camino.</p>'

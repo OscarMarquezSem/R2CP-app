@@ -126,6 +126,9 @@ page_start($adv['name'], ['nav' => $u, 'office' => $office, 'active' => 'oficina
     <h2>Resultados acumulados</h2>
     <?php kpi_grid($s); ?>
     <p class="small muted">Actividades cumplidas: <?= $s['done'] ?> de <?= $s['assigned'] ?> (<?= $s['pct'] ?>%) · Días registrados: <?= $s['workdays_logged'] ?> de <?= $s['workdays_elapsed'] ?></p>
+    <h3>Citas con su Team Leader en la oficina</h3>
+    <p class="small"><?= $s['tl']['due'] ? 'Fue a <b>' . (int)$s['tl']['done'] . ' de ' . (int)$s['tl']['due'] . '</b> citas que ya le tocaban' : 'Aún no le toca ninguna' ?> (son <?= (int)$s['tl']['total'] ?> en el curso).</p>
+    <?php if ($s['tl']['missed']): ?><ul class="small"><?php foreach ($s['tl']['missed'] as $c): ?><li>⬜ Semana <?= (int)$c['week'] ?> · <?= h(fecha_corta($c['date'])) ?> · <?= h($c['title']) ?></li><?php endforeach; ?></ul><?php endif; ?>
     <h3>Logros</h3>
     <ul>
       <li><?= h(oh_label($office)) ?>: <?= (int)$adv['oh_done'] ? 'Sí, ' . h(fecha_corta($adv['oh_date'])) . ' · ' . (int)$adv['oh_attendees'] . ' asistentes' : 'Aún no' ?></li>

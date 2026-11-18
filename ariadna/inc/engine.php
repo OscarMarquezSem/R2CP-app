@@ -35,6 +35,7 @@ const KIND_LABELS = [
     'metas'   => 'Metas de la semana',
     'video'   => 'Video del curso',
     'oficina' => 'Sesión en tu oficina',
+    'tl'      => 'Cita con tu Team Leader',
     'repaso'  => 'Repaso semanal',
 ];
 
@@ -391,7 +392,11 @@ function day_items(array $ctx, array $o = []): array
             $items[] = $it;
         }
     }
-    foreach ($acts as $a) if (!in_array($a['kind'], ['agenda', 'metas'], true)) $items[] = $a;
+    // Si hoy hay sesión en la oficina, la cita con el TL va después (es la misma visita).
+    $hasSession = (bool)array_filter($acts, fn($a) => !empty($a['session']));
+    $rest = array_values(array_filter($acts, fn($a) => !in_array($a['kind'], ['agenda', 'metas'], true)));
+    if ($hasSession) $rest = array_merge(array_filter($rest, fn($a) => $a['kind'] !== 'tl'), array_filter($rest, fn($a) => $a['kind'] === 'tl'));
+    foreach ($rest as $a) $items[] = $a;
     return $items;
 }
 
@@ -406,6 +411,8 @@ function week_time_list(int $week, array $sessions = [], ?array $office = null):
             if ($a['kind'] === 'oficina') {
                 $occ = $sessions[(int)$a['id']] ?? null;
                 $when = $occ ? fecha_corta($occ['date']) . ($occ['stime'] ? ' · ' . time_label($occ['stime']) : '') : 'tu oficina te dirá la fecha';
+            } elseif ($a['kind'] === 'tl') {
+                $when = 'acuerda la hora con tu Team Leader';
             }
             $list[] = ['day' => $d, 'title' => oh_text($a['title'], $office), 'kind' => $a['kind'],
                 'minutes' => $a['minutes'] !== null ? (int)$a['minutes'] : null, 'when' => $when];
@@ -524,11 +531,13 @@ function advisor_stats(array $adv, array $office, ?string $today = null): array
     $assignedA = []; $assignedOther = 0; $doneOther = 0;
     $weekA = array_fill(1, PROGRAM_WEEKS, []); $weekOther = array_fill(1, PROGRAM_WEEKS, 0); $weekOtherDone = array_fill(1, PROGRAM_WEEKS, 0);
     $workdaysElapsed = 0; $workdaysLogged = 0;
+    $tlFirst = [];   // cita con el TL (clave A#) → fecha en que le tocaba por primera vez
     foreach ($schedule as $date => $ctx) {
         $w = $ctx['week'];
         $items = day_items($ctx, ['office' => $office, 'sessions' => $sessions, 'done_elsewhere' => $ctx['type'] === 'catchup' ? done_keys($logs, $date) : []]);
         foreach ($items as $it) {
             if ($it['key'][0] === 'A') {
+                if ($it['kind'] === 'tl' && !isset($tlFirst[$it['key']])) $tlFirst[$it['key']] = ['date' => $date, 'week' => $w, 'title' => $it['title']];
                 if ($date <= $today) $assignedA[$it['key']] = true;
                 $weekA[$w][$it['key']] = true;
             } else {
@@ -551,6 +560,18 @@ function advisor_stats(array $adv, array $office, ?string $today = null): array
         $weekDone[$w] = count(array_intersect(array_keys($weekA[$w]), $doneAll)) + $weekOtherDone[$w];
     }
 
+    // Citas con el TL: cumplidas y las que ya pasaron sin cumplir
+    $tl = ['total' => count($tlFirst), 'due' => 0, 'done' => 0, 'missed' => [], 'week_due' => array_fill(1, PROGRAM_WEEKS, 0), 'week_done' => array_fill(1, PROGRAM_WEEKS, 0)];
+    $tlSince = (string)setting('tl_since');
+    foreach ($tlFirst as $key => $c) {
+        $isDone = in_array($key, $doneAll, true);
+        if ($c['date'] < $tlSince && !$isDone) { $tl['total']--; continue; }   // eran de antes de que existieran las citas
+        if ($c['date'] >= $today && !$isDone) continue;      // todavía no le toca
+        $tl['due']++; $tl['week_due'][$c['week']]++;
+        if ($isDone) { $tl['done']++; $tl['week_done'][$c['week']]++; }
+        else $tl['missed'][] = $c;
+    }
+
     // Días hábiles seguidos sin registrar (sin contar hoy)
     $missed = 0;
     if ($started) {
@@ -571,7 +592,7 @@ function advisor_stats(array $adv, array $office, ?string $today = null): array
         'week_assigned' => $weekAssigned, 'week_done' => $weekDone,
         'missed' => $missed, 'last_log' => $logs ? max(array_keys($logs)) : null,
         'workdays_elapsed' => $workdaysElapsed, 'workdays_logged' => $workdaysLogged,
-        'low_goals' => [],
+        'low_goals' => [], 'tl' => $tl,
     ];
     foreach ($goals as $w => $g) if ((int)$g['low_accepted'] === 1) $s['low_goals'][$w] = goals_below_min($g, $w);
     $s['evaluation'] = evaluation($adv, $s, $office);
@@ -622,6 +643,15 @@ function compute_status(array $adv, array $s): array
     if (!$s['finished'] && $s['missed'] >= (int)setting('yellow_days')) {
         return ['color' => 'amarillo', 'rule' => null, 'reason' => $s['missed'] . ' días hábiles sin registrar',
             'action' => "Habla hoy con $name: {$s['missed']} días sin registrar."];
+    }
+    $tlMiss = $s['finished'] ? [] : array_values(array_filter($s['tl']['missed'], fn($c) => $c['week'] >= $s['week'] - 1));
+    if (count($tlMiss) >= 2) {
+        return ['color' => 'amarillo', 'rule' => null, 'reason' => 'Faltó a ' . count($tlMiss) . ' citas con su Team Leader',
+            'action' => "Llama hoy a $name: faltó a " . count($tlMiss) . ' citas con su Team Leader en la oficina. Que venga esta semana.'];
+    }
+    if ($tlMiss) {
+        return ['color' => 'verde', 'rule' => null, 'reason' => 'Faltó a una cita con su Team Leader',
+            'action' => "Pregúntale a $name por su cita con su Team Leader («" . $tlMiss[0]['title'] . "»): no la registró como hecha. Agéndala de nuevo."];
     }
     if (!empty($s['low_goals'][$s['week']])) {
         return ['color' => 'verde', 'rule' => null, 'reason' => 'Se puso metas por debajo del mínimo',
@@ -770,7 +800,13 @@ function headline_activity(array $items): string
 {
     $real = array_values(array_filter($items, fn($i) => !$i['routine'] && !$i['pending_session'] && !in_array($i['kind'], ['agenda', 'metas'], true)));
     if (!$real) return 'Tus contactos del día';
-    return ($real[0]['kind'] === 'oficina' ? 'Sesión en tu oficina: ' : '') . $real[0]['title'] . (count($real) > 1 ? ' (+' . (count($real) - 1) . ')' : '');
+    return kind_prefix($real[0]['kind']) . $real[0]['title'] . (count($real) > 1 ? ' (+' . (count($real) - 1) . ')' : '');
+}
+
+/** Prefijo para las listas cortas (recordatorios, agenda). */
+function kind_prefix(string $kind): string
+{
+    return $kind === 'oficina' ? 'Sesión en tu oficina: ' : ($kind === 'tl' ? 'Cita con tu TL en la oficina: ' : '');
 }
 
 /** Texto para pegar en el grupo de WhatsApp de la oficina. */
@@ -803,7 +839,8 @@ function weekly_report_text(array $office, array $rows): string
         $t = $s['totals'];
         $txt .= "\n" . $emoji[$s['status']['color']] . ' *' . $a['name'] . '* · ' . ($s['finished'] ? 'Terminó' : 'Semana ' . $s['week'])
             . "\nActividades " . $s['pct'] . '% · Contactos ' . $t['contactos'] . ' · Tratos ' . $t['tratos'] . ' · Analizadas ' . $t['analizadas']
-            . ' · Promovidas ' . $t['promovidas'] . ' · Citas ' . $t['citas'] . ' · Captaciones ' . $t['captaciones'];
+            . ' · Promovidas ' . $t['promovidas'] . ' · Citas ' . $t['citas'] . ' · Captaciones ' . $t['captaciones']
+            . ($s['tl']['due'] ? "\nCitas con su TL: " . $s['tl']['done'] . ' de ' . $s['tl']['due'] : '');
         if ($s['status']['action']) $txt .= "\n👉 " . $s['status']['action'];
         $txt .= "\n";
     }
