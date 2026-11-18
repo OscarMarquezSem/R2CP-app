@@ -1,20 +1,21 @@
-# Cambios pendientes de subir a Hostinger
+# Actualizaciones de Ariadna
 
-Se suben todos juntos al terminar la revisión. Al subir, reemplaza solo estos archivos (no toques `config.php` ni la carpeta `uploads`).
+## Actualización 1 (`ariadna_actualizacion_1.zip`)
 
-| # | Cambio | Archivo a reemplazar |
-|---|---|---|
-| 1 | Los videos dicen «Aparta 3 h: video y tarea» en lugar de «3 h», para que nadie piense que el video dura eso y bloquee el tiempo completo. | `inc/hoy_view.php` |
+**Archivos:** `inc/hoy_view.php` (reemplaza al actual) y `actualizar_plan.php` (nuevo, de un solo uso).
 
-## Cambios que Oscar hace directo en la app (no requieren subir archivos)
+**Qué cambia:**
+1. Los videos dicen «Aparta X: video y tarea» en lugar de solo el tiempo.
+2. Rutina diaria: «Usa 1 de los 3 diálogos para llamar que vienen en tu hoja de Mi Mapa…».
+3. S1 D2 y S1 D3: mención de los 3 diálogos de Mi Mapa.
+4. S2 D4: «Analiza 3 propiedades de la oficina y cuéntame qué opinas de cada una», con su guía; mínimo de la Semana 2 = 3.
+5. S3 D3: guía de la sesión «Inventario de la oficina».
+6. S3 D4: guía para invitar al Open House (contactos y vecinos de dos cuadras).
+7. Guías para las 17 actividades que no tenían.
 
-| # | Cambio | Dónde |
-|---|---|---|
-| A | Mencionar los 3 diálogos de llamadas de Mi Mapa en la rutina diaria. | Ajustes → Rutina diaria → guía de la primera actividad |
-| B | Mencionar los diálogos en «Llena Mi Mapa» (S1 D2) y en la sesión de llamadas (S1 D3). | Plan → Semana 1 → Días 2 y 3 |
+**Cómo aplicarla:**
+1. Administrador de archivos → sube `ariadna_actualizacion_1.zip` a la carpeta de Ariadna → Extraer → marca «Overwrite existing files» (reemplazar).
+2. Entra como administrador y abre `https://ariadna.oscarmarquez.com/actualizar_plan.php`.
+3. Borra `actualizar_plan.php` y el zip.
 
-(Estos textos ya están también en el código para instalaciones nuevas.)
-| C | S2 D4: «Analiza 3 propiedades de la oficina y cuéntame qué opinas de cada una», con su nueva guía; mínimo de propiedades analizadas de la Semana 2: 3. | Plan → Semana 2 → Día 4 y «Mínimos del programa» |
-| D | Rutina diaria: «Usa 1 de los 3 diálogos para llamar…» (reemplaza el texto del cambio A). | Ajustes → Rutina diaria |
-| E | S3 D3 · Sesión «Inventario de la oficina»: agregar la guía (analizar el inventario con el TL o gerente para responder bien a los clientes). | Plan → Semana 3 → Día 3 |
-| F | S3 D4 · «Invita y prospecta para tu Open House»: invitar a quienes ya contactó y llevar invitaciones a vecinos de dos cuadras a la redonda. | Plan → Semana 3 → Día 4 (o archivo de un solo uso) |
+`ariadna_hostinger.zip` (instalación nueva) ya trae todo esto incluido.
