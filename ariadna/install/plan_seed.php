@@ -99,7 +99,7 @@ return [
             ['d' => 3, 'k' => 'oficina', 't' => 'Inventario de la oficina', 'm' => 60, 'g' => 'Siéntate con el Team Leader o el gerente de tu oficina a analizar el inventario: qué propiedades hay, en qué zonas, sus precios y lo más importante de cada una. Así, cuando un cliente te pregunte por algo, vas a poder responderle bien. Escribe aquí qué propiedades te llamaron más la atención y por qué.'],
             ['d' => 3, 'k' => 'video', 't' => 'Ve el video: perfilamiento de compradores'],
             ['d' => 3, 'k' => 'check', 't' => 'Analiza 3 propiedades y cuéntame qué opinas de su valor', 'g' => 'Súmalas en «Propiedades analizadas».'],
-            ['d' => 4, 'k' => 'check', 't' => 'Invita y prospecta para tu {OH}', 'g' => 'Anota a cada asistente con su celular, qué le interesó y el siguiente paso.'],
+            ['d' => 4, 'k' => 'check', 't' => 'Invita y prospecta para tu {OH}', 'g' => 'Invita a las personas con las que has hablado. También puedes crear una invitación y llevársela a los vecinos de dos cuadras a la redonda: muchos de ellos quizá estén pensando en vender y quieren saber cómo se compara su casa. Anota a cada asistente con su celular, qué le interesó y el siguiente paso.'],
             ['d' => 4, 'k' => 'check', 't' => 'Promueve 3 propiedades en tus redes y en grupos', 'm' => 120, 'g' => 'Súmalas en «Propiedades promovidas».'],
             ['d' => 4, 'k' => 'check', 't' => 'Agenda tu primera cita', 'g' => 'Súmala en «Citas agendadas».'],
             ['d' => 5, 'k' => 'check', 't' => 'Publica 3 de las 5 propiedades en tus redes y en 10 grupos; contacta compradores, no a otros asesores', 'm' => 180],

@@ -17,3 +17,4 @@ Se suben todos juntos al terminar la revisión. Al subir, reemplaza solo estos a
 | C | S2 D4: «Analiza 3 propiedades de la oficina y cuéntame qué opinas de cada una», con su nueva guía; mínimo de propiedades analizadas de la Semana 2: 3. | Plan → Semana 2 → Día 4 y «Mínimos del programa» |
 | D | Rutina diaria: «Usa 1 de los 3 diálogos para llamar…» (reemplaza el texto del cambio A). | Ajustes → Rutina diaria |
 | E | S3 D3 · Sesión «Inventario de la oficina»: agregar la guía (analizar el inventario con el TL o gerente para responder bien a los clientes). | Plan → Semana 3 → Día 3 |
+| F | S3 D4 · «Invita y prospecta para tu Open House»: invitar a quienes ya contactó y llevar invitaciones a vecinos de dos cuadras a la redonda. | Plan → Semana 3 → Día 4 (o archivo de un solo uso) |
