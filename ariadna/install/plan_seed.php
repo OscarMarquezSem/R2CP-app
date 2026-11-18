@@ -14,7 +14,9 @@
  *   foto    · Con foto
  *   repaso  · Repaso semanal con Ariadna
  *   check   · Normal
- * {OH} se cambia por «Open House» o «Recorrido en vivo», según la oficina.
+ * {OH} se cambia por «Open House», «Recorrido en vivo» o «Jornada de opinión de valor», según la oficina;
+ * {ASISTENTES} por «asistentes», «interesados» o «propietarios interesados».
+ * {jornada}…{/jornada}: solo en la Jornada · {evento}…{/evento}: solo en Open House y Recorrido.
  * Las metas de cada semana son los MÍNIMOS del programa (semáforo y evaluación).
  */
 
@@ -96,8 +98,8 @@ return [
         'title' => 'Inventario y análisis de mercado',
         'objective' => 'Aprender a valorar propiedades, perfilar compradores y hacer tu primer {OH}.',
         'material' => "Módulo 4: Open House\nVideos: opinión de valor; perfilamiento de compradores\nSesión en tu oficina: inventario de la oficina",
-        'remember' => "Esta semana tienes 4 citas con tu Team Leader en la oficina: una después de cada video (días 1, 2 y 3) y tu punto de control.\nContacta a posibles compradores, no a otros asesores.\nPerfila al comprador antes de enseñarle propiedades.\nRegistra a cada asistente de tu {OH} y dale seguimiento.",
-        'questions' => "¿Cuántas personas asistieron a tu {OH} y qué hiciste con ellas?\n¿Qué propiedad analizaste mejor y por qué?\n¿Qué te falta para agendar más citas?",
+        'remember' => "Esta semana tienes 4 citas con tu Team Leader en la oficina: una después de cada video (días 1, 2 y 3) y tu punto de control.\nContacta a posibles compradores, no a otros asesores.\nPerfila al comprador antes de enseñarle propiedades.\nDa seguimiento a cada uno de los {ASISTENTES} de tu {OH}.",
+        'questions' => "¿Cuántos {ASISTENTES} tuviste en tu {OH} y qué hiciste con cada uno?\n¿Qué propiedad analizaste mejor y por qué?\n¿Qué te falta para agendar más citas?",
         'routine_start_day' => 1,
         'metas' => ['contactos' => 100, 'tratos' => 0, 'analizadas' => 5, 'promovidas' => 3, 'citas' => 1],
         'acts' => [
@@ -105,7 +107,7 @@ return [
             ['d' => 1] + $MT,
             ['d' => 1, 'k' => 'video', 't' => 'Ve el Módulo 4: Open House', 'm' => 120, 'v' => $B . '1049b1d5-37f5-4a49-a31e-3a5679cc41ac', 'g' => 'Pon atención a cómo se organiza y se promueve; esta semana harás el tuyo.'],
             ['d' => 1] + $REV('Revisa con tu Team Leader lo que aprendiste del Módulo 4', 'En cuanto termines el video, ve a tu oficina. Tu Team Leader te pregunta qué aprendiste del Módulo 4 y empiezan juntos a organizar tu {OH}.'),
-            ['d' => 1, 'k' => 'check', 't' => 'Organiza y promueve tu {OH} con la supervisión del Team Leader o gerente de tu oficina', 'g' => 'Cuando lo realices, regístralo en «Mis logros» con el número de asistentes reales (mínimo 5).'],
+            ['d' => 1, 'k' => 'check', 't' => 'Organiza{evento} y promueve{/evento} tu {OH} con la supervisión del Team Leader o gerente de tu oficina', 'g' => '{jornada}Elige con tu Team Leader una propiedad de la oficina: vas a recorrer las dos cuadras a la redonda. Prepara un volante con tu foto, tus datos y la oferta: «Te doy una opinión de valor de tu casa, sin costo». {/jornada}Cuando lo realices, regístralo en «Mis logros» con el número de {ASISTENTES} (mínimo 5).'],
             ['d' => 2, 'k' => 'video', 't' => 'Ve el video: opinión de valor', 'g' => 'Aprende a comparar una propiedad con otras parecidas de la zona; hoy mismo lo aplicas al analizar tus propiedades.'],
             ['d' => 2] + $REV('Platica con tu Team Leader lo que aprendiste del video de opinión de valor', 'En cuanto termines el video, ve a tu oficina. Tu Team Leader te pide que le expliques cómo comparas una propiedad con otras parecidas de la zona, con una de las propiedades que vas a analizar.'),
             ['d' => 2, 'k' => 'check', 't' => 'Analiza 2 propiedades y cuéntame qué opinas de su valor', 'g' => 'Súmalas en «Propiedades analizadas».'],
@@ -113,7 +115,7 @@ return [
             ['d' => 3, 'k' => 'video', 't' => 'Ve el video: perfilamiento de compradores', 'g' => 'Aprende qué preguntarle a un comprador antes de enseñarle propiedades: presupuesto, motivo, tiempos, quién decide y tipo de crédito.'],
             ['d' => 3] + $REV('Platica con tu Team Leader lo que aprendiste del video de perfilamiento', 'En cuanto termines el video, ve a tu oficina. Tu Team Leader hace contigo un ejercicio: hace el papel de comprador y tú le haces las preguntas para perfilarlo.'),
             ['d' => 3, 'k' => 'check', 't' => 'Analiza 3 propiedades y cuéntame qué opinas de su valor', 'g' => 'Súmalas en «Propiedades analizadas».'],
-            ['d' => 4, 'k' => 'check', 't' => 'Invita y prospecta para tu {OH}', 'g' => 'Invita a las personas con las que has hablado. También puedes crear una invitación y llevársela a los vecinos de dos cuadras a la redonda: muchos de ellos quizá estén pensando en vender y quieren saber cómo se compara su casa. Anota a cada asistente con su celular, qué le interesó y el siguiente paso.'],
+            ['d' => 4, 'k' => 'check', 't' => '{evento}Invita y prospecta para tu {OH}{/evento}{jornada}Haz tu {OH}: recorre las dos cuadras{/jornada}', 'g' => '{evento}Invita a las personas con las que has hablado. También puedes crear una invitación y llevársela a los vecinos de dos cuadras a la redonda: muchos de ellos quizá estén pensando en vender y quieren saber cómo se compara su casa. Anota a cada asistente con su celular, qué le interesó y el siguiente paso.{/evento}{jornada}Toca puertas en las dos cuadras a la redonda de la propiedad que elegiste. Preséntate, entrega tu volante y ofrece una opinión de valor de su casa sin costo: muchos vecinos quizá estén pensando en vender y quieren saber cuánto vale su casa. Anota a cada propietario interesado con su nombre, celular, dirección y cuándo le entregas su opinión. Necesitas mínimo 5. Prepara cada opinión con lo que aprendiste en el video de opinión de valor y entrégala en persona: es tu oportunidad de captar.{/jornada}'],
             ['d' => 4, 'k' => 'check', 't' => 'Promueve 3 propiedades en tus redes y en grupos', 'm' => 120, 'g' => 'Súmalas en «Propiedades promovidas».'],
             ['d' => 4, 'k' => 'check', 't' => 'Agenda tu primera cita', 'g' => 'Súmala en «Citas agendadas».'],
             ['d' => 5, 'k' => 'check', 't' => 'Publica 3 de las 5 propiedades en tus redes y en 10 grupos; contacta compradores, no a otros asesores', 'm' => 180, 'g' => 'Publícalas en tus redes y en 10 grupos. Contesta a posibles compradores, no a otros asesores. Súmalas en «Propiedades promovidas».'],

@@ -48,4 +48,5 @@
 | # | Cambio | Archivo |
 |---|---|---|
 | 1 | **Reto del video** (10 videos): 5 preguntas con respuesta clave que aplica el TL después de cada video; 1 punto por video (4-5 de 5), medio punto (3 de 5); segunda oportunidad en el cierre del día 5. Evaluación: Aprendizaje 10 y cierre de renta de 20 a 10. Mockup: https://claude.ai/artifact/ACJrLg8wHu5SnZH9AnXnC5 | Pendiente: subtítulos de Bunny |
-| 2 | Tercera opción para oficinas que no hacen Open House ni Recorrido en vivo. | Pendiente: definir la actividad |
+| 2 | **Jornada de opinión de valor**, tercera opción en Sesiones para oficinas que no hacen Open House ni Recorrido: el asesor recorre las dos cuadras a la redonda de una propiedad de la oficina ofreciendo una opinión de valor sin costo; mínimo 5 propietarios interesados. Vale lo mismo en la evaluación y el punto de control. Textos de S3 D1, S3 D4, «Recuerda» y preguntas de la Semana 3 según la opción. **Ya programado y probado.** | `sesiones.php`, `inc/engine.php`, `inc/hoy_view.php`, `asesor.php`, `admin_plan.php`, `admin_ajustes.php`, `export.php`, `actualizar_plan.php` |
+| 3 | Al subir la Actualización 6: agregar la Jornada al playbook y al manual del director. | Docs |

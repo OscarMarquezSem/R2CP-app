@@ -68,7 +68,7 @@ page_start('Ajustes', ['nav' => $u, 'active' => 'ajustes']);
   <h2>Evaluación y punto de control</h2>
   <div class="grid2">
     <label>Puntos mínimos en el punto de control (Semana 3)<input type="number" name="checkpoint_min_score" min="0" max="100" value="<?= $s('checkpoint_min_score') ?>"></label>
-    <label>Asistentes mínimos al Open House<input type="number" name="oh_min_attendees" min="1" value="<?= $s('oh_min_attendees') ?>"></label>
+    <label>Mínimo de asistentes o interesados (Open House, Recorrido o Jornada)<input type="number" name="oh_min_attendees" min="1" value="<?= $s('oh_min_attendees') ?>"></label>
     <label>«Registro ordenado»: % mínimo de días registrados<input type="number" name="registro_min_pct" min="0" max="100" value="<?= $s('registro_min_pct') ?>"></label>
   </div>
   <p class="small muted">Puntos de actividad: proporcionales a la suma de los mínimos semanales, con tope en el máximo de cada renglón. Las metas se editan en Plan, semana por semana. Calidad de captación: 3 de 3 criterios = Alta (10), 2 = Media (5), 1 = Baja (0).</p>

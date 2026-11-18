@@ -1,6 +1,6 @@
 <?php
 /**
- * ARIADNA · Actualización 5 del plan: citas con el Team Leader en la oficina (archivo de UN SOLO USO).
+ * ARIADNA · Actualización del plan: citas con el Team Leader y Jornada de opinión de valor (archivo de UN SOLO USO).
  * 1) Súbelo junto con los demás archivos.
  * 2) Entra como administrador y abre https://ariadna.oscarmarquez.com/actualizar_plan.php
  * 3) Revisa el resultado y BORRA este archivo.
@@ -243,6 +243,65 @@ foreach ($REMEMBER as $w => $txt) {
     q('UPDATE plan_weeks SET remember = ? WHERE week_no = ?', [trim($first . "\n" . $cur), $w]);
     $changes[] = 'Semana ' . $w . ' · «Recuerda»: ' . $first;
 }
+$OHCH = array (
+  'acts' => 
+  array (
+    0 => 
+    array (
+      'w' => 3,
+      'd' => 1,
+      'ot' => 'Organiza y promueve tu {OH} con la supervisión del Team Leader o gerente de tu oficina',
+      'nt' => 'Organiza{evento} y promueve{/evento} tu {OH} con la supervisión del Team Leader o gerente de tu oficina',
+      'og' => 'Cuando lo realices, regístralo en «Mis logros» con el número de asistentes reales (mínimo 5).',
+      'ng' => '{jornada}Elige con tu Team Leader una propiedad de la oficina: vas a recorrer las dos cuadras a la redonda. Prepara un volante con tu foto, tus datos y la oferta: «Te doy una opinión de valor de tu casa, sin costo». {/jornada}Cuando lo realices, regístralo en «Mis logros» con el número de {ASISTENTES} (mínimo 5).',
+    ),
+    1 => 
+    array (
+      'w' => 3,
+      'd' => 4,
+      'ot' => 'Invita y prospecta para tu {OH}',
+      'nt' => '{evento}Invita y prospecta para tu {OH}{/evento}{jornada}Haz tu {OH}: recorre las dos cuadras{/jornada}',
+      'og' => 'Invita a las personas con las que has hablado. También puedes crear una invitación y llevársela a los vecinos de dos cuadras a la redonda: muchos de ellos quizá estén pensando en vender y quieren saber cómo se compara su casa. Anota a cada asistente con su celular, qué le interesó y el siguiente paso.',
+      'ng' => '{evento}Invita a las personas con las que has hablado. También puedes crear una invitación y llevársela a los vecinos de dos cuadras a la redonda: muchos de ellos quizá estén pensando en vender y quieren saber cómo se compara su casa. Anota a cada asistente con su celular, qué le interesó y el siguiente paso.{/evento}{jornada}Toca puertas en las dos cuadras a la redonda de la propiedad que elegiste. Preséntate, entrega tu volante y ofrece una opinión de valor de su casa sin costo: muchos vecinos quizá estén pensando en vender y quieren saber cuánto vale su casa. Anota a cada propietario interesado con su nombre, celular, dirección y cuándo le entregas su opinión. Necesitas mínimo 5. Prepara cada opinión con lo que aprendiste en el video de opinión de valor y entrégala en persona: es tu oportunidad de captar.{/jornada}',
+    ),
+  ),
+  'weeks' => 
+  array (
+    0 => 
+    array (
+      'w' => 3,
+      'f' => 'remember',
+      'o' => 'Registra a cada asistente de tu {OH} y dale seguimiento.',
+      'n' => 'Da seguimiento a cada uno de los {ASISTENTES} de tu {OH}.',
+    ),
+    1 => 
+    array (
+      'w' => 3,
+      'f' => 'review_questions',
+      'o' => '¿Cuántas personas asistieron a tu {OH} y qué hiciste con ellas?',
+      'n' => '¿Cuántos {ASISTENTES} tuviste en tu {OH} y qué hiciste con cada uno?',
+    ),
+  ),
+);
+
+// Jornada de opinión de valor: textos del plan que cambian según lo que haga la oficina.
+foreach ($OHCH['acts'] as $c) {
+    foreach (all('SELECT id, title, guide FROM plan_activities WHERE active = 1 AND week_no = ? AND day_no = ? AND title IN (?, ?)', [$c['w'], $c['d'], $c['ot'], $c['nt']]) as $r) {
+        $t = $r['title'] === $c['ot'] ? $c['nt'] : $r['title'];
+        $g = $r['guide'] === $c['og'] ? $c['ng'] : $r['guide'];
+        if ($t === $r['title'] && $g === $r['guide']) continue;
+        q('UPDATE plan_activities SET title = ?, guide = ? WHERE id = ?', [$t, $g, $r['id']]);
+        $changes[] = 'S' . $c['w'] . ' D' . $c['d'] . ' · texto para la Jornada de opinión de valor';
+    }
+}
+foreach ($OHCH['weeks'] as $c) {
+    $f = $c['f'] === 'remember' ? 'remember' : 'review_questions';
+    $cur = (string)val("SELECT $f FROM plan_weeks WHERE week_no = ?", [$c['w']]);
+    if (strpos($cur, $c['o']) === false) continue;
+    q("UPDATE plan_weeks SET $f = ? WHERE week_no = ?", [str_replace($c['o'], $c['n'], $cur), $c['w']]);
+    $changes[] = 'Semana ' . $c['w'] . ' · ' . ($f === 'remember' ? '«Recuerda»' : 'preguntas del repaso') . ' para la Jornada de opinión de valor';
+}
+
 // Las citas con el TL cuentan para el semáforo a partir de hoy (no se marcan faltas de días anteriores).
 if (val("SELECT v FROM settings WHERE k = 'tl_since'") === null) {
     set_setting('tl_since', date('Y-m-d'));

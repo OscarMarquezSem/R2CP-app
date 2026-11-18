@@ -131,7 +131,7 @@ page_start($adv['name'], ['nav' => $u, 'office' => $office, 'active' => 'oficina
     <?php if ($s['tl']['missed']): ?><ul class="small"><?php foreach ($s['tl']['missed'] as $c): ?><li>⬜ Semana <?= (int)$c['week'] ?> · <?= h(fecha_corta($c['date'])) ?> · <?= h($c['title']) ?></li><?php endforeach; ?></ul><?php endif; ?>
     <h3>Logros</h3>
     <ul>
-      <li><?= h(oh_label($office)) ?>: <?= (int)$adv['oh_done'] ? 'Sí, ' . h(fecha_corta($adv['oh_date'])) . ' · ' . (int)$adv['oh_attendees'] . ' asistentes' : 'Aún no' ?></li>
+      <li><?= h(oh_label($office)) ?>: <?= (int)$adv['oh_done'] ? 'Sí, ' . h(fecha_corta($adv['oh_date'])) . ' · ' . (int)$adv['oh_attendees'] . ' ' . OH_MODES[oh_mode($office)]['plural'] : 'Aún no' ?></li>
       <li>Calidad de la captación: precio <?= (int)$adv['cap_precio'] ? '✅' : '⬜' ?> · documentos <?= (int)$adv['cap_docs'] ? '✅' : '⬜' ?> · disponibilidad <?= (int)$adv['cap_disp'] ? '✅' : '⬜' ?></li>
       <li>Renta cerrada: <?= (int)$adv['renta_closed'] ? 'Sí ' . h(fecha_corta($adv['renta_date'])) : 'Aún no' ?></li>
     </ul>

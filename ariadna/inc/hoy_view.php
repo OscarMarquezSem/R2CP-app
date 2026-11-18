@@ -133,7 +133,7 @@ function render_hoy(array $V): void
     echo '<details class="card logros"><summary><b>Mis logros</b> <span class="muted small">' . h($ohL) . ', captación y renta</span></summary><div class="logros-in">'
         . '<label class="check"><input type="checkbox" name="logros[oh_done]" value="1"' . ((int)$adv['oh_done'] ? ' checked' : '') . '> Ya realicé mi ' . h($ohL) . ', supervisado por mi oficina</label>'
         . '<div class="grid2"><label class="lbl">Fecha<input type="date" name="logros[oh_date]" value="' . h($adv['oh_date'] ?? '') . '"></label>'
-        . '<label class="lbl">' . ($ohL === 'Open House' ? 'Asistentes reales' : 'Interesados que dejaron sus datos') . '<input type="number" min="0" inputmode="numeric" name="logros[oh_attendees]" value="' . (int)$adv['oh_attendees'] . '"></label></div>'
+        . '<label class="lbl">' . oh_count_label($office) . '<input type="number" min="0" inputmode="numeric" name="logros[oh_attendees]" value="' . (int)$adv['oh_attendees'] . '"></label></div>'
         . '<p class="small muted">Si captaste una propiedad, marca lo que ya tienes completo:</p>'
         . '<label class="check"><input type="checkbox" name="logros[cap_precio]" value="1"' . ((int)$adv['cap_precio'] ? ' checked' : '') . '> Precio en valor de mercado</label>'
         . '<label class="check"><input type="checkbox" name="logros[cap_docs]" value="1"' . ((int)$adv['cap_docs'] ? ' checked' : '') . '> Documentos completos</label>'

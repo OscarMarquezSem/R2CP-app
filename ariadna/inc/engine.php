@@ -111,15 +111,42 @@ function help_links(?string $raw): array
     return $out;
 }
 
-/** «Open House» o «Recorrido en vivo», según elige la oficina. */
-function oh_label(?array $office): string
+const OH_MODES = [
+    'open_house' => ['label' => 'Open House', 'count' => 'Asistentes reales', 'plural' => 'asistentes'],
+    'recorrido'  => ['label' => 'Recorrido en vivo', 'count' => 'Interesados que dejaron sus datos', 'plural' => 'interesados'],
+    'jornada'    => ['label' => 'Jornada de opinión de valor', 'count' => 'Propietarios interesados que dejaron sus datos', 'plural' => 'propietarios interesados'],
+];
+
+function oh_mode(?array $office): string
 {
-    return ($office['oh_mode'] ?? 'open_house') === 'recorrido' ? 'Recorrido en vivo' : 'Open House';
+    $m = $office['oh_mode'] ?? 'open_house';
+    return isset(OH_MODES[$m]) ? $m : 'open_house';
 }
 
+/** «Open House», «Recorrido en vivo» o «Jornada de opinión de valor», según elige la oficina. */
+function oh_label(?array $office): string
+{
+    return OH_MODES[oh_mode($office)]['label'];
+}
+
+function oh_count_label(?array $office): string
+{
+    return OH_MODES[oh_mode($office)]['count'];
+}
+
+/**
+ * Textos del plan: {OH} = la actividad de la oficina; {ASISTENTES} = asistentes / interesados / propietarios interesados.
+ * {jornada}…{/jornada} solo se ve en la Jornada de opinión de valor; {evento}…{/evento} solo en Open House y Recorrido.
+ */
 function oh_text(?string $s, ?array $office): string
 {
-    return str_replace('{OH}', oh_label($office), (string)$s);
+    $s = (string)$s;
+    $j = oh_mode($office) === 'jornada';
+    if (strpos($s, '{') !== false) {
+        $s = preg_replace('~\{jornada\}(.*?)\{/jornada\}~s', $j ? '$1' : '', $s);
+        $s = preg_replace('~\{evento\}(.*?)\{/evento\}~s', $j ? '' : '$1', $s);
+    }
+    return str_replace(['{OH}', '{ASISTENTES}'], [oh_label($office), OH_MODES[oh_mode($office)]['plural']], $s);
 }
 
 /** Convierte un enlace de Bunny/YouTube/Vimeo a su versión para insertar en la página. */
@@ -689,7 +716,7 @@ function evaluation(array $adv, array $s, ?array $office = null): array
     $att = (int)$adv['oh_attendees'];
     $minAtt = (int)setting('oh_min_attendees');
     $rows[] = ['group' => $ohL, 'label' => "Realizó su $ohL", 'meta' => 'Sí', 'result' => $oh ? 'Sí' : 'No', 'max' => 10, 'pts' => $oh ? 10.0 : 0.0];
-    $rows[] = ['group' => $ohL, 'label' => "Asistentes o interesados reales (mínimo $minAtt)", 'meta' => $minAtt, 'result' => $oh ? $att : 0, 'max' => 10, 'pts' => $oh ? $prop($att, $minAtt, 10) : 0.0];
+    $rows[] = ['group' => $ohL, 'label' => oh_count_label($office) . " (mínimo $minAtt)", 'meta' => $minAtt, 'result' => $oh ? $att : 0, 'max' => 10, 'pts' => $oh ? $prop($att, $minAtt, 10) : 0.0];
 
     $renta = (int)$adv['renta_closed'] === 1;
     $rows[] = ['group' => 'Cierre de renta', 'label' => '¿Cerró una renta?', 'meta' => 'Sí', 'result' => $renta ? 'Sí' : 'No', 'max' => 20, 'pts' => $renta ? 20.0 : 0.0];

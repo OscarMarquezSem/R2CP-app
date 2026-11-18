@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         q('DELETE FROM office_sessions WHERE id = ? AND office_id = ?', [(int)post('sid'), $office['id']]);
         flash('Sesión eliminada.');
     } elseif ($act === 'oh') {
-        q('UPDATE offices SET oh_mode = ? WHERE id = ?', [post('oh_mode') === 'recorrido' ? 'recorrido' : 'open_house', $office['id']]);
+        q('UPDATE offices SET oh_mode = ? WHERE id = ?', [isset(OH_MODES[post('oh_mode')]) ? post('oh_mode') : 'open_house', $office['id']]);
         flash('Guardado.');
     }
     redirect($self);
@@ -113,13 +113,14 @@ $hidden = is_admin($u) ? '<input type="hidden" name="office" value="' . (int)$of
     </form>
   </div>
   <div class="card">
-    <h2>Open House</h2>
-    <p>En la Semana 3 cada asesor hace su primer evento con compradores, supervisado por el Team Leader o el gerente de la oficina. Elige qué hace tu oficina:</p>
+    <h2>Open House o alternativa</h2>
+    <p>En la Semana 3 cada asesor hace su primera actividad para conseguir prospectos, supervisado por el Team Leader o el gerente de la oficina. Elige qué hace tu oficina:</p>
     <form method="post" class="form">
       <?= csrf_field() . $hidden ?><input type="hidden" name="action" value="oh">
-      <label class="check"><input type="radio" name="oh_mode" value="open_house"<?= $office['oh_mode'] !== 'recorrido' ? ' checked' : '' ?>> <span><b>Open House</b><br><span class="small muted">Puertas abiertas en una propiedad del inventario. Mínimo 5 asistentes reales.</span></span></label>
-      <label class="check"><input type="radio" name="oh_mode" value="recorrido"<?= $office['oh_mode'] === 'recorrido' ? ' checked' : '' ?>> <span><b>Recorrido en vivo</b><br><span class="small muted">El asesor muestra en vivo una propiedad del inventario (transmisión en Facebook o Instagram, o recorrido presencial con interesados). Cuentan las personas interesadas que dejan sus datos: mínimo 5.</span></span></label>
-      <p class="small muted">Los dos valen lo mismo en la evaluación de 100 puntos.</p>
+      <label class="check"><input type="radio" name="oh_mode" value="open_house"<?= oh_mode($office) === 'open_house' ? ' checked' : '' ?>> <span><b>Open House</b><br><span class="small muted">Puertas abiertas en una propiedad del inventario. Mínimo 5 asistentes reales.</span></span></label>
+      <label class="check"><input type="radio" name="oh_mode" value="recorrido"<?= oh_mode($office) === 'recorrido' ? ' checked' : '' ?>> <span><b>Recorrido en vivo</b><br><span class="small muted">El asesor muestra en vivo una propiedad del inventario (transmisión en Facebook o Instagram, o recorrido presencial con interesados). Cuentan las personas interesadas que dejan sus datos: mínimo 5.</span></span></label>
+      <label class="check"><input type="radio" name="oh_mode" value="jornada"<?= oh_mode($office) === 'jornada' ? ' checked' : '' ?>> <span><b>Jornada de opinión de valor</b><br><span class="small muted">Para oficinas que no hacen eventos. El asesor recorre las dos cuadras a la redonda de una propiedad de la oficina y ofrece a los vecinos una opinión de valor de su casa sin costo. Cuentan los propietarios interesados que dejan sus datos: mínimo 5. Lo hace prospectar propietarios.</span></span></label>
+      <p class="small muted">Las tres valen lo mismo en la evaluación de 100 puntos.</p>
       <button class="btn btn-main">Guardar</button>
     </form>
   </div>

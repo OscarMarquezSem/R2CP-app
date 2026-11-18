@@ -23,7 +23,7 @@ if ($type === 'oficinas') {
         fputcsv($out, array_merge([$o['name'], $o['city'], $n, $c['verde'], $c['amarillo'], $c['rojo'], $n ? round($pct / $n) : 0], array_values($t), [$n ? round($sc / $n) : 0]));
     }
 } else {
-    fputcsv($out, ['Oficina', 'Asesor', 'Celular', 'Correo', 'Inicio', 'Semana', 'Semáforo', 'Motivo', '% actividades', 'Contactos', 'Tratos directos', 'Propiedades analizadas', 'Propiedades promovidas', 'Citas', 'Captaciones', 'Open House', 'Asistentes', 'Renta', 'Evaluación', 'Último registro', 'Decisión S3']);
+    fputcsv($out, ['Oficina', 'Asesor', 'Celular', 'Correo', 'Inicio', 'Semana', 'Semáforo', 'Motivo', '% actividades', 'Contactos', 'Tratos directos', 'Propiedades analizadas', 'Propiedades promovidas', 'Citas', 'Captaciones', 'Open House o alternativa', 'Asistentes o interesados', 'Renta', 'Evaluación', 'Último registro', 'Decisión S3']);
     foreach ($offices as $o) {
         foreach (office_advisors_stats($o, false) as $r) {
             $a = $r['adv']; $s = $r['stats'];
