@@ -41,13 +41,13 @@ Ariadna acompaña al asesor todos los días, pero **quien va a su oficina es qui
 
 | Semana | Después de ver el video | Cierre de semana |
 |---|---|---|
-| 1 | Día 1: bienvenida, conoce la oficina y agenda sus horarios con su TL · Día 2: Módulo 1 · Día 5: Módulo 2 (en el cierre) | Día 5 |
+| 1 | Día 1: bienvenida, conoce la oficina y agenda sus horarios con su TL · Día 2: Módulo 1 · Día 4: conceptos básicos · Día 5: Módulo 2 (en el cierre) | Día 5 |
 | 2 | Día 3: Módulo 3 | Día 5: revisan sus mínimos |
-| 3 | Día 1: Módulo 4 | Día 5: punto de control |
+| 3 | Día 1: Módulo 4 · Día 2: opinión de valor · Día 3: perfilamiento | Día 5: punto de control |
 | 4 | Día 1: Módulo 5 | Día 5 |
 | 5 | Día 1: Módulo 6 · Día 4: Módulo 7 | Día 5: cierre del curso y plan de 30 días |
 
-El repaso es el mismo día del video: el asesor lo ve y después va a la oficina a platicarlo con su TL. Los videos cortos (conceptos básicos, opinión de valor y perfilamiento) se platican en el cierre. En tu panel ves **«Hoy vienen a la oficina con su Team Leader»** y la columna **Citas con TL**. Si un asesor falta a una cita, Ariadna te lo sugiere; si falta a 2, se pone en **amarillo**.
+El repaso es el mismo día del video: el asesor lo ve y después va a la oficina a platicarlo con su TL. Así sabemos si de verdad entendió cada video. En tu panel ves **«Hoy vienen a la oficina con su Team Leader»** y la columna **Citas con TL**. Si un asesor falta a una cita, Ariadna te lo sugiere; si falta a 2, se pone en **amarillo**.
 
 ## 5. Tu tabla de asesores
 | Columna | Qué significa |
