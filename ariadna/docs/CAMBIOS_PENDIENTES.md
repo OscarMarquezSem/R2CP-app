@@ -25,3 +25,9 @@
 **Qué cambia:** las imágenes de Ariadna nunca se salen de su recuadro (aunque el navegador tenga estilos viejos guardados) y la app busca siempre primero los estilos más recientes.
 
 **Archivos:** `inc/hoy_view.php` (va dentro de `inc`) y `sw.js` (va suelto en la carpeta de Ariadna).
+
+## Próxima actualización (aún no se arma el zip; se junta con lo que salga de la prueba)
+
+| # | Cambio | Archivo |
+|---|---|---|
+| 1 | Dar de baja a un asesor y registrar si continúa (punto de control): solo el director y el gerente. El Team Leader ve la decisión, pero no la cambia. | `asesor.php` |
