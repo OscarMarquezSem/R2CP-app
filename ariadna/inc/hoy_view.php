@@ -167,7 +167,7 @@ function render_item(array $it, array $V): void
     } elseif ($isSession && $preview) {
         echo '<span class="act-meta">La fecha y la hora las programa tu oficina</span>';
     }
-    if ($it['minutes']) echo '<span class="chip">' . h(minutes_label($it['minutes'])) . '</span>';
+    if ($it['minutes']) echo '<span class="chip">' . h(time_chip($it['kind'], $it['minutes'])) . '</span>';
     echo '</span></label>';
 
     if ($it['pending_session']) {
@@ -205,6 +205,12 @@ function render_item(array $it, array $V): void
     echo '</details></li>';
 }
 
+/** En los videos, el tiempo es para el video y su tarea; así nadie piensa que el video dura eso. */
+function time_chip(string $kind, int $minutes): string
+{
+    return $kind === 'video' ? 'Aparta ' . minutes_label($minutes) . ': video y tarea' : minutes_label($minutes);
+}
+
 function num_field(string $f, string $label, int $value, string $hint, string $goal): void
 {
     echo '<div class="num"><div class="num-l"><span class="num-label">' . h($label) . '</span><span class="num-hint">' . h($hint) . '</span>'
@@ -221,7 +227,7 @@ function agenda_list(int $week, array $sessions, ?array $office): void
     echo '<ul class="agenda">';
     foreach ($list as $a) {
         echo '<li><span class="eyebrow">Día ' . (int)$a['day'] . '</span> ' . ($a['kind'] === 'oficina' ? 'Sesión en tu oficina: ' : '') . h($a['title'])
-            . ($a['minutes'] ? ' <span class="chip">' . h(minutes_label($a['minutes'])) . '</span>' : '')
+            . ($a['minutes'] ? ' <span class="chip">' . h(time_chip($a['kind'], $a['minutes'])) . '</span>' : '')
             . ($a['when'] ? ' <span class="small muted">(' . h($a['when']) . ')</span>' : '') . '</li>';
     }
     echo '</ul>';
