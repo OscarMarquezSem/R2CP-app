@@ -559,12 +559,14 @@ function advisor_stats(array $adv, array $office, ?string $today = null): array
     $weekA = array_fill(1, PROGRAM_WEEKS, []); $weekOther = array_fill(1, PROGRAM_WEEKS, 0); $weekOtherDone = array_fill(1, PROGRAM_WEEKS, 0);
     $workdaysElapsed = 0; $workdaysLogged = 0;
     $tlFirst = [];   // cita con el TL (clave A#) → fecha en que le tocaba por primera vez
+    $vidFirst = [];  // video (clave A#) → fecha en que le tocaba por primera vez
     foreach ($schedule as $date => $ctx) {
         $w = $ctx['week'];
         $items = day_items($ctx, ['office' => $office, 'sessions' => $sessions, 'done_elsewhere' => $ctx['type'] === 'catchup' ? done_keys($logs, $date) : []]);
         foreach ($items as $it) {
             if ($it['key'][0] === 'A') {
                 if ($it['kind'] === 'tl' && !isset($tlFirst[$it['key']])) $tlFirst[$it['key']] = ['date' => $date, 'week' => $w, 'title' => $it['title']];
+                if ($it['kind'] === 'video' && !isset($vidFirst[$it['id']])) $vidFirst[$it['id']] = ['date' => $date, 'week' => $w];
                 if ($date <= $today) $assignedA[$it['key']] = true;
                 $weekA[$w][$it['key']] = true;
             } else {
@@ -599,6 +601,19 @@ function advisor_stats(array $adv, array $office, ?string $today = null): array
         else $tl['missed'][] = $c;
     }
 
+    // Retos del video
+    $rows = advisor_retos((int)$adv['id']);
+    $retos = ['total' => 0, 'due' => 0, 'done' => 0, 'points' => 0.0, 'list' => []];
+    foreach (reto_videos() as $vid => $a) {
+        $when = $vidFirst[$vid] ?? ['date' => null, 'week' => (int)$a['week_no']];
+        $row = $rows[$vid] ?? null;
+        $isDue = $row || ($when['date'] && $when['date'] <= $today);
+        $retos['total']++;
+        if ($isDue) $retos['due']++;
+        if ($row) { $retos['done']++; $retos['points'] += reto_points($row); }
+        $retos['list'][] = ['activity' => $a, 'label' => reto_label($a['title']), 'date' => $when['date'], 'week' => $when['week'], 'due' => $isDue, 'row' => $row];
+    }
+
     // Días hábiles seguidos sin registrar (sin contar hoy)
     $missed = 0;
     if ($started) {
@@ -619,7 +634,7 @@ function advisor_stats(array $adv, array $office, ?string $today = null): array
         'week_assigned' => $weekAssigned, 'week_done' => $weekDone,
         'missed' => $missed, 'last_log' => $logs ? max(array_keys($logs)) : null,
         'workdays_elapsed' => $workdaysElapsed, 'workdays_logged' => $workdaysLogged,
-        'low_goals' => [], 'tl' => $tl,
+        'low_goals' => [], 'tl' => $tl, 'retos' => $retos,
     ];
     foreach ($goals as $w => $g) if ((int)$g['low_accepted'] === 1) $s['low_goals'][$w] = goals_below_min($g, $w);
     $s['evaluation'] = evaluation($adv, $s, $office);
@@ -680,6 +695,18 @@ function compute_status(array $adv, array $s): array
         return ['color' => 'verde', 'rule' => null, 'reason' => 'Faltó a una cita con su Team Leader',
             'action' => "Pregúntale a $name por su cita con su Team Leader («" . $tlMiss[0]['title'] . "»): no la registró como hecha. Agéndala de nuevo."];
     }
+    if (!$s['finished']) {
+        foreach ($s['retos']['list'] as $r) {
+            if ($r['row'] && (int)$r['row']['ok_count'] < 4 && (int)$r['row']['attempt'] < 2 && $r['week'] >= $s['week'] - 1) {
+                return ['color' => 'verde', 'rule' => null, 'reason' => 'Le toca repasar su Reto del ' . $r['label'],
+                    'action' => "En su cierre de semana, vuelve a hacerle a $name las preguntas de su Reto del " . $r['label'] . ' que no supo.'];
+            }
+            if (!$r['row'] && $r['date'] && $r['date'] < $s['today'] && $r['week'] >= $s['week'] - 1) {
+                return ['color' => 'verde', 'rule' => null, 'reason' => 'Falta su Reto del ' . $r['label'],
+                    'action' => "Aplícale a $name su Reto del " . $r['label'] . ': ya vio el video y aún no tiene sus 5 preguntas.'];
+            }
+        }
+    }
     if (!empty($s['low_goals'][$s['week']])) {
         return ['color' => 'verde', 'rule' => null, 'reason' => 'Se puso metas por debajo del mínimo',
             'action' => "Revisa con $name sus metas de esta semana: están por debajo del mínimo."];
@@ -718,8 +745,12 @@ function evaluation(array $adv, array $s, ?array $office = null): array
     $rows[] = ['group' => $ohL, 'label' => "Realizó su $ohL", 'meta' => 'Sí', 'result' => $oh ? 'Sí' : 'No', 'max' => 10, 'pts' => $oh ? 10.0 : 0.0];
     $rows[] = ['group' => $ohL, 'label' => oh_count_label($office) . " (mínimo $minAtt)", 'meta' => $minAtt, 'result' => $oh ? $att : 0, 'max' => 10, 'pts' => $oh ? $prop($att, $minAtt, 10) : 0.0];
 
+    $rt = $s['retos'] ?? ['total' => 0, 'points' => 0.0];
+    $rows[] = ['group' => 'Aprendizaje', 'label' => 'Retos del video con su Team Leader (1 punto por video)', 'meta' => $rt['total'] . ' videos', 'result' => rtrim(rtrim(number_format($rt['points'], 1), '0'), '.') . ' de ' . $rt['total'],
+        'max' => 10, 'pts' => $rt['total'] ? round(min(1, $rt['points'] / $rt['total']) * 10, 1) : 0.0];
+
     $renta = (int)$adv['renta_closed'] === 1;
-    $rows[] = ['group' => 'Cierre de renta', 'label' => '¿Cerró una renta?', 'meta' => 'Sí', 'result' => $renta ? 'Sí' : 'No', 'max' => 20, 'pts' => $renta ? 20.0 : 0.0];
+    $rows[] = ['group' => 'Cierre de renta', 'label' => '¿Cerró una renta?', 'meta' => 'Sí', 'result' => $renta ? 'Sí' : 'No', 'max' => 10, 'pts' => $renta ? 10.0 : 0.0];
 
     $total = (int)round(array_sum(array_column($rows, 'pts')));
     if ($total >= 90)      $level = ['TOP', 'Nivel TOP: listo para avanzar al siguiente programa.'];
@@ -830,6 +861,58 @@ function headline_activity(array $items): string
     return kind_prefix($real[0]['kind']) . $real[0]['title'] . (count($real) > 1 ? ' (+' . (count($real) - 1) . ')' : '');
 }
 
+// ---------------------------------------------------------------------------
+// Reto del video: 5 preguntas que el Team Leader hace después de cada video
+// ---------------------------------------------------------------------------
+/** Preguntas de un video: [['q' => …, 'a' => …, 'min' => …], …] («Pregunta | Respuesta clave | minuto» por línea). */
+function reto_questions(?array $a): array
+{
+    $out = [];
+    foreach (preg_split('/\R/', (string)($a['reto'] ?? '')) as $line) {
+        $p = array_map('trim', explode('|', $line));
+        if (($p[0] ?? '') === '') continue;
+        $out[] = ['q' => $p[0], 'a' => $p[1] ?? '', 'min' => $p[2] ?? ''];
+    }
+    return $out;
+}
+
+/** «Módulo 4: Open House» a partir de «Ve el Módulo 4: Open House». */
+function reto_label(string $videoTitle): string
+{
+    return trim(preg_replace('/^Ve (el |la )?/u', '', $videoTitle));
+}
+
+/** Puntos de un Reto: 4 o 5 bien = 1; 3 = 0.5; menos = 0. */
+function reto_points(?array $row): float
+{
+    if (!$row) return 0.0;
+    $ok = (int)$row['ok_count'];
+    return $ok >= 4 ? 1.0 : ($ok === 3 ? 0.5 : 0.0);
+}
+
+function advisor_retos(int $advisorId): array
+{
+    ensure_schema();
+    $out = [];
+    foreach (all('SELECT * FROM advisor_retos WHERE advisor_id = ?', [$advisorId]) as $r) $out[(int)$r['activity_id']] = $r;
+    return $out;
+}
+
+/** Videos del plan que tienen Reto. */
+function reto_points_label(float $p): string
+{
+    return rtrim(rtrim(number_format($p, 1), '0'), '.');
+}
+
+function reto_videos(): array
+{
+    $out = [];
+    foreach (plan_activities() as $days) foreach ($days as $list) foreach ($list as $a) {
+        if ($a['kind'] === 'video' && reto_questions($a)) $out[(int)$a['id']] = $a;
+    }
+    return $out;
+}
+
 /** Prefijo para las listas cortas (recordatorios, agenda). */
 function kind_prefix(string $kind): string
 {
@@ -867,7 +950,8 @@ function weekly_report_text(array $office, array $rows): string
         $txt .= "\n" . $emoji[$s['status']['color']] . ' *' . $a['name'] . '* · ' . ($s['finished'] ? 'Terminó' : 'Semana ' . $s['week'])
             . "\nActividades " . $s['pct'] . '% · Contactos ' . $t['contactos'] . ' · Tratos ' . $t['tratos'] . ' · Analizadas ' . $t['analizadas']
             . ' · Promovidas ' . $t['promovidas'] . ' · Citas ' . $t['citas'] . ' · Captaciones ' . $t['captaciones']
-            . ($s['tl']['due'] ? "\nCitas con su TL: " . $s['tl']['done'] . ' de ' . $s['tl']['due'] : '');
+            . ($s['tl']['due'] ? "\nCitas con su TL: " . $s['tl']['done'] . ' de ' . $s['tl']['due'] : '')
+            . ($s['retos']['due'] ? ' · Retos del video: ' . reto_points_label($s['retos']['points']) . ' de ' . $s['retos']['due'] : '');
         if ($s['status']['action']) $txt .= "\n👉 " . $s['status']['action'];
         $txt .= "\n";
     }

@@ -17,6 +17,7 @@ function seed_plan(bool $replace = false): void
     q('DELETE FROM plan_activities');
     q('DELETE FROM plan_weeks');
     $plan = require __DIR__ . '/plan_seed.php';
+    $retos = require __DIR__ . '/retos_seed.php';
     foreach ($plan as $w => $p) {
         q('INSERT INTO plan_weeks (week_no, title, objective, material, remember, review_questions, routine_start_day,
             meta_contactos, meta_tratos, meta_analizadas, meta_promovidas, meta_citas) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)', [
@@ -29,8 +30,8 @@ function seed_plan(bool $replace = false): void
             $sort[$d] = ($sort[$d] ?? 0) + 10;
             $help = '';
             foreach ($a['h'] ?? [] as [$t, $u]) $help .= $t . ' | ' . $u . "\n";
-            q('INSERT INTO plan_activities (week_no, day_no, sort, title, guide, minutes, kind, video_url, help_links) VALUES (?,?,?,?,?,?,?,?,?)',
-                [$w, $d, $sort[$d], $a['t'], $a['g'] ?? '', $a['m'] ?? null, $a['k'], $a['v'] ?? null, trim($help) ?: null]);
+            q('INSERT INTO plan_activities (week_no, day_no, sort, title, guide, minutes, kind, video_url, help_links, reto) VALUES (?,?,?,?,?,?,?,?,?,?)',
+                [$w, $d, $sort[$d], $a['t'], $a['g'] ?? '', $a['m'] ?? null, $a['k'], $a['v'] ?? null, trim($help) ?: null, $a['k'] === 'video' ? ($retos[$a['t']] ?? null) : null]);
         }
     }
     if (val("SELECT v FROM settings WHERE k = 'routine_items'") === null) {
@@ -114,6 +115,19 @@ function seed_demo(): array
         foreach ($st['low_goals'] as $w => $_) notice_once('metas_bajas:' . $id . ':' . $w);
         $created[] = ['name' => $name, 'link' => advisor_link($adv), 'office' => $office['name'], 'week' => $st['week']];
     }
+    // Retos del video de ejemplo: los videos que ya pasaron, con resultados variados (el último, pendiente).
+    ensure_schema();
+    foreach (all('SELECT a.*, o.timezone FROM advisors a JOIN offices o ON o.id = a.office_id') as $adv) {
+        $office = one('SELECT * FROM offices WHERE id = ?', [$adv['office_id']]);
+        $past = array_values(array_filter(advisor_stats($adv, $office)['retos']['list'], fn($r) => $r['date'] && $r['date'] < office_today($office)));
+        array_pop($past);
+        foreach ($past as $i => $r) {
+            $ans = ['ooooo', 'ooroo', 'ororo', 'oooor', 'ooooo'][($adv['id'] + $i) % 5];
+            q('INSERT INTO advisor_retos (advisor_id, activity_id, answers, ok_count, attempt, note, user_id, user_name, created_at, updated_at) VALUES (?,?,?,?,1,?,NULL,?,NOW(),NOW())',
+                [$adv['id'], $r['activity']['id'], $ans, substr_count($ans, 'o'), substr_count($ans, 'o') < 4 ? 'Repasa la parte que marqué y lo platicamos en tu cierre.' : null, 'Sofía Cano']);
+        }
+    }
+
     return ['password' => $pass, 'users' => $users, 'advisors' => $created];
 }
 
@@ -166,7 +180,7 @@ function demo_logs(array $adv, array $office, string $profile, string $today): v
                 $n['contactos'] += $ctx['arranque'] ? mt_rand(17, 22) : ($profile === 'estrella' ? mt_rand(26, 32) : ($profile === 'se_detuvo' ? mt_rand(6, 10) : mt_rand(19, 27)));
             }
             if (preg_match('/^Analiza (\d+)/u', $it['title'], $m)) $n['analizadas'] += (int)$m[1];
-            if (preg_match('/^(?:Publica|Promueve) (\d+) (?:propiedades|de las)/u', $it['title'], $m)) $n['promovidas'] += (int)$m[1];
+            if (preg_match('/^(?:Publica|Promueve) (?:tus )?(\d+) propiedades/u', $it['title'], $m)) $n['promovidas'] += (int)$m[1];
             if (str_contains($it['title'], 'tratos directos') || str_contains($it['title'], 'trato directo') || str_contains($it['title'], 'propietario')) $n['tratos'] += mt_rand(1, 3);
             if (str_starts_with($it['title'], 'Agenda tu primera cita') || str_starts_with($it['title'], 'Agenda tus citas')) $n['citas'] += 1;
             if ($it['kind'] === 'agenda') $doneItems[$it['key']] = 'Bloques de 9:00 a 11:00 y de 16:00 a 18:00.';

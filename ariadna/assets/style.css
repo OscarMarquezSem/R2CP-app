@@ -204,7 +204,8 @@ details.card[open] > summary::after { content: "－"; }
 .prose p { font-size: 1rem; }
 .plan-act { border: 1px solid var(--line); border-radius: 12px; padding: 12px; margin: 0 0 10px; background: #FCFAF5; }
 .plan-act .grid-act { display: grid; grid-template-columns: 1fr 110px 120px 80px; gap: 10px; }
-.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+.cols > * { min-width: 0; }
 .copyarea { width: 100%; min-height: 220px; font-size: .9rem; }
 
 @media (max-width: 720px) {

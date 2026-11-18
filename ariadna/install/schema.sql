@@ -160,6 +160,7 @@ CREATE TABLE IF NOT EXISTS plan_activities (
   kind VARCHAR(12) NOT NULL DEFAULT 'check',
   video_url VARCHAR(500) NULL,
   help_links TEXT NULL,
+  reto TEXT NULL,
   active TINYINT(1) NOT NULL DEFAULT 1,
   KEY idx_wd (week_no, day_no, sort)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -217,6 +218,23 @@ CREATE TABLE IF NOT EXISTS advisor_events (
   created_at DATETIME NOT NULL,
   KEY idx_adv (advisor_id, created_at),
   CONSTRAINT fk_ev_adv FOREIGN KEY (advisor_id) REFERENCES advisors(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Reto del video: lo que contestó el asesor a las preguntas de su Team Leader.
+CREATE TABLE IF NOT EXISTS advisor_retos (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  advisor_id INT UNSIGNED NOT NULL,
+  activity_id INT UNSIGNED NOT NULL,
+  answers VARCHAR(20) NOT NULL,
+  ok_count TINYINT NOT NULL DEFAULT 0,
+  attempt TINYINT NOT NULL DEFAULT 1,
+  note TEXT NULL,
+  user_id INT UNSIGNED NULL,
+  user_name VARCHAR(150) NULL,
+  created_at DATETIME NOT NULL,
+  updated_at DATETIME NOT NULL,
+  UNIQUE KEY uq_adv_act (advisor_id, activity_id),
+  CONSTRAINT fk_reto_adv FOREIGN KEY (advisor_id) REFERENCES advisors(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Avisos que solo se envían una vez (metas bajas, temas sin fecha…).

@@ -230,22 +230,12 @@ Las preguntas salen de la transcripción de cada módulo.
 
 ---
 
-## Lo que encontré al revisar las transcripciones (para que decidas)
+## Diferencias entre los videos y Ariadna (ya corregidas en la Actualización 6)
 
-1. **Semana 1, día 5, contenidos.**
-   - **El Módulo 2 pide:** publicar **3 propiedades (2 en venta y 1 en renta) en todas tus redes y en mínimo 5 grupos**, más 1 contenido de valor (regla 3 + 1).
-   - **Ariadna dice:** *"Crea mínimo 3 contenidos"*.
-   - **Propuesta:** cambiar el texto de Ariadna para que diga lo mismo que el video.
-2. **Semana 1, llamadas diarias.**
-   - **El Módulo 1 pide:** hablar con **mínimo 5 personas diarias**, o las que marque tu letra H.
-   - **Ariadna pide:** **20 llamadas diarias** a partir del día 3 (lo decidimos así).
-   - **Propuesta:** dejar las 20 y que el TL aclare que el video da el mínimo absoluto.
-3. **Semana 4, tratos directos.**
-   - **El Módulo 5 pide:** **identificar 20 tratos directos**.
-   - **El mínimo actual en Ariadna:** **6 tratos directos**.
-   - **Propuesta:** decidir si subimos el mínimo, o si dejamos 6 contactados y 20 identificados.
-4. **Semana 5, citas con propietarios.**
-   - **El Módulo 6 pide:** **3 citas con propietarios por semana**.
-   - **El mínimo de la Semana 5 en Ariadna:** 2 citas.
-5. **La Jornada de opinión de valor ya está en el video.** El Módulo 4 dice que el "secreto" del Open House es invitar a los vecinos con una opinión de valor gratis, así que la nueva opción para oficinas sin Open House va en línea con tu curso.
-6. **Videos que se entregan al TL.** Varios módulos piden mandar capturas o enlaces "a la persona que te está ayudando". Eso encaja con el Reto: el TL puede pedirlos en la misma cita.
+1. **Semana 1, día 5:** ahora pide 3 propiedades (2 en venta y 1 en renta) en todas tus redes y en mínimo 5 grupos, 1 contenido de valor y WhatsApp Business.
+2. **Llamadas diarias:** se quedan las 20 del arranque. En «Recuerda» de la Semana 1, Ariadna explica que el video pide mínimo 5 al día.
+3. **Semana 4:** identificar y llamar 20 tratos directos; el mínimo de la semana es 20.
+4. **Semana 5:** 3 citas con propietarios por semana (mínimo 3), lista y clasificación de contactos, 10 mensajes con pretexto de valor y roleplay de las 5 objeciones.
+5. **Ritmo de cada semana:** 3 propiedades y 1 contenido. El mínimo de promovidas es 3 por semana, y el semáforo de la Semana 2 pide 6 en total.
+
+Las preguntas se editan en **Plan**, en el campo «Reto del video» de cada video: un renglón por pregunta, «Pregunta | Respuesta clave | minuto».

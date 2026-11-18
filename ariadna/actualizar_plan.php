@@ -11,6 +11,7 @@ require __DIR__ . '/inc/app.php';
 
 enforce_https();
 $u = require_user(['admin']);
+ensure_schema();   // crea las tablas nuevas (Reto del video) si faltan
 
 $ACTS = array (
   0 => 
@@ -39,8 +40,8 @@ Escribe aquí en qué horarios quedaron tus bloques.',
     'w' => 1,
     'd' => 2,
     'k' => 'tl',
-    't' => 'Revisa con tu Team Leader lo que aprendiste del Módulo 1',
-    'g' => 'En cuanto termines el video, ve a tu oficina. Tu Team Leader te pregunta qué aprendiste del Módulo 1 y te ayuda a empezar tu Mi Mapa. Escribe aquí qué te preguntó y en qué te pidió reforzar.',
+    't' => 'Reto del Módulo 1 con tu Team Leader',
+    'g' => 'En cuanto termines el video, ve a tu oficina. Tu Team Leader te hace las 5 preguntas de tu Reto del Módulo 1 (unos 10 minutos) y te ayuda a empezar tu Mi Mapa. No es para calificarte: es para asegurarnos de que agarraste el hilo. Escribe aquí en qué te pidió reforzar.',
     'm' => 30,
     'after' => 'Ve el Módulo 1: Matemática de tu éxito',
   ),
@@ -49,8 +50,8 @@ Escribe aquí en qué horarios quedaron tus bloques.',
     'w' => 1,
     'd' => 4,
     'k' => 'tl',
-    't' => 'Platica con tu Team Leader los conceptos básicos del video',
-    'g' => 'En cuanto termines el video, ve a tu oficina. Tu Team Leader te pregunta los conceptos básicos para saber si quedaron claros y te ayuda a preparar tu examen de terminología. Escribe aquí qué te preguntó y en qué te pidió reforzar.',
+    't' => 'Reto del video de conceptos básicos con tu Team Leader',
+    'g' => 'En cuanto termines el video, ve a tu oficina. Tu Team Leader te hace las 5 preguntas de tu Reto del video de conceptos básicos (unos 10 minutos) y te ayuda a preparar tu examen de terminología. No es para calificarte: es para asegurarnos de que agarraste el hilo. Escribe aquí en qué te pidió reforzar.',
     'm' => 30,
     'after' => 'Ve el video: conceptos básicos de bienes raíces',
   ),
@@ -60,7 +61,7 @@ Escribe aquí en qué horarios quedaron tus bloques.',
     'd' => 5,
     'k' => 'tl',
     't' => 'Cierre de semana con tu Team Leader',
-    'g' => 'Ve a tu oficina y siéntate con tu Team Leader. Revisen juntos tus actividades y tus números de la semana, tu repaso conmigo y lo que aprendiste en el Módulo 2. Escribe aquí los acuerdos a los que llegaron.',
+    'g' => 'Ve a tu oficina y siéntate con tu Team Leader. Revisen juntos tus actividades y tus números de la semana, tu repaso conmigo y tu Reto del Módulo 2: 5 preguntas del video. Escribe aquí los acuerdos a los que llegaron.',
     'm' => 45,
     'after' => NULL,
   ),
@@ -69,8 +70,8 @@ Escribe aquí en qué horarios quedaron tus bloques.',
     'w' => 2,
     'd' => 3,
     'k' => 'tl',
-    't' => 'Revisa con tu Team Leader lo que aprendiste del Módulo 3',
-    'g' => 'En cuanto termines el video, ve a tu oficina. Tu Team Leader te pregunta qué aprendiste del Módulo 3 y te orienta con el trabajo que pide. Escribe aquí qué te preguntó y en qué te pidió reforzar.',
+    't' => 'Reto del Módulo 3 con tu Team Leader',
+    'g' => 'En cuanto termines el video, ve a tu oficina. Tu Team Leader te hace las 5 preguntas de tu Reto del Módulo 3 (unos 10 minutos) y te orienta con tu foto y tu biografía. No es para calificarte: es para asegurarnos de que agarraste el hilo. Escribe aquí en qué te pidió reforzar.',
     'm' => 30,
     'after' => 'Ve el Módulo 3: Marca personal desde el día 1',
   ),
@@ -89,8 +90,8 @@ Escribe aquí en qué horarios quedaron tus bloques.',
     'w' => 3,
     'd' => 1,
     'k' => 'tl',
-    't' => 'Revisa con tu Team Leader lo que aprendiste del Módulo 4',
-    'g' => 'En cuanto termines el video, ve a tu oficina. Tu Team Leader te pregunta qué aprendiste del Módulo 4 y empiezan juntos a organizar tu {OH}. Escribe aquí qué te preguntó y en qué te pidió reforzar.',
+    't' => 'Reto del Módulo 4 con tu Team Leader',
+    'g' => 'En cuanto termines el video, ve a tu oficina. Tu Team Leader te hace las 5 preguntas de tu Reto del Módulo 4 (unos 10 minutos) y empiezan juntos a organizar tu {OH}. No es para calificarte: es para asegurarnos de que agarraste el hilo. Escribe aquí en qué te pidió reforzar.',
     'm' => 30,
     'after' => 'Ve el Módulo 4: Open House',
   ),
@@ -99,8 +100,8 @@ Escribe aquí en qué horarios quedaron tus bloques.',
     'w' => 3,
     'd' => 2,
     'k' => 'tl',
-    't' => 'Platica con tu Team Leader lo que aprendiste del video de opinión de valor',
-    'g' => 'En cuanto termines el video, ve a tu oficina. Tu Team Leader te pide que le expliques cómo comparas una propiedad con otras parecidas de la zona, con una de las propiedades que vas a analizar. Escribe aquí qué te preguntó y en qué te pidió reforzar.',
+    't' => 'Reto del video de opinión de valor con tu Team Leader',
+    'g' => 'En cuanto termines el video, ve a tu oficina. Tu Team Leader te hace las 5 preguntas de tu Reto del video de opinión de valor (unos 10 minutos): le explicas cómo comparas una propiedad con otras parecidas de la zona. No es para calificarte: es para asegurarnos de que agarraste el hilo. Escribe aquí en qué te pidió reforzar.',
     'm' => 30,
     'after' => 'Ve el video: opinión de valor',
   ),
@@ -109,8 +110,8 @@ Escribe aquí en qué horarios quedaron tus bloques.',
     'w' => 3,
     'd' => 3,
     'k' => 'tl',
-    't' => 'Platica con tu Team Leader lo que aprendiste del video de perfilamiento',
-    'g' => 'En cuanto termines el video, ve a tu oficina. Tu Team Leader hace contigo un ejercicio: hace el papel de comprador y tú le haces las preguntas para perfilarlo. Escribe aquí qué te preguntó y en qué te pidió reforzar.',
+    't' => 'Reto del video de perfilamiento con tu Team Leader',
+    'g' => 'En cuanto termines el video, ve a tu oficina. Tu Team Leader te hace las 5 preguntas de tu Reto del video de perfilamiento (unos 10 minutos) y hacen un ejercicio: tu Team Leader hace el papel de comprador y tú lo perfilas. No es para calificarte: es para asegurarnos de que agarraste el hilo. Escribe aquí en qué te pidió reforzar.',
     'm' => 30,
     'after' => 'Ve el video: perfilamiento de compradores',
   ),
@@ -129,8 +130,8 @@ Escribe aquí en qué horarios quedaron tus bloques.',
     'w' => 4,
     'd' => 1,
     'k' => 'tl',
-    't' => 'Revisa con tu Team Leader lo que aprendiste del Módulo 5',
-    'g' => 'En cuanto termines el video, ve a tu oficina. Tu Team Leader te pregunta qué aprendiste del Módulo 5 y te ayuda a elegir la zona que vas a recorrer. Escribe aquí qué te preguntó y en qué te pidió reforzar.',
+    't' => 'Reto del Módulo 5 con tu Team Leader',
+    'g' => 'En cuanto termines el video, ve a tu oficina. Tu Team Leader te hace las 5 preguntas de tu Reto del Módulo 5 (unos 10 minutos) y te ayuda a elegir dónde buscar tus 20 tratos directos. No es para calificarte: es para asegurarnos de que agarraste el hilo. Escribe aquí en qué te pidió reforzar.',
     'm' => 30,
     'after' => 'Ve el Módulo 5: Tratos directos y la primera cita',
   ),
@@ -149,8 +150,8 @@ Escribe aquí en qué horarios quedaron tus bloques.',
     'w' => 5,
     'd' => 1,
     'k' => 'tl',
-    't' => 'Revisa con tu Team Leader lo que aprendiste del Módulo 6',
-    'g' => 'En cuanto termines el video, ve a tu oficina. Tu Team Leader te pregunta qué aprendiste del Módulo 6 y revisan juntos a qué prospectos les vas a dar seguimiento. Escribe aquí qué te preguntó y en qué te pidió reforzar.',
+    't' => 'Reto del Módulo 6 con tu Team Leader',
+    'g' => 'En cuanto termines el video, ve a tu oficina. Tu Team Leader te hace las 5 preguntas de tu Reto del Módulo 6 (unos 10 minutos) y revisan juntos cómo vas a organizar tus contactos. No es para calificarte: es para asegurarnos de que agarraste el hilo. Escribe aquí en qué te pidió reforzar.',
     'm' => 30,
     'after' => 'Ve el Módulo 6: Seguimiento sin parecer desesperado',
   ),
@@ -159,8 +160,8 @@ Escribe aquí en qué horarios quedaron tus bloques.',
     'w' => 5,
     'd' => 4,
     'k' => 'tl',
-    't' => 'Revisa con tu Team Leader lo que aprendiste del Módulo 7',
-    'g' => 'En cuanto termines el video, ve a tu oficina. Tu Team Leader te pregunta qué aprendiste del Módulo 7 y practican juntos cómo responder las objeciones que más te han hecho. Escribe aquí qué te preguntó y en qué te pidió reforzar.',
+    't' => 'Reto del Módulo 7 con tu Team Leader',
+    'g' => 'En cuanto termines el video, ve a tu oficina. Tu Team Leader te hace las 5 preguntas de tu Reto del Módulo 7 (unos 10 minutos) y practican juntos cómo responder las objeciones que más te han hecho. No es para calificarte: es para asegurarnos de que agarraste el hilo. Escribe aquí en qué te pidió reforzar.',
     'm' => 30,
     'after' => 'Ve el Módulo 7: Manejo de objeciones básicas',
   ),
@@ -178,10 +179,60 @@ Escribe aquí en qué horarios quedaron tus bloques.',
 
 $REMEMBER = array (
   1 => 'Ir a tu oficina es parte del programa: esta semana tu Team Leader te espera los días 1, 2, 4 y 5. Cada vez que veas un video del curso, ve a tu oficina a platicar con tu Team Leader lo que aprendiste.',
-  2 => 'Esta semana tienes 2 citas con tu Team Leader en la oficina: el repaso del video y el cierre de semana.',
+  2 => 'Esta semana tienes 2 citas con tu Team Leader en la oficina: el Reto del video y el cierre de semana.',
   3 => 'Esta semana tienes 4 citas con tu Team Leader en la oficina: una después de cada video (días 1, 2 y 3) y tu punto de control.',
-  4 => 'Esta semana tienes 2 citas con tu Team Leader en la oficina: el repaso del video y el cierre de semana.',
+  4 => 'Esta semana tienes 2 citas con tu Team Leader en la oficina: el Reto del video y el cierre de semana.',
   5 => 'Esta semana tienes 3 citas con tu Team Leader en la oficina: una después de cada video (Módulos 6 y 7) y el cierre del curso.',
+);
+
+$TL_ALIAS = array (
+  'Reto del Módulo 1 con tu Team Leader' => 'Revisa con tu Team Leader lo que aprendiste del Módulo 1',
+  'Reto del video de conceptos básicos con tu Team Leader' => 'Platica con tu Team Leader los conceptos básicos del video',
+  'Reto del Módulo 3 con tu Team Leader' => 'Revisa con tu Team Leader lo que aprendiste del Módulo 3',
+  'Reto del Módulo 4 con tu Team Leader' => 'Revisa con tu Team Leader lo que aprendiste del Módulo 4',
+  'Reto del video de opinión de valor con tu Team Leader' => 'Platica con tu Team Leader lo que aprendiste del video de opinión de valor',
+  'Reto del video de perfilamiento con tu Team Leader' => 'Platica con tu Team Leader lo que aprendiste del video de perfilamiento',
+  'Reto del Módulo 5 con tu Team Leader' => 'Revisa con tu Team Leader lo que aprendiste del Módulo 5',
+  'Reto del Módulo 6 con tu Team Leader' => 'Revisa con tu Team Leader lo que aprendiste del Módulo 6',
+  'Reto del Módulo 7 con tu Team Leader' => 'Revisa con tu Team Leader lo que aprendiste del Módulo 7',
+);
+
+$RETOS = array (
+  'Ve el Módulo 1: Matemática de tu éxito' => '¿Por qué decimos que tu trabajo no es vender casas? | Tu trabajo es conseguir personas. Sin prospectos no hay ventas: un médico sin pacientes es solo alguien con bata blanca. | 4
+¿Cómo calculas en Mi Mapa cuántos lados necesitas al año? | Gastos del mes × 12 = gasto anual. Ese número entre tu comisión promedio (lo que entra a tu bolsillo por una venta) te da los lados al año. | 8-13
+¿Por qué el 70 % de tus lados debe ser del lado del propietario? | Con la propiedad, los compradores te siguen, puedes llevarte los dos lados y ganas estabilidad y experiencia real (no «5 veces el primer año»). | 15-17
+¿Qué cuenta como un contacto y cuál es el número más importante de tu Mi Mapa? | Decir uno de los diálogos, no solo saludar. La letra H, tus contactos diarios (6 días a la semana): tu número mínimo de supervivencia. | 20-23
+¿Cuáles son los 5 pasos del diálogo y qué haces si alguien te dice que quiere vender? | Confirmar, presentarte, captar la atención («necesito pedirte algo y no es dinero»), explicar y cerrar («¿conoces a alguien que quiera comprar, vender o rentar?»). Si quiere vender, le propones sentarse a platicar y pides que alguien de tu oficina te acompañe. | 27-35',
+  'Ve el Módulo 2: Tu vitrina digital' => '¿Por qué las redes son tu «oficina pública» y cada cuándo publicas? | Son trabajo, no entretenimiento: la herramienta de marketing más poderosa y gratis (cuesta tiempo y esfuerzo). Publicas todos los días, no cuando tengas ganas. | 3-6
+¿Qué diferencia hay entre Facebook, Instagram, TikTok y el estatus de WhatsApp? | Facebook: mayores de 30 con poder de compra; perfil, página de negocios y grupos, con foto, precio, zona y contacto. Instagram: visual, que se imaginen viviendo ahí. TikTok: alcance orgánico, historia y atrapar en 3 segundos. Estatus de WhatsApp Business: gente que ya confía en ti; mínimo una propiedad o contenido al día. | 6-14
+¿Cuáles son las 4 partes del post perfecto? | Gancho (detiene el scroll), descripción que haga soñar con 3 o 4 datos clave, precio (obligatorio en México; filtra y atrae) y llamado a la acción específico. | 15-24
+¿Por qué el llamado a la acción es «Comenta me interesa» y no tu número de WhatsApp? | La interacción hace que la red siga mostrando tu post. Si solo te llaman, la red cree que no funcionó y lo deja de promover. | 22-24
+¿Por qué una de tus 3 propiedades debe ser renta y qué es la regla 3 + 1? | La renta tiene un ciclo corto (unos 30 días), contactos inmediatos, práctica sin presión y flujo de ingresos; el inquilino de hoy es el comprador de mañana. Regla 3 + 1: por cada 3 propiedades, 1 contenido de valor. | 24-37',
+  'Ve el Módulo 3: Marca personal desde el día 1' => '¿Cuánto tiempo tienes para la primera impresión digital y en qué se fija la gente? | Menos de 10 segundos: tu foto, tu nombre y tu biografía. Un perfil descuidado es peor que no tener perfil. | 0-4
+¿Cómo debe ser tu foto de perfil y cuáles no funcionan? | Ropa de negocios, buena luz, sonrisa genuina, fondo limpio, actual y la misma en todas tus redes. No: playa, boda, mascota, hijos, lentes de sol o fotos viejas. | 3-7
+¿Qué 3 preguntas responde tu biografía? | Quién eres (asesor inmobiliario en tu ciudad o zona), a quién ayudas (tu avatar o especialidad) y cómo te contactan (tu número o enlace de WhatsApp, obligatorio). | 7-13
+¿Por qué conviene especializarte y cuáles son los 3 nichos? | Te vuelves el referente de esa zona o ese tipo de cliente. Los nichos son salud, dinero y relaciones. | 8-12
+¿Qué cuidas en tu comportamiento en redes? | Publicar todos los días (puedes programar con Meta Business Suite), la regla 3 + 1, nada de política, peleas ni quejas, cuidar tu perfil personal porque te investigan y responder en minutos. | 13-20',
+  'Ve el Módulo 4: Open House' => '¿Por qué funciona un Open House y por qué hacerlo con otro asesor? | Sin cita ni presión; llegan prospectos más calificados (compradores y vendedores) y es práctica real. Con otro asesor hay doble energía, seguridad y leads compartidos; se acuerda antes cómo se reparten. | 3-8
+¿Qué propiedad eliges y cómo la preparas? | Atractiva, bien ubicada, fácil de llegar y con precio competitivo. Limpia, ordenada, iluminada y que huela bien; si tiene daños, avísalo al recibir a la gente. | 5-14
+¿Cómo lo promueves y por qué el anuncio dice «Comenta info y te confirmo el lugar»? | 7 días antes, todos los días y varias veces al día en redes, grupos y WhatsApp, con QR de registro e invitación a los vecinos. Sin dirección, para generar interacción y controlar los accesos. | 16-25
+¿Qué 3 preguntas clasifican al prospecto en la entrada? | ¿Para vivir o para invertir (revender o rentar)?, ¿tienes un límite de tiempo? y ¿ya visitaste otras en la zona? Lo clasificas como caliente, tibio o frío. Haces preguntas en vez de afirmaciones y escuchas más. | 27-35
+¿Cuándo das seguimiento y cuál es el «secreto» para conseguir inventario? | Esa misma tarde, con un mensaje que termine en pregunta («¿Te puedo llamar mañana?»). El secreto: invitar a los vecinos de 2 o 3 cuadras con una opinión de valor gratis; así consigues propietarios que quieren vender. | 36-40',
+  'Ve el Módulo 5: Tratos directos y la primera cita' => '¿Qué es un trato directo y dónde lo encuentras? | Un propietario que vende por su cuenta, sin asesor, y al que tú buscas primero. En letreros y lonas, portales (filtro «trato directo»), Marketplace, grupos de compraventa de Facebook y tu propio vecindario. | 3-8
+¿Cuáles son los 5 pasos del diálogo de trato directo? | Confirmar («¿eres el dueño de la casa en venta en…?»), presentarte (primer nombre y asesor inmobiliario), captar la atención («tengo una pregunta» y una pausa breve), explicar («¿te interesaría mostrar tu propiedad a un cliente de mi inmobiliaria?») y cerrar la cita proponiendo tú el día y la hora. | 8-16
+¿Qué contestas si al teléfono te pone condiciones («no firmo exclusiva», «no pago comisión»)? | «No hay problema, nos vemos hoy a las 5». El objetivo es entrar a la casa, no discutir por teléfono. | 16-18
+¿Cómo te preparas para la cita y qué preguntas haces ahí? | Investigas la zona y los precios de propiedades parecidas (datos, no opiniones) y llegas 5 minutos antes. Preguntas: cuánto tiempo lleva en venta (en promedio 6 semanas), si ha tenido visitas y qué le dijeron, por qué vende por su cuenta, qué tan pronto necesita vender, si trabaja con otros asesores y si tiene un plan de ventas. | 21-34
+¿Qué es hablar de resultados y no de servicios, y con qué terminas siempre la cita? | En vez de «publicamos en portales», dices «tenemos clientes buscando este tipo de casa en esta zona». Nunca te vas sin el siguiente paso: volver a tomar fotos en 1 a 3 días, presentar tu plan de ventas, una llamada con fecha y hora, o una cita con alguien de tu oficina y con todos los que deciden. | 33-40',
+  'Ve el Módulo 6: Seguimiento sin parecer desesperado' => '¿Por qué se muere el seguimiento y qué dice la estadística? | Por el miedo a molestar. El 48 % abandona después del primer intento y el 80 % de las ventas ocurre después del quinto contacto. Dar seguimiento es estar presente cuando el cliente decide. | 0-4
+¿Cuáles son los 3 elementos del sistema y qué datos lleva tu lista? | Lista, frecuencia y pretexto de valor. La lista lleva nombre, teléfono, fuente, qué busca, último contacto con notas y fechas especiales (en WhatsApp Business con etiquetas, una hoja de Google o Excel, o el CRM de tu oficina). | 4-11
+¿Cada cuándo das seguimiento a un prospecto caliente, uno tibio y uno frío? | Caliente: cada 1 a 5 días. Tibio: una vez por semana. Frío: 2 o 3 veces al mes, con redes, fechas especiales y novedades del mercado. | 11-18
+¿Por qué no preguntas «¿ya se decidieron?» y cómo es un buen mensaje? | Esa pregunta da por hecho que ya están listos. Un buen mensaje lleva un pretexto de valor (propiedad nueva que le queda, precios de su zona, dato de impuestos), es corto, lleva su nombre y termina con una pregunta. Las llamadas, para los calientes y los momentos clave. | 18-29
+¿Cuándo y cómo sueltas a un prospecto con elegancia? | Después de 5 o 6 contactos bien espaciados y con valor, sin respuesta. Mensaje de cierre: «Entiendo que quizá no es el momento… aquí voy a estar». Quita presión y muchos contestan; sigue en tu lista de distribución. | 31-36',
+  'Ve el Módulo 7: Manejo de objeciones básicas' => '¿Qué es en realidad una objeción? | No es un no: es una pregunta disfrazada, «todavía no me has dado suficiente razón». Es una puerta entreabierta. | 2-4
+¿Qué contestas a «lo voy a pensar»? | No dices «claro, tómese su tiempo» y te vas: es una cortina de humo. Validas y preguntas: «¿Qué es lo que te genera más dudas: el precio, la ubicación, el proceso, la comisión o la exclusiva?». | 3-6
+¿Y a «está muy caro»? | No lo tomas personal: «Entiendo que el precio es importante, ¿con qué lo estás comparando?». Si es parecido, averiguas qué ofrece la competencia; si no, explicas la diferencia con datos. Terminas con «¿qué precio te haría sentir que es una buena decisión?». | 6-8
+¿Y a «ya tengo asesor»? | Preguntas si ya firmó exclusiva. Si no, le ofreces otra perspectiva (tu plan de ventas). Si ya firmó, la respetas y te retiras con clase, sin hablar mal del otro asesor. | 8-10
+¿Cómo respondes a «no es el momento» y a «lo tengo que platicar con mi pareja»? ¿Cuáles son las 3 reglas de oro? | «¿Qué tendría que pasar para que fuera el momento?» y sigues con seguimiento de valor. «¿Cuándo podemos reunirnos los tres?». Reglas de oro: no interrumpir, validar antes de responder y practicar en voz alta. | 10-13',
 );
 
 $changes = [];
@@ -197,7 +248,16 @@ foreach ($ACTS as $a) {
         }
         continue;
     }
-    if (one('SELECT id FROM plan_activities WHERE active = 1 AND week_no = ? AND day_no = ? AND title = ?', [$a['w'], $a['d'], $a['t']])) continue;
+    $same = one('SELECT id, guide FROM plan_activities WHERE active = 1 AND week_no = ? AND day_no = ? AND title = ?', [$a['w'], $a['d'], $a['t']]);
+    if (!$same && isset($TL_ALIAS[$a['t']])) {
+        // La cita ya existía con su nombre anterior: ahora se llama «Reto … con tu Team Leader».
+        $same = one('SELECT id, guide FROM plan_activities WHERE active = 1 AND week_no = ? AND day_no = ? AND title = ?', [$a['w'], $a['d'], $TL_ALIAS[$a['t']]]);
+        if ($same) { q('UPDATE plan_activities SET title = ? WHERE id = ?', [$a['t'], $same['id']]); $same['guide'] = null; }
+    }
+    if ($same) {
+        if ($same['guide'] !== $a['g']) { q('UPDATE plan_activities SET guide = ? WHERE id = ?', [$a['g'], $same['id']]); $changes[] = $label . ' (texto nuevo)'; }
+        continue;
+    }
     if ($a['w'] === 1 && $a['d'] === 1) {
         // La bienvenida de la Semana 1 deja de ser un tema que programa la oficina: ahora es la cita con el TL.
         $old = one("SELECT id FROM plan_activities WHERE active = 1 AND week_no = 1 AND day_no = 1 AND title = 'Bienvenida e introducción al negocio'");
@@ -220,6 +280,16 @@ foreach ($ACTS as $a) {
     $changes[] = $label . ' (nueva)';
 }
 
+
+// Las 5 preguntas del Reto de cada video (solo si el video aún no tiene preguntas).
+foreach ($RETOS as $title => $txt) {
+    foreach (all("SELECT id, reto FROM plan_activities WHERE active = 1 AND kind = 'video' AND title = ?", [$title]) as $r) {
+        if (trim((string)$r['reto']) !== '') continue;
+        q('UPDATE plan_activities SET reto = ? WHERE id = ?', [$txt, $r['id']]);
+        $changes[] = 'Reto del video · ' . reto_label($title) . ': 5 preguntas';
+    }
+}
+
 // «Recuerda» de cada semana: se agrega al principio la línea de las citas con el TL.
 // Líneas de borradores anteriores de esta actualización (por si ya se había subido la Actualización 5).
 $OLDREM = [
@@ -229,6 +299,7 @@ $OLDREM = [
     'Esta semana tienes 2 citas con tu Team Leader en la oficina: el repaso del video y tu punto de control.',
     'Esta semana tienes 2 citas con tu Team Leader en la oficina: el repaso del video y el cierre del curso.',
     'Esta semana tienes 2 citas con tu Team Leader en la oficina: el repaso de cada video (Módulos 6 y 7) y el cierre del curso.',
+    'Esta semana tienes 2 citas con tu Team Leader en la oficina: el repaso del video y el cierre de semana.',
 ];
 foreach ($REMEMBER as $w => $txt) {
     $first = strtok($txt, "\n");

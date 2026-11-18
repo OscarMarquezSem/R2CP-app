@@ -19,6 +19,7 @@ function ariadna_message(array $ctx, array $items, ?array $office): string
 {
     if ($ctx['type'] === 'training') return 'Hoy te toca tu capacitación interna en la oficina. Pon mucha atención a sus políticas y documentos. Mañana seguimos juntos.';
     if ($ctx['type'] === 'catchup') return 'Hoy es un buen día para ponerte al corriente con lo que te quedó pendiente de la semana.';
+    foreach ($items as $it) if ($it['kind'] === 'tl' && strpos($it['title'], 'Reto ') === 0) return 'Hoy tienes tu ' . h(str_replace(' con tu Team Leader', '', $it['title'])) . ' con tu Team Leader. Ve el video con calma y después ve a tu oficina: te va a hacer 5 preguntas. No es para calificarte, es para asegurarnos de que agarraste el hilo.';
     foreach ($items as $it) if ($it['kind'] === 'tl') return 'Hoy te espera tu Team Leader en la oficina. Yo te acompaño todos los días, pero tu equipo está allá: no faltes. Antes, tus contactos del día.';
     foreach ($items as $it) if ($it['kind'] === 'oficina' && $it['session']) return 'Hoy tienes un tema con tu oficina. Lleva libreta y pregunta todo lo que no te quede claro. Antes, tus contactos del día.';
     if (!empty($ctx['arranque'])) return 'Hoy tus ' . h((string)setting('arranque_llamadas')) . ' llamadas van primero. Cada llamada te quita un poco de miedo: haz de esto un hábito.';
@@ -146,7 +147,17 @@ function render_hoy(array $V): void
 
     echo '<details class="card"><summary><b>Mi avance en el curso</b></summary>';
     kpi_grid($stats);
-    echo '<p class="small muted">Actividades cumplidas hasta hoy: ' . (int)$stats['done'] . ' de ' . (int)$stats['assigned'] . ' (' . (int)$stats['pct'] . '%). Evaluación estimada: ' . (int)$stats['evaluation']['total'] . ' de 100 puntos.</p></details>';
+    echo '<p class="small muted">Actividades cumplidas hasta hoy: ' . (int)$stats['done'] . ' de ' . (int)$stats['assigned'] . ' (' . (int)$stats['pct'] . '%). Evaluación estimada: ' . (int)$stats['evaluation']['total'] . ' de 100 puntos.</p>';
+    $mine = array_filter($stats['retos']['list'] ?? [], fn($r) => $r['due']);
+    if ($mine) {
+        echo '<h3>Mis Retos del video</h3><ul class="retos-mine">';
+        foreach ($mine as $r) {
+            $ok = $r['row'] ? (int)$r['row']['ok_count'] : null;
+            echo '<li>' . h($r['label']) . ': <b>' . ($ok === null ? 'pendiente' : $ok . ' de 5' . ($ok >= 4 ? ' · superado' : ' · repasar')) . '</b></li>';
+        }
+        echo '</ul>';
+    }
+    echo '</details>';
     if ($pw && trim((string)$pw['remember']) !== '') {
         echo '<div class="box remember"><span class="eyebrow">Lo que te pido que recuerdes</span><ul>';
         foreach (array_filter(explode("\n", oh_text($pw['remember'], $office))) as $r) echo '<li>' . h($r) . '</li>';
@@ -193,6 +204,7 @@ function render_item(array $it, array $V): void
             echo '<div class="video-soon">Este video estará listo muy pronto.</div>';
         }
         echo '</div>';
+        reto_result_box($it, $V);
     }
 
     $open = in_array($it['kind'], ['repaso', 'metas'], true);
@@ -214,6 +226,26 @@ function render_item(array $it, array $V): void
         if (!empty($li['photo'])) echo '<p class="small ok">✓ Ya subiste una foto. Si subes otra, se reemplaza.</p>';
     }
     echo '</details></li>';
+}
+
+/** Resultado del Reto del video, con lo que hay que repasar. */
+function reto_result_box(array $it, array $V): void
+{
+    foreach ($V['stats']['retos']['list'] ?? [] as $r) {
+        if ((int)$r['activity']['id'] !== (int)$it['id'] || !$r['row']) continue;
+        $row = $r['row']; $ok = (int)$row['ok_count'];
+        if ($ok >= 4) {
+            echo '<div class="box reto-ok"><b>¡Superaste tu Reto del ' . h($r['label']) . '!</b> ' . $ok . ' de 5. Agarraste el hilo: sigue así.</div>';
+            return;
+        }
+        $qs = reto_questions($r['activity']); $mins = [];
+        foreach (str_split((string)$row['answers']) as $i => $v) if ($v === 'r' && ($qs[$i]['min'] ?? '') !== '') $mins[] = $qs[$i]['min'];
+        echo '<div class="box warn reto-rep"><b>Te toca repasar el ' . h($r['label']) . '</b> (' . $ok . ' de 5). Vuelve a ver el video'
+            . ($mins ? ', sobre todo los minutos ' . h(implode(', ', $mins)) : '') . '.'
+            . (trim((string)$row['note']) !== '' ? '<br>Tu Team Leader te dice: «' . h($row['note']) . '»' : '')
+            . '<br>En tu cierre de semana te vuelve a preguntar y puedes ganar el punto completo.</div>';
+        return;
+    }
 }
 
 /** En los videos, el tiempo es para el video y su tarea; así nadie piensa que el video dura eso. */

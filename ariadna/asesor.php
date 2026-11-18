@@ -121,6 +121,28 @@ page_start($adv['name'], ['nav' => $u, 'office' => $office, 'active' => 'oficina
 </div>
 <?php endif; ?>
 
+<?php $rt = $s['retos']; if ($rt['total']): ?>
+<div class="card" id="retos">
+  <h2>Retos del video <span class="small muted">· <?= h(reto_points_label($rt['points'])) ?> de <?= (int)$rt['total'] ?> puntos</span></h2>
+  <p class="small muted">Después de cada video, su Team Leader le hace 5 preguntas de palabra. 4 o 5 de 5 = 1 punto · 3 de 5 = medio punto. Valen 10 puntos de su evaluación.</p>
+  <div class="tbl-wrap"><table class="tbl responsive">
+    <thead><tr><th>Video</th><th>Cuándo</th><th>Resultado</th><th>Lo aplicó</th><th></th></tr></thead>
+    <tbody>
+    <?php foreach ($rt['list'] as $r): $row = $r['row']; ?>
+      <tr>
+        <td class="first"><?= h($r['label']) ?></td>
+        <td data-l="Cuándo">Semana <?= (int)$r['week'] ?><?= $r['date'] ? ' · ' . h(fecha_corta($r['date'])) : '' ?></td>
+        <td data-l="Resultado"><?php if ($row): ?><span><b><?= (int)$row['ok_count'] ?> de 5</b><?= (int)$row['ok_count'] >= 4 ? ' · superado' : ((int)$row['ok_count'] === 3 ? ' · medio punto' : ' · repasar') ?></span><?php elseif ($r['due']): ?><span style="color:var(--red)">Pendiente</span><?php else: ?><span class="muted">Más adelante</span><?php endif; ?></td>
+        <td data-l="Lo aplicó"><?= $row ? h(($row['user_name'] ?? '') . ' · ' . fecha_corta(substr((string)$row['updated_at'], 0, 10))) : '—' ?></td>
+        <td data-l=""><?php if ($row || $r['due']): ?><a class="btn btn-sm<?= $row ? ' btn-ghost' : ' btn-main' ?>" href="reto.php?id=<?= (int)$adv['id'] ?>&amp;a=<?= (int)$r['activity']['id'] . h($amp) ?>"><?= $row ? 'Volver a aplicar' : 'Aplicar Reto' ?></a><?php endif; ?></td>
+      </tr>
+      <?php if ($row && trim((string)$row['note']) !== ''): ?><tr><td colspan="5" class="small muted">Comentario: <?= h($row['note']) ?></td></tr><?php endif; ?>
+    <?php endforeach; ?>
+    </tbody>
+  </table></div>
+</div>
+<?php endif; ?>
+
 <div class="cols">
   <div class="card">
     <h2>Resultados acumulados</h2>
@@ -204,7 +226,7 @@ page_start($adv['name'], ['nav' => $u, 'office' => $office, 'active' => 'oficina
 <h2 class="sec">Repasos semanales</h2>
 <div class="cols">
 <?php foreach ($reviews as $w => $ans):
-    $qs2 = array_values(array_filter(array_map('trim', explode("\n", (string)(plan_weeks()[$w]['review_questions'] ?? ''))))); ?>
+    $qs2 = array_values(array_filter(array_map('trim', explode("\n", oh_text(plan_weeks()[$w]['review_questions'] ?? '', $office))))); ?>
   <div class="card"><h3>Semana <?= (int)$w ?></h3>
     <?php foreach ($qs2 as $i => $qq): ?><p class="small"><b><?= h($qq) ?></b><br><?= h($ans[$i] ?? '—') ?></p><?php endforeach; ?>
   </div>

@@ -4,6 +4,7 @@
  */
 declare(strict_types=1);
 require __DIR__ . '/inc/app.php';
+ensure_schema();
 
 enforce_https();
 $u = require_user(['admin']);
@@ -20,7 +21,12 @@ $clean = function (array $a) use ($KINDS): array {
         $p = array_map('trim', explode('|', $line, 2));
         if (count($p) === 2 && $p[0] !== '' && preg_match('#^https?://#i', $p[1])) $help[] = $p[0] . ' | ' . $p[1];
     }
-    return [$kind, $min, preg_match('#^https?://#i', $video) ? mb_substr($video, 0, 500) : null, $help ? implode("\n", $help) : null];
+    $reto = [];
+    foreach (preg_split('/\R/', (string)($a['reto'] ?? '')) as $line) {
+        $p = array_map('trim', explode('|', $line));
+        if ($p[0] !== '') $reto[] = $p[0] . ' | ' . ($p[1] ?? '') . ' | ' . ($p[2] ?? '');
+    }
+    return [$kind, $min, preg_match('#^https?://#i', $video) ? mb_substr($video, 0, 500) : null, $help ? implode("\n", $help) : null, $kind === 'video' && $reto ? implode("\n", $reto) : null];
 };
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -38,18 +44,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!empty($a['delete'])) { q('UPDATE plan_activities SET active = 0 WHERE id = ? AND week_no = ?', [$id, $w]); continue; }
         $title = trim((string)($a['title'] ?? ''));
         if ($title === '') continue;
-        [$kind, $min, $video, $help] = $clean($a);
-        q('UPDATE plan_activities SET day_no = ?, sort = ?, title = ?, guide = ?, minutes = ?, kind = ?, video_url = ?, help_links = ? WHERE id = ? AND week_no = ?', [
-            max(1, min(PLAN_DAYS_PER_WEEK, (int)$a['day_no'])), (int)$a['sort'], mb_substr($title, 0, 255), trim((string)$a['guide']), $min, $kind, $video, $help, $id, $w]);
+        [$kind, $min, $video, $help, $reto] = $clean($a);
+        q('UPDATE plan_activities SET day_no = ?, sort = ?, title = ?, guide = ?, minutes = ?, kind = ?, video_url = ?, help_links = ?, reto = ? WHERE id = ? AND week_no = ?', [
+            max(1, min(PLAN_DAYS_PER_WEEK, (int)$a['day_no'])), (int)$a['sort'], mb_substr($title, 0, 255), trim((string)$a['guide']), $min, $kind, $video, $help, $reto, $id, $w]);
     }
     foreach ((array)($_POST['new'] ?? []) as $a) {
         $title = trim((string)($a['title'] ?? ''));
         if ($title === '') continue;
-        [$kind, $min, $video, $help] = $clean($a);
+        [$kind, $min, $video, $help, $reto] = $clean($a);
         $day = max(1, min(PLAN_DAYS_PER_WEEK, (int)$a['day_no']));
         $sort = (int)val('SELECT COALESCE(MAX(sort), 0) + 10 FROM plan_activities WHERE week_no = ? AND day_no = ?', [$w, $day]);
-        q('INSERT INTO plan_activities (week_no, day_no, sort, title, guide, minutes, kind, video_url, help_links) VALUES (?,?,?,?,?,?,?,?,?)',
-            [$w, $day, $sort, mb_substr($title, 0, 255), trim((string)$a['guide']), $min, $kind, $video, $help]);
+        q('INSERT INTO plan_activities (week_no, day_no, sort, title, guide, minutes, kind, video_url, help_links, reto) VALUES (?,?,?,?,?,?,?,?,?,?)',
+            [$w, $day, $sort, mb_substr($title, 0, 255), trim((string)$a['guide']), $min, $kind, $video, $help, $reto]);
     }
     db()->commit();
     flash('Semana ' . $w . ' guardada. Los cambios ya se ven en la app de los asesores.');
@@ -73,6 +79,7 @@ $actFields = function (string $n, array $a) use ($KINDS): void { ?>
   </div>
   <label>Enlace del video (solo tipo «Video del curso»: el enlace de Bunny, YouTube o Vimeo)<input name="<?= $n ?>[video_url]" value="<?= h($a['video_url'] ?? '') ?>" placeholder="https://player.mediadelivery.net/play/…"></label>
   <label>Videos de apoyo opcionales (uno por renglón: Título | enlace)<textarea name="<?= $n ?>[help_links]" rows="2" placeholder="Cómo utilizar Canva | https://youtu.be/…"><?= h($a['help_links'] ?? '') ?></textarea></label>
+  <label>Reto del video (solo tipo «Video del curso»: 5 renglones, cada uno «Pregunta | Respuesta clave | minuto»)<textarea name="<?= $n ?>[reto]" rows="<?= ($a['kind'] ?? '') === 'video' ? 6 : 1 ?>" placeholder="¿Qué cuenta como un contacto? | Decir uno de los diálogos, no solo saludar. | 20-23"><?= h($a['reto'] ?? '') ?></textarea></label>
 <?php };
 ?>
 <div class="page-head"><div><span class="eyebrow">Administrador</span><h1>Plan del curso Fast Track Residencial</h1></div>

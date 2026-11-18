@@ -6,7 +6,7 @@
 declare(strict_types=1);
 
 define('APP_ROOT', dirname(__DIR__));
-define('APP_VERSION', '1.2.0');
+define('APP_VERSION', '1.3.0');
 
 if (!is_file(APP_ROOT . '/config.php')) {
     if (PHP_SAPI !== 'cli' && basename($_SERVER['SCRIPT_NAME'] ?? '') !== 'install.php') {
@@ -159,8 +159,9 @@ function ensure_schema(): void
     static $done = false;
     if ($done) return;
     $done = true;
-    if ((int)setting('schema_version') >= 2) return;
-    db()->exec("CREATE TABLE IF NOT EXISTS advisor_events (
+    $v = (int)setting('schema_version');
+    if ($v >= 3) return;
+    if ($v < 2) db()->exec("CREATE TABLE IF NOT EXISTS advisor_events (
         id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
         advisor_id INT UNSIGNED NOT NULL,
         user_id INT UNSIGNED NULL,
@@ -172,7 +173,24 @@ function ensure_schema(): void
         KEY idx_adv (advisor_id, created_at),
         CONSTRAINT fk_ev_adv FOREIGN KEY (advisor_id) REFERENCES advisors(id) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
-    set_setting('schema_version', '2');
+    // Versión 3: Reto del video (preguntas por video y resultados por asesor).
+    if (!all("SHOW COLUMNS FROM plan_activities LIKE 'reto'")) db()->exec('ALTER TABLE plan_activities ADD COLUMN reto TEXT NULL');
+    db()->exec("CREATE TABLE IF NOT EXISTS advisor_retos (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  advisor_id INT UNSIGNED NOT NULL,
+  activity_id INT UNSIGNED NOT NULL,
+  answers VARCHAR(20) NOT NULL,
+  ok_count TINYINT NOT NULL DEFAULT 0,
+  attempt TINYINT NOT NULL DEFAULT 1,
+  note TEXT NULL,
+  user_id INT UNSIGNED NULL,
+  user_name VARCHAR(150) NULL,
+  created_at DATETIME NOT NULL,
+  updated_at DATETIME NOT NULL,
+  UNIQUE KEY uq_adv_act (advisor_id, activity_id),
+  CONSTRAINT fk_reto_adv FOREIGN KEY (advisor_id) REFERENCES advisors(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+    set_setting('schema_version', '3');
 }
 
 /** Registra un movimiento del asesor (baja, reactivación, decisión del punto de control). */
