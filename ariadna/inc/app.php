@@ -122,7 +122,7 @@ function setting_defaults(): array
         'admin_email'            => '',
         'routine_items'          => json_encode([
             ['key' => 'R1', 'title' => 'Haz tus contactos del día',
-             'guide' => 'Antes de hacer cualquier otra cosa, haz tus llamadas. Cada llamada cuenta como contacto. Contactar todos los días es lo que mantiene tu semana en movimiento. Súmalos en «Contactos».'],
+             'guide' => 'Antes de hacer cualquier otra cosa, haz tus llamadas. Usa los 3 diálogos para llamar que vienen en tu hoja de Mi Mapa. Cada llamada cuenta como contacto. Contactar todos los días es lo que mantiene tu semana en movimiento. Súmalos en «Contactos».'],
             ['key' => 'R2', 'title' => 'Anota cada contacto en tu agenda, la lista de tu celular o el CRM de tu oficina',
              'guide' => 'Con lo que te respondió y el siguiente paso. Tus registros detallados viven ahí; en Ariadna solo me cuentas cuántos fueron.'],
         ], JSON_UNESCAPED_UNICODE),
