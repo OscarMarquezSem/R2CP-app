@@ -30,4 +30,4 @@
 
 | # | Cambio | Archivo |
 |---|---|---|
-| 1 | Dar de baja a un asesor y registrar si continúa (punto de control): solo el director y el gerente. El Team Leader ve la decisión, pero no la cambia. | `asesor.php` |
+| 1 | Dar de baja a un asesor: solo el director y el gerente. Registrar «continúa / no continúa» en el punto de control: cualquiera de los tres. | `asesor.php` |

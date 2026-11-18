@@ -12,7 +12,7 @@ $qs = office_qs($office);
 $amp = $qs ? '&' . $qs : '';
 $adv = office_advisor($office, (int)($_GET['id'] ?? $_POST['id'] ?? 0));
 $self = 'asesor.php?id=' . (int)$adv['id'] . $amp;
-// Dar de baja y decidir si continúa: solo el director y el gerente (y el administrador).
+// Dar de baja: solo el director y el gerente (y el administrador). La decisión del punto de control la registra cualquiera de los tres.
 $canDecide = in_array($u['role'], ['admin', 'director', 'gerente'], true);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -46,8 +46,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         q('UPDATE advisors SET pin_hash = NULL WHERE id = ?', [$adv['id']]);
         q('DELETE FROM login_attempts WHERE k = ?', ['pin:' . $adv['id']]);
         flash('PIN restablecido. La próxima vez que entre creará uno nuevo.');
-    } elseif (in_array($act, ['toggle', 'decision'], true) && !$canDecide) {
-        flash('Solo el director o el gerente pueden dar de baja a un asesor o decidir si continúa.', 'err');
+    } elseif ($act === 'toggle' && !$canDecide) {
+        flash('Solo el director o el gerente pueden dar de baja a un asesor.', 'err');
     } elseif ($act === 'toggle') {
         q('UPDATE advisors SET active = 1 - active WHERE id = ?', [$adv['id']]);
         flash((int)$adv['active'] ? 'Asesor dado de baja. Su enlace deja de funcionar.' : 'Asesor reactivado.');
@@ -96,10 +96,6 @@ page_start($adv['name'], ['nav' => $u, 'office' => $office, 'active' => 'oficina
 <div class="card">
   <h2>Punto de control (Semana 3): <?= $cp['pass'] ? '<span class="ok">Cumple</span>' : '<span style="color:var(--red)">No cumple</span>' ?></h2>
   <ul><?php foreach ($cp['checks'] as [$l, $ok]) echo '<li>' . ($ok ? '✅' : '⬜') . ' ' . h($l) . '</li>'; ?></ul>
-  <?php if (!$canDecide): ?>
-    <p><b>Decisión:</b> <?= h(['continua' => 'Sí, continúa', 'no_continua' => 'No continúa', 'pendiente' => 'Pendiente de decidir'][$adv['decision'] ?? 'pendiente'] ?? 'Pendiente de decidir') ?><?= $adv['decision_note'] ? ' · ' . h($adv['decision_note']) : '' ?></p>
-    <p class="small muted">La decisión la registran el director o el gerente.</p>
-  <?php else: ?>
   <form method="post" class="form">
     <?= csrf_field() ?><input type="hidden" name="action" value="decision"><input type="hidden" name="id" value="<?= (int)$adv['id'] ?>">
     <?php if (is_admin($u)): ?><input type="hidden" name="office" value="<?= (int)$office['id'] ?>"><?php endif; ?>
@@ -112,7 +108,6 @@ page_start($adv['name'], ['nav' => $u, 'office' => $office, 'active' => 'oficina
     <label>Comentario<input name="decision_note" maxlength="500" value="<?= h($adv['decision_note'] ?? '') ?>"></label>
     <button class="btn btn-main">Guardar decisión</button>
   </form>
-  <?php endif; ?>
 </div>
 <?php endif; ?>
 
