@@ -14,7 +14,7 @@ $office = null;
 foreach ($offices as $o) if ((int)$o['id'] === $officeId) $office = $o;
 $office = $office ?? ($offices[0] ?? ['id' => 0, 'name' => 'Tu oficina', 'oh_mode' => 'open_house', 'timezone' => 'America/Cancun']);
 
-$screens = ['dia' => 'Día del curso', 'bienvenida' => 'Bienvenida (primera vez)', 'descanso' => 'Día de descanso', 'capacitacion' => 'Capacitación interna'];
+$screens = ['dia' => 'Día del curso', 'bienvenida' => 'Bienvenida (primera vez)', 'descanso' => 'Día de descanso', 'capacitacion' => 'Capacitación interna', 'celebracion' => 'Al guardar el día (celebración)', 'graduacion' => 'Fin del curso (graduación)'];
 $screen = array_key_exists($_GET['s'] ?? '', $screens) ? $_GET['s'] : 'dia';
 $w = max(1, min(PROGRAM_WEEKS, (int)($_GET['w'] ?? 1)));
 $d = max(1, min(PLAN_DAYS_PER_WEEK, (int)($_GET['d'] ?? 1)));
@@ -57,7 +57,7 @@ if ($screen === 'bienvenida') {
 
 $fakeAdv = ['id' => 0, 'name' => 'Ana López', 'start_date' => add_days(date('Y-m-d'), -(($w - 1) * 7 + $d - 1)), 'token' => '',
     'oh_done' => 0, 'oh_date' => null, 'oh_attendees' => 0, 'cap_precio' => 0, 'cap_docs' => 0, 'cap_disp' => 0, 'renta_closed' => 0, 'renta_date' => null];
-$type = ['dia' => 'plan', 'descanso' => 'rest', 'capacitacion' => 'training'][$screen];
+$type = ['dia' => 'plan', 'descanso' => 'rest', 'capacitacion' => 'training', 'celebracion' => 'plan', 'graduacion' => 'plan'][$screen];
 // Día de arranque (llamadas) para esta posición del plan
 $arr = null;
 $k = 0;
@@ -78,7 +78,9 @@ $stats = ['started' => true, 'finished' => false, 'elapsed' => ($w - 1) * 7 + $d
     'workdays_elapsed' => 0, 'workdays_logged' => 0];
 $stats['evaluation'] = evaluation($fakeAdv, $stats, $office);
 
+if ($screen === 'graduacion') { $stats['finished'] = true; }
 render_hoy([
+    'celebrate' => $screen === 'celebracion' ? '¡Listo! Ya guardé tu día. Mañana seguimos. No sueltes el hilo.' : null,
     'adv' => $fakeAdv, 'office' => $office, 'token' => '', 'preview' => true, 'preview_nav' => $nav,
     'date' => date('Y-m-d'), 'today' => date('Y-m-d'), 'ayer_mode' => false, 'ayer_offer' => null,
     'ctx' => $ctx, 'items' => $items, 'log' => null, 'stats' => $stats, 'goals' => [], 'sessions' => [],

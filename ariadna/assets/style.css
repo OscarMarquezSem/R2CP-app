@@ -281,3 +281,7 @@ details.card[open] > summary::after { content: "－"; }
 /* Ariadna con rostro */
 img.bubble-av { width: 48px; height: 48px; flex: 0 0 48px; border-radius: 50%; object-fit: cover; border: 2px solid var(--gold-l); background: var(--cream); }
 .welcome-img { display: block; width: 100%; height: auto; border-radius: 14px; margin: 4px 0 14px; background: var(--cream); }
+
+.card.celebrate { text-align: center; border: 2px solid var(--gold); }
+.card.celebrate img { width: 70%; max-width: 280px; height: auto; border-radius: 50%; display: block; margin: 0 auto 10px; }
+.card.celebrate p { font-size: 1.1rem; font-weight: 600; margin: 0; }

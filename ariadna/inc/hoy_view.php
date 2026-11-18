@@ -51,6 +51,9 @@ function render_hoy(array $V): void
     else echo '<p class="hero-sub">Semana ' . (int)$week . ' · ' . h(ctx_label($ctx)) . '</p>';
     echo '<svg class="thread" viewBox="0 0 400 30" preserveAspectRatio="none" aria-hidden="true"><path d="M0 20 C 60 0, 110 30, 170 14 S 280 4, 330 18 S 390 22, 400 10" fill="none" stroke="#B89860" stroke-width="2"/></svg></header>';
 
+    if (!empty($V['celebrate'])) {
+        echo '<div class="card celebrate"><img src="assets/ariadna-celebra.jpg" alt="Ariadna celebra contigo" width="600" height="600"><p>' . h($V['celebrate']) . '</p></div>';
+    }
     if (!empty($V['ayer_offer'])) {
         $o = $V['ayer_offer'];
         echo '<div class="card ayer">' . ariadna_bubble('<b>Ayer no me contaste cómo te fue.</b> ¿Lo registramos rápido antes de empezar tu día?')
@@ -63,8 +66,12 @@ function render_hoy(array $V): void
     if (!$stats['started']) { echo '<div class="card"><p>Cuando llegue tu primer día, aquí verás tus actividades. Guarda este enlace en tu pantalla de inicio.</p></div>'; install_hint(); return; }
     if ($stats['finished'] && empty($V['ayer_mode'])) {
         $ev = $stats['evaluation'];
-        echo '<div class="card"><h2>Tu evaluación final: ' . (int)$ev['total'] . ' puntos</h2><p class="lead">' . h($ev['level_text']) . '</p>';
+        echo '<div class="card"><img class="welcome-img" src="assets/ariadna-graduacion.jpg" alt="Ariadna te felicita por terminar el curso" width="600" height="600">'
+            . ariadna_bubble('<b>¡Saliste del laberinto!</b> Terminaste el curso Fast Track Residencial. Estoy muy orgullosa de ti.')
+            . '<h2>Tu evaluación final: ' . (int)$ev['total'] . ' puntos</h2><p class="lead">' . h($ev['level_text']) . '</p>';
+        echo '<div class="tbl-wrap">';
         eval_table($ev);
+        echo '</div>';
         echo '<p>Gracias por seguir el hilo. Tu plan de los próximos 30 días lo revisas con tu oficina.</p></div>';
         return;
     }
@@ -87,7 +94,7 @@ function render_hoy(array $V): void
     if (!empty($V['ayer_mode'])) echo '<input type="hidden" name="d" value="ayer">';
 
     if ($ctx['type'] === 'rest') {
-        echo '<div class="card rest"><h2>Hoy descansas, pero no sueltes el hilo.</h2><p>Si conoces a alguien que quiera comprar, vender o rentar, anótalo aquí.</p>';
+        echo '<div class="card rest"><img class="welcome-img" src="assets/ariadna-descanso.jpg" alt="Ariadna descansando con un café" width="600" height="600"><h2>Hoy descansas, pero no sueltes el hilo.</h2><p>Si conoces a alguien que quiera comprar, vender o rentar, anótalo aquí.</p>';
         num_field('contactos', 'Contactos', (int)($log['contactos'] ?? 0), '¿A cuántas personas detectaste?', '');
         foreach (['tratos', 'analizadas', 'promovidas', 'citas', 'captaciones'] as $f) echo '<input type="hidden" name="n[' . $f . ']" value="' . (int)($log[$f] ?? 0) . '">';
         echo '<label class="lbl">¿Quién es y qué busca? (opcional)<textarea name="note" rows="3" placeholder="Ej. Mi primo quiere vender su casa en la Región 15">' . h($log['note'] ?? '') . '</textarea></label>';

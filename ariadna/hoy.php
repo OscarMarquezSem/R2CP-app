@@ -180,15 +180,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && post('action') === 'save' && $ctx) 
     if ($lowAlert && notice_once('metas_bajas:' . $adv['id'] . ':' . $lowAlert[0])) {
         send_low_goals_alert($adv, $office, $lowAlert[0], $lowAlert[1]);
     }
-    flash($flashMsg, $flashType);
-    redirect($self . ($flashType === 'err' && $ayerMode ? '&d=ayer' : '') . '#hoy');
+    if ($flashType === 'ok' && $ctx['type'] !== 'rest') {
+        // Ariadna celebra; si cerró su repaso semanal, celebra la semana.
+        $closedWeek = false;
+        foreach ($items as $it) if ($it['kind'] === 'repaso' && (!empty($done[$it['key']]) || array_filter($reviewAnswers))) $closedWeek = true;
+        $_SESSION['celebrate'] = $closedWeek
+            ? '¡Cerraste tu Semana ' . (int)$week . '! Estoy muy orgullosa de ti. Descansa y prepárate: la que viene es todavía mejor. No sueltes el hilo.'
+            : $flashMsg;
+    } else {
+        flash($flashMsg, $flashType);
+    }
+    redirect($self . ($flashType === 'err' && $ayerMode ? '&d=ayer' : '') . (isset($_SESSION['celebrate']) ? '' : '#hoy'));
 }
 
 // ---------------------------------------------------------------------------
 // Vista
 // ---------------------------------------------------------------------------
+$celebrate = $_SESSION['celebrate'] ?? null;
+unset($_SESSION['celebrate']);
 page_start('Hoy', $opts);
 render_hoy([
+    'celebrate' => $celebrate,
     'adv' => $adv, 'office' => $office, 'token' => $t, 'preview' => false,
     'date' => $date, 'today' => $today, 'ayer_mode' => $ayerMode, 'ayer_offer' => (!$ayerMode && $ayer) ? ['date' => $ayer] : null,
     'ctx' => $ctx ?? ['type' => 'rest', 'week' => $stats['week'], 'date' => $date, 'days' => [], 'day_no' => 0, 'arranque' => null],

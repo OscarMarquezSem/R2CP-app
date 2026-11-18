@@ -1,5 +1,5 @@
 /* ARIADNA · Service worker: guarda estilos e íconos y muestra los avisos de Ariadna. */
-const CACHE = 'ariadna-v3';
+const CACHE = 'ariadna-v4';
 const ASSETS = ['assets/style.css', 'assets/app.js', 'assets/icon-192.png', 'assets/icon-512.png', 'assets/ariadna-avatar.jpg'];
 self.addEventListener('install', e => e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting())));
 self.addEventListener('activate', e => e.waitUntil(
