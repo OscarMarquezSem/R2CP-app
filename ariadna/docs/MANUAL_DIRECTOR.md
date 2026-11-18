@@ -39,15 +39,15 @@ En la misma pantalla eliges si tu oficina hace **Open House** o **Recorrido en v
 ### Citas con el Team Leader (no se programan en Sesiones)
 Ariadna acompaña al asesor todos los días, pero **quien va a su oficina es quien se queda en el negocio**. Por eso cada semana tiene citas con su Team Leader en la oficina. La hora la acuerdan el asesor y su TL.
 
-| Semana | Repaso de lo que aprendió | Cierre de semana |
+| Semana | Después de ver el video | Cierre de semana |
 |---|---|---|
-| 1 | Día 1: bienvenida, conoce la oficina y agenda sus horarios con su TL · Día 3: Módulo 1, Mi Mapa e Impulsor | Día 5 |
-| 2 | Día 4: Módulo 3 | Día 5: revisan sus mínimos |
-| 3 | Día 3: Módulo 4, opinión de valor y perfilamiento | Día 5: punto de control |
-| 4 | Día 2: Módulo 5 y sus tratos directos | Día 5 |
-| 5 | Día 2: Módulo 6 | Día 5: cierre del curso y plan de 30 días |
+| 1 | Día 1: bienvenida, conoce la oficina y agenda sus horarios con su TL · Día 2: Módulo 1 | Día 5 |
+| 2 | Día 3: Módulo 3 | Día 5: revisan sus mínimos |
+| 3 | Día 1: Módulo 4 | Día 5: punto de control |
+| 4 | Día 1: Módulo 5 | Día 5 |
+| 5 | Día 1: Módulo 6 | Día 5: cierre del curso y plan de 30 días |
 
-Casi todas caen el mismo día que una sesión en la oficina, así que es la misma visita. En tu panel ves **«Hoy vienen a la oficina con su Team Leader»** y la columna **Citas con TL**. Si un asesor falta a una cita, Ariadna te lo sugiere; si falta a 2, se pone en **amarillo**.
+El repaso es el mismo día del video: el asesor lo ve y después va a la oficina a platicarlo con su TL. Los videos que faltan de la semana se platican en el cierre. En tu panel ves **«Hoy vienen a la oficina con su Team Leader»** y la columna **Citas con TL**. Si un asesor falta a una cita, Ariadna te lo sugiere; si falta a 2, se pone en **amarillo**.
 
 ## 5. Tu tabla de asesores
 | Columna | Qué significa |

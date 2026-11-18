@@ -29,7 +29,7 @@
 ## Actualización 5 (`ariadna_actualizacion_5.zip`)
 
 **Qué trae:**
-1. **Citas con el Team Leader en la oficina** (tipo de actividad nuevo «Cita con tu Team Leader»): 11 en el curso. Semana 1: días 1 (bienvenida y agenda de horarios), 3 (repaso del Módulo 1) y 5 (cierre). Semanas 2 a 5: un repaso de lo que aprendió en los videos y el cierre de semana.
+1. **Citas con el Team Leader en la oficina** (tipo de actividad nuevo «Cita con tu Team Leader»): 11 en el curso. Semana 1: días 1 (bienvenida y agenda de horarios), 2 (después de ver el Módulo 1) y 5 (cierre). Semanas 2 a 5: una cita el mismo día del video, después de verlo, y el cierre del día 5.
 2. La bienvenida de la Semana 1 deja de ser un tema que programa la oficina: ahora es la cita con el TL (quedan 11 temas de oficina).
 3. Ariadna le insiste al asesor en ir a su oficina (bienvenida, mensaje del día y «Recuerda» de cada semana).
 4. Panel de la oficina: «Hoy vienen a la oficina con su Team Leader» y columna «Citas con TL». Detalle del asesor: a cuántas citas fue y a cuáles faltó. Reporte semanal: «Citas con su TL».

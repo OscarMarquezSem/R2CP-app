@@ -21,6 +21,7 @@ $ACTS = array (
     't' => 'Bienvenida: conoce tu oficina con tu Team Leader',
     'g' => 'Ve a tu oficina. Tu Team Leader te presenta la oficina y a tu equipo, y te da la introducción al negocio. Ahí mismo agendan juntos tus horarios de trabajo. Escribe aquí lo más importante que aprendiste.',
     'm' => 90,
+    'after' => NULL,
   ),
   1 => 
   array (
@@ -28,18 +29,20 @@ $ACTS = array (
     'd' => 1,
     'k' => 'agenda',
     't' => 'Agenda con tu Team Leader tus horarios de trabajo',
-    'g' => 'En tu bienvenida, aparta con tu Team Leader en el calendario de tu celular un bloque de tiempo para cada actividad de la semana. Abajo tienes la lista con el tiempo que pide cada una. Incluye todos los días tu bloque de prospección y tus citas con tu Team Leader de los días 3 y 5.
+    'g' => 'En tu bienvenida, aparta con tu Team Leader en el calendario de tu celular un bloque de tiempo para cada actividad de la semana. Abajo tienes la lista con el tiempo que pide cada una. Incluye todos los días tu bloque de prospección y tus citas con tu Team Leader de los días 2 y 5.
 Escribe aquí en qué horarios quedaron tus bloques.',
     'm' => NULL,
+    'after' => NULL,
   ),
   2 => 
   array (
     'w' => 1,
-    'd' => 3,
+    'd' => 2,
     'k' => 'tl',
     't' => 'Revisa con tu Team Leader lo que aprendiste del Módulo 1',
-    'g' => 'Ya que hoy estás en la oficina, tu Team Leader te pregunta qué aprendiste del Módulo 1 y revisa tu Mi Mapa y tu Impulsor de Memoria. Llévalos llenos. Escribe aquí qué te preguntó y en qué te pidió reforzar.',
+    'g' => 'En cuanto termines el video, ve a tu oficina. Tu Team Leader te pregunta qué aprendiste del Módulo 1 y te ayuda a empezar tu Mi Mapa. Escribe aquí qué te preguntó y en qué te pidió reforzar.',
     'm' => 30,
+    'after' => 'Ve el Módulo 1: Matemática de tu éxito',
   ),
   3 => 
   array (
@@ -49,15 +52,17 @@ Escribe aquí en qué horarios quedaron tus bloques.',
     't' => 'Cierre de semana con tu Team Leader',
     'g' => 'Ve a tu oficina y siéntate con tu Team Leader. Revisen juntos tus actividades y tus números de la semana, tu repaso conmigo y lo que aprendiste en el Módulo 2 y en el video de conceptos básicos. Escribe aquí los acuerdos a los que llegaron.',
     'm' => 45,
+    'after' => NULL,
   ),
   4 => 
   array (
     'w' => 2,
-    'd' => 4,
+    'd' => 3,
     'k' => 'tl',
     't' => 'Revisa con tu Team Leader lo que aprendiste del Módulo 3',
-    'g' => 'Ya que hoy estás en la oficina, tu Team Leader te pregunta qué aprendiste del Módulo 3 y revisa el trabajo que subiste. Escribe aquí qué te preguntó y en qué te pidió reforzar.',
+    'g' => 'En cuanto termines el video, ve a tu oficina. Tu Team Leader te pregunta qué aprendiste del Módulo 3 y te orienta con el trabajo que pide. Escribe aquí qué te preguntó y en qué te pidió reforzar.',
     'm' => 30,
+    'after' => 'Ve el Módulo 3: Marca personal desde el día 1',
   ),
   5 => 
   array (
@@ -67,15 +72,17 @@ Escribe aquí en qué horarios quedaron tus bloques.',
     't' => 'Cierre de semana con tu Team Leader',
     'g' => 'Ve a tu oficina y siéntate con tu Team Leader. Revisen juntos tus actividades y tus números de la semana, tu repaso conmigo y si cumpliste tus mínimos de las semanas 1 y 2. Platiquen también de lo que aprendiste en el Módulo 3 y en tus sesiones de documentación. Escribe aquí los acuerdos a los que llegaron.',
     'm' => 45,
+    'after' => NULL,
   ),
   6 => 
   array (
     'w' => 3,
-    'd' => 3,
+    'd' => 1,
     'k' => 'tl',
-    't' => 'Revisa con tu Team Leader lo que aprendiste de los videos de esta semana',
-    'g' => 'Ya que hoy estás en la oficina, tu Team Leader te pregunta qué aprendiste del Módulo 4 y de los videos de opinión de valor y perfilamiento, y revisa cómo va la organización de tu {OH}. Escribe aquí qué te preguntó y en qué te pidió reforzar.',
+    't' => 'Revisa con tu Team Leader lo que aprendiste del Módulo 4',
+    'g' => 'En cuanto termines el video, ve a tu oficina. Tu Team Leader te pregunta qué aprendiste del Módulo 4 y empiezan juntos a organizar tu {OH}. Escribe aquí qué te preguntó y en qué te pidió reforzar.',
     'm' => 30,
+    'after' => 'Ve el Módulo 4: Open House',
   ),
   7 => 
   array (
@@ -83,17 +90,19 @@ Escribe aquí en qué horarios quedaron tus bloques.',
     'd' => 5,
     'k' => 'tl',
     't' => 'Punto de control con tu Team Leader',
-    'g' => 'Ve a tu oficina y siéntate con tu Team Leader. Revisen juntos tus actividades y tus números de la semana, tu repaso conmigo y cómo te fue en tu {OH}, tus citas y tus captaciones. Con eso deciden juntos cómo sigues en las semanas 4 y 5. Escribe aquí los acuerdos a los que llegaron.',
+    'g' => 'Ve a tu oficina y siéntate con tu Team Leader. Revisen juntos tus actividades y tus números de la semana, tu repaso conmigo y lo que aprendiste en los videos de opinión de valor y perfilamiento, cómo te fue en tu {OH}, tus citas y tus captaciones. Con eso deciden juntos cómo sigues en las semanas 4 y 5. Escribe aquí los acuerdos a los que llegaron.',
     'm' => 45,
+    'after' => NULL,
   ),
   8 => 
   array (
     'w' => 4,
-    'd' => 2,
+    'd' => 1,
     'k' => 'tl',
     't' => 'Revisa con tu Team Leader lo que aprendiste del Módulo 5',
-    'g' => 'Ya que hoy estás en la oficina, tu Team Leader te pregunta qué aprendiste del Módulo 5 y revisa los propietarios que anotaste en tu recorrido. Escribe aquí qué te preguntó y en qué te pidió reforzar.',
+    'g' => 'En cuanto termines el video, ve a tu oficina. Tu Team Leader te pregunta qué aprendiste del Módulo 5 y te ayuda a elegir la zona que vas a recorrer. Escribe aquí qué te preguntó y en qué te pidió reforzar.',
     'm' => 30,
+    'after' => 'Ve el Módulo 5: Tratos directos y la primera cita',
   ),
   9 => 
   array (
@@ -103,15 +112,17 @@ Escribe aquí en qué horarios quedaron tus bloques.',
     't' => 'Cierre de semana con tu Team Leader',
     'g' => 'Ve a tu oficina y siéntate con tu Team Leader. Revisen juntos tus actividades y tus números de la semana, tu repaso conmigo y lo que aprendiste en el Módulo 5, tus tratos directos y tus citas. Escribe aquí los acuerdos a los que llegaron.',
     'm' => 45,
+    'after' => NULL,
   ),
   10 => 
   array (
     'w' => 5,
-    'd' => 2,
+    'd' => 1,
     'k' => 'tl',
     't' => 'Revisa con tu Team Leader lo que aprendiste del Módulo 6',
-    'g' => 'Ya que hoy estás en la oficina, tu Team Leader te pregunta qué aprendiste del Módulo 6 y revisa el seguimiento que les estás dando a tus prospectos. Escribe aquí qué te preguntó y en qué te pidió reforzar.',
+    'g' => 'En cuanto termines el video, ve a tu oficina. Tu Team Leader te pregunta qué aprendiste del Módulo 6 y revisan juntos a qué prospectos les vas a dar seguimiento. Escribe aquí qué te preguntó y en qué te pidió reforzar.',
     'm' => 30,
+    'after' => 'Ve el Módulo 6: Seguimiento sin parecer desesperado',
   ),
   11 => 
   array (
@@ -121,11 +132,12 @@ Escribe aquí en qué horarios quedaron tus bloques.',
     't' => 'Cierre del curso con tu Team Leader',
     'g' => 'Ve a tu oficina y siéntate con tu Team Leader. Revisen juntos tus actividades y tus números de la semana, tu repaso conmigo y lo que aprendiste en el Módulo 7, tu evaluación final y tu plan de los próximos 30 días. Escribe aquí los acuerdos a los que llegaron.',
     'm' => 45,
+    'after' => NULL,
   ),
 );
 
 $REMEMBER = array (
-  1 => 'Ir a tu oficina es parte del programa: esta semana tu Team Leader te espera los días 1, 3 y 5.
+  1 => 'Ir a tu oficina es parte del programa: esta semana tu Team Leader te espera los días 1, 2 y 5. Cada semana, después de ver el video del curso, ve a tu oficina a platicar con tu Team Leader lo que aprendiste.
 Tu negocio es de actividad: sin contactos no hay citas.
 Mi Mapa te dice cuántos contactos necesitas cada día para tu meta.
 Después de ver cada módulo empiezas la tarea de inmediato.',
@@ -133,7 +145,7 @@ Después de ver cada módulo empiezas la tarea de inmediato.',
 Tus redes y tus contenidos deben estar terminados antes de avanzar.
 Solo promueves propiedades del inventario de la oficina.
 Cada contacto queda anotado con su siguiente paso en tu agenda, celular o CRM.',
-  3 => 'Esta semana tienes 2 citas con tu Team Leader en la oficina: el repaso de los videos y tu punto de control.
+  3 => 'Esta semana tienes 2 citas con tu Team Leader en la oficina: el repaso del video y tu punto de control.
 Contacta a posibles compradores, no a otros asesores.
 Perfila al comprador antes de enseñarle propiedades.
 Registra a cada asistente de tu {OH} y dale seguimiento.',
@@ -170,7 +182,14 @@ foreach ($ACTS as $a) {
             continue;
         }
     }
-    $sort = (int)val('SELECT COALESCE(MAX(sort), 0) FROM plan_activities WHERE week_no = ? AND day_no = ?', [$a['w'], $a['d']]) + 10;
+    // El repaso con el TL va justo después de su video; si no, al final del día.
+    $vsort = $a['after'] ? val('SELECT sort FROM plan_activities WHERE active = 1 AND week_no = ? AND day_no = ? AND title = ?', [$a['w'], $a['d'], $a['after']]) : null;
+    if ($vsort !== null) {
+        $sort = (int)$vsort + 1;
+        q('UPDATE plan_activities SET sort = sort + 2 WHERE week_no = ? AND day_no = ? AND sort > ?', [$a['w'], $a['d'], (int)$vsort]);
+    } else {
+        $sort = (int)val('SELECT COALESCE(MAX(sort), 0) FROM plan_activities WHERE week_no = ? AND day_no = ?', [$a['w'], $a['d']]) + 10;
+    }
     q('INSERT INTO plan_activities (week_no, day_no, sort, title, guide, minutes, kind) VALUES (?,?,?,?,?,?,?)',
         [$a['w'], $a['d'], $sort, $a['t'], $a['g'], $a['m'], $a['k']]);
     $changes[] = $label . ' (nueva)';
