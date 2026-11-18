@@ -149,6 +149,39 @@ function set_setting(string $key, string $value): void
     setting('__flush');
 }
 
+/**
+ * Actualiza la base de datos sola cuando una versión nueva de Ariadna necesita tablas nuevas.
+ * Así no hay que correr nada a mano al subir una actualización.
+ */
+function ensure_schema(): void
+{
+    static $done = false;
+    if ($done) return;
+    $done = true;
+    if ((int)setting('schema_version') >= 2) return;
+    db()->exec("CREATE TABLE IF NOT EXISTS advisor_events (
+        id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        advisor_id INT UNSIGNED NOT NULL,
+        user_id INT UNSIGNED NULL,
+        user_name VARCHAR(150) NULL,
+        user_role VARCHAR(20) NULL,
+        kind VARCHAR(20) NOT NULL,
+        note TEXT NULL,
+        created_at DATETIME NOT NULL,
+        KEY idx_adv (advisor_id, created_at),
+        CONSTRAINT fk_ev_adv FOREIGN KEY (advisor_id) REFERENCES advisors(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+    set_setting('schema_version', '2');
+}
+
+/** Registra un movimiento del asesor (baja, reactivación, decisión del punto de control). */
+function advisor_event(int $advisorId, array $user, string $kind, string $note): void
+{
+    ensure_schema();
+    q('INSERT INTO advisor_events (advisor_id, user_id, user_name, user_role, kind, note, created_at) VALUES (?,?,?,?,?,?,NOW())',
+        [$advisorId, $user['id'], $user['name'], $user['role'], $kind, $note !== '' ? $note : null]);
+}
+
 // ---------------------------------------------------------------------------
 // Sesión y seguridad
 // ---------------------------------------------------------------------------

@@ -49,13 +49,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($act === 'toggle' && !$canDecide) {
         flash('Solo el director o el gerente pueden dar de baja a un asesor.', 'err');
     } elseif ($act === 'toggle') {
-        q('UPDATE advisors SET active = 1 - active WHERE id = ?', [$adv['id']]);
-        flash((int)$adv['active'] ? 'Asesor dado de baja. Su enlace deja de funcionar.' : 'Asesor reactivado.');
+        $note = mb_substr(post('note'), 0, 1000);
+        if ((int)$adv['active'] && $note === '') {
+            flash('Para dar de baja escribe el motivo.', 'err');
+        } else {
+            q('UPDATE advisors SET active = 1 - active WHERE id = ?', [$adv['id']]);
+            advisor_event((int)$adv['id'], $u, (int)$adv['active'] ? 'baja' : 'reactivacion', $note);
+            flash((int)$adv['active'] ? 'Asesor dado de baja. Su enlace deja de funcionar.' : 'Asesor reactivado.');
+        }
     } elseif ($act === 'decision') {
         $d = post('decision');
-        if (in_array($d, ['continua', 'no_continua', 'pendiente'], true)) {
+        $note = mb_substr(post('decision_note'), 0, 500);
+        if ($d === 'no_continua' && $note === '') {
+            flash('Para marcar «No continúa» escribe el motivo en el comentario.', 'err');
+        } elseif (in_array($d, ['continua', 'no_continua', 'pendiente'], true)) {
             q('UPDATE advisors SET decision = ?, decision_note = ?, decision_by = ?, decision_at = NOW() WHERE id = ?',
-                [$d, mb_substr(post('decision_note'), 0, 500), $u['id'], $adv['id']]);
+                [$d, $note, $u['id'], $adv['id']]);
+            advisor_event((int)$adv['id'], $u, 'decision_' . $d, $note);
             flash('Decisión registrada.');
         }
     }
@@ -105,7 +115,7 @@ page_start($adv['name'], ['nav' => $u, 'office' => $office, 'active' => 'oficina
         <option value="continua" <?= $adv['decision'] === 'continua' ? 'selected' : '' ?>>Sí, continúa</option>
         <option value="no_continua" <?= $adv['decision'] === 'no_continua' ? 'selected' : '' ?>>No continúa (su enlace se pausa)</option>
       </select></label>
-    <label>Comentario<input name="decision_note" maxlength="500" value="<?= h($adv['decision_note'] ?? '') ?>"></label>
+    <label>Comentario (obligatorio si no continúa: ¿por qué?)<input name="decision_note" maxlength="500" value="<?= h($adv['decision_note'] ?? '') ?>"></label>
     <button class="btn btn-main">Guardar decisión</button>
   </form>
 </div>
@@ -227,9 +237,8 @@ page_start($adv['name'], ['nav' => $u, 'office' => $office, 'active' => 'oficina
   <div class="actions">
     <?php foreach ([['regen', 'Generar enlace nuevo', '¿Generar un enlace nuevo? El anterior dejará de funcionar.'],
                     ['reset_pin', 'Restablecer PIN', '¿Restablecer el PIN de este asesor?'],
-                    ['toggle', (int)$adv['active'] ? 'Dar de baja' : 'Reactivar', (int)$adv['active'] ? '¿Dar de baja a este asesor? Su enlace dejará de funcionar.' : '¿Reactivar a este asesor?']] as [$a, $label, $conf]):
-        if ($a === 'reset_pin' && !(int)$office['pin_enabled']) continue;
-        if ($a === 'toggle' && !$canDecide) { echo '<span class="small muted">Solo el director o el gerente pueden dar de baja a un asesor.</span>'; continue; } ?>
+                    ] as [$a, $label, $conf]):
+        if ($a === 'reset_pin' && !(int)$office['pin_enabled']) continue; ?>
       <form method="post" class="inline-form" data-confirm="<?= h($conf) ?>">
         <?= csrf_field() ?><input type="hidden" name="action" value="<?= $a ?>"><input type="hidden" name="id" value="<?= (int)$adv['id'] ?>">
         <?php if (is_admin($u)): ?><input type="hidden" name="office" value="<?= (int)$office['id'] ?>"><?php endif; ?>
@@ -237,5 +246,34 @@ page_start($adv['name'], ['nav' => $u, 'office' => $office, 'active' => 'oficina
       </form>
     <?php endforeach; ?>
   </div>
+  <?php if (!$canDecide): ?>
+    <p class="small muted" style="margin-top:12px">Solo el director o el gerente pueden dar de baja a un asesor.</p>
+  <?php else: ?>
+    <form method="post" class="form" style="margin-top:16px" data-confirm="<?= (int)$adv['active'] ? '¿Dar de baja a este asesor? Su enlace dejará de funcionar.' : '¿Reactivar a este asesor?' ?>">
+      <?= csrf_field() ?><input type="hidden" name="action" value="toggle"><input type="hidden" name="id" value="<?= (int)$adv['id'] ?>">
+      <?php if (is_admin($u)): ?><input type="hidden" name="office" value="<?= (int)$office['id'] ?>"><?php endif; ?>
+      <label><?= (int)$adv['active'] ? 'Motivo de la baja (obligatorio)' : 'Comentario (opcional)' ?>
+        <textarea name="note" rows="2" maxlength="1000"<?= (int)$adv['active'] ? ' required' : '' ?> placeholder="<?= (int)$adv['active'] ? 'Ej. Dejó la oficina; no registró actividad en 2 semanas…' : '' ?>"></textarea></label>
+      <button class="btn btn-sm <?= (int)$adv['active'] ? 'btn-danger' : 'btn-ghost' ?>"><?= (int)$adv['active'] ? 'Dar de baja' : 'Reactivar' ?></button>
+    </form>
+  <?php endif; ?>
+</div>
+
+<?php
+ensure_schema();
+$events = all('SELECT * FROM advisor_events WHERE advisor_id = ? ORDER BY created_at DESC, id DESC', [$adv['id']]);
+$evLabels = ['baja' => 'Dio de baja', 'reactivacion' => 'Reactivó', 'decision_continua' => 'Punto de control: sí continúa',
+    'decision_no_continua' => 'Punto de control: no continúa', 'decision_pendiente' => 'Punto de control: pendiente de decidir'];
+?>
+<h2 class="sec">Movimientos</h2>
+<div class="card">
+  <?php if (!$events): ?><p class="muted">Aún no hay movimientos (bajas, reactivaciones o decisiones del punto de control).</p><?php endif; ?>
+  <?php foreach ($events as $e): ?>
+    <div class="plan-act">
+      <b><?= h($evLabels[$e['kind']] ?? $e['kind']) ?></b>
+      <span class="small muted"> · <?= h(fecha_corta(substr($e['created_at'], 0, 10))) ?> <?= h(substr($e['created_at'], 11, 5)) ?> · <?= h($e['user_name'] ?? '') ?> (<?= h(ROLE_LABELS[$e['user_role']] ?? $e['user_role']) ?>)</span>
+      <?php if (trim((string)$e['note']) !== ''): ?><div>“<?= h($e['note']) ?>”</div><?php endif; ?>
+    </div>
+  <?php endforeach; ?>
 </div>
 <?php page_end();

@@ -205,6 +205,20 @@ CREATE TABLE IF NOT EXISTS week_reviews (
   CONSTRAINT fk_rev_adv FOREIGN KEY (advisor_id) REFERENCES advisors(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Movimientos del asesor (bajas, reactivaciones y decisiones del punto de control), con quién y por qué.
+CREATE TABLE IF NOT EXISTS advisor_events (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  advisor_id INT UNSIGNED NOT NULL,
+  user_id INT UNSIGNED NULL,
+  user_name VARCHAR(150) NULL,
+  user_role VARCHAR(20) NULL,
+  kind VARCHAR(20) NOT NULL,
+  note TEXT NULL,
+  created_at DATETIME NOT NULL,
+  KEY idx_adv (advisor_id, created_at),
+  CONSTRAINT fk_ev_adv FOREIGN KEY (advisor_id) REFERENCES advisors(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- Avisos que solo se envían una vez (metas bajas, temas sin fecha…).
 CREATE TABLE IF NOT EXISTS notices (
   k VARCHAR(190) NOT NULL PRIMARY KEY,

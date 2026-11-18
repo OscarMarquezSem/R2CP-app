@@ -31,3 +31,4 @@
 | # | Cambio | Archivo |
 |---|---|---|
 | 1 | Dar de baja a un asesor: solo el director y el gerente. Registrar «continúa / no continúa» en el punto de control: cualquiera de los tres. | `asesor.php` |
+| 2 | Motivo obligatorio al dar de baja y al marcar «no continúa»; sección «Movimientos» en el detalle del asesor (quién, cuándo, qué y por qué). La base de datos se actualiza sola la primera vez. | `asesor.php`, `inc/app.php` |
