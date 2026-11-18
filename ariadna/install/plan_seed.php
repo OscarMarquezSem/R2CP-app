@@ -96,7 +96,7 @@ return [
             ['d' => 1, 'k' => 'check', 't' => 'Organiza y promueve tu {OH} con la supervisión del Team Leader o gerente de tu oficina', 'g' => 'Cuando lo realices, regístralo en «Mis logros» con el número de asistentes reales (mínimo 5).'],
             ['d' => 2, 'k' => 'video', 't' => 'Ve el video: opinión de valor'],
             ['d' => 2, 'k' => 'check', 't' => 'Analiza 2 propiedades y cuéntame qué opinas de su valor', 'g' => 'Súmalas en «Propiedades analizadas».'],
-            ['d' => 3, 'k' => 'oficina', 't' => 'Inventario de la oficina', 'm' => 60],
+            ['d' => 3, 'k' => 'oficina', 't' => 'Inventario de la oficina', 'm' => 60, 'g' => 'Siéntate con el Team Leader o el gerente de tu oficina a analizar el inventario: qué propiedades hay, en qué zonas, sus precios y lo más importante de cada una. Así, cuando un cliente te pregunte por algo, vas a poder responderle bien. Escribe aquí qué propiedades te llamaron más la atención y por qué.'],
             ['d' => 3, 'k' => 'video', 't' => 'Ve el video: perfilamiento de compradores'],
             ['d' => 3, 'k' => 'check', 't' => 'Analiza 3 propiedades y cuéntame qué opinas de su valor', 'g' => 'Súmalas en «Propiedades analizadas».'],
             ['d' => 4, 'k' => 'check', 't' => 'Invita y prospecta para tu {OH}', 'g' => 'Anota a cada asistente con su celular, qué le interesó y el siguiente paso.'],
