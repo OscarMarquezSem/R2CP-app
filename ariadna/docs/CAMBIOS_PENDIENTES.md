@@ -47,4 +47,5 @@
 
 | # | Cambio | Archivo |
 |---|---|---|
-| — | Aún no hay cambios pendientes. | |
+| 1 | **Reto del video** (10 videos): 5 preguntas con respuesta clave que aplica el TL después de cada video; 1 punto por video (4-5 de 5), medio punto (3 de 5); segunda oportunidad en el cierre del día 5. Evaluación: Aprendizaje 10 y cierre de renta de 20 a 10. Mockup: https://claude.ai/artifact/ACJrLg8wHu5SnZH9AnXnC5 | Pendiente: subtítulos de Bunny |
+| 2 | Tercera opción para oficinas que no hacen Open House ni Recorrido en vivo. | Pendiente: definir la actividad |
