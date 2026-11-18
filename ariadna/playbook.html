@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<link rel="icon" href="assets/icon-192.png">
+<title>Playbook de Ariadna</title>
+</head>
+<body>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: una columna de lectura, secciones como fichas de trabajo de la oficina. */
+:root {
+  --bg: #F7F3EA; --card: #FFFFFF; --ink: #1F2A44; --ink2: #3A4766; --muted: #5F6576;
+  --line: #E6DECB; --cream: #F1EBDC; --terra: #A94B2C; --terra-bg: #FBE9DF; --gold: #7A6235; --gold-l: #E4D6B8;
+  --ok: #2E8B57; --warn: #B08600; --bad: #C0392B;
+  --f: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #141A28; --card: #1C2436; --ink: #EEF0F5; --ink2: #C9CEDA; --muted: #A3AAB9;
+  --line: #2E3850; --cream: #232C42; --terra: #F0956F; --terra-bg: #3A2620; --gold: #D9BE8A; --gold-l: #4A4030;
+  --ok: #5CC38A; --warn: #E5BD45; --bad: #F07A6A; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #141A28; --card: #1C2436; --ink: #EEF0F5; --ink2: #C9CEDA; --muted: #A3AAB9;
+  --line: #2E3850; --cream: #232C42; --terra: #F0956F; --terra-bg: #3A2620; --gold: #D9BE8A; --gold-l: #4A4030;
+  --ok: #5CC38A; --warn: #E5BD45; --bad: #F07A6A; color-scheme: dark }
+
+body { background: var(--bg); color: var(--ink); font: 17px/1.55 var(--f); }
+.wrap { max-width: 760px; margin: 0 auto; padding-block: 28px 64px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h1, h2, h3 { line-height: 1.2; text-wrap: balance; margin: 0; }
+h1 { font-size: 2rem; font-weight: 800; letter-spacing: -0.01em; }
+h2 { font-size: 1.3rem; font-weight: 800; }
+h3 { font-size: 1.02rem; font-weight: 700; }
+p { margin: 0; }
+.eyebrow { font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; font-weight: 700; color: var(--gold); }
+.muted { color: var(--muted); }
+
+.head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 22px; }
+.brand { display: flex; align-items: center; gap: 8px; }
+.brand b { letter-spacing: .22em; font-size: .95rem; }
+.brand small { display: block; font-size: .66rem; color: var(--muted); letter-spacing: 0; font-weight: 500; }
+.r2 { text-align: right; font-size: .78rem; line-height: 1.3; color: var(--gold); }
+.r2 b { letter-spacing: .06em; }
+
+.intro { display: flex; gap: 16px; align-items: flex-start; background: var(--card); border: 1.5px solid var(--gold-l); border-radius: 18px; padding: 18px; margin: 18px 0 8px; }
+.intro img { width: 64px; height: 64px; border-radius: 50%; flex: 0 0 64px; object-fit: cover; }
+.intro p { font-size: 1rem; }
+
+.toc { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 6px; }
+.toc a { font-size: .86rem; font-weight: 600; color: var(--ink2); text-decoration: none; border: 1px solid var(--line); background: var(--card); border-radius: 99px; padding: 6px 12px; }
+.toc a:hover, .toc a:focus-visible { border-color: var(--gold); outline: none; }
+
+section { margin-top: 34px; display: flex; flex-direction: column; gap: 14px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 620px) { .grid2 { grid-template-columns: 1fr; } }
+
+ul.list, ol.list { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 6px; }
+.check { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+.check li { display: flex; gap: 10px; align-items: flex-start; }
+.check input { width: 20px; height: 20px; margin-top: 3px; flex: 0 0 20px; accent-color: var(--ink); }
+.check label { cursor: pointer; }
+.where { font-size: .82rem; color: var(--muted); display: block; }
+
+.role { border-top: 3px solid var(--gold); }
+.role h3 { margin-bottom: 2px; }
+
+.rhythm { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 0; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; background: var(--card); }
+.rhythm > div { padding: 14px 16px; border-bottom: 1px solid var(--line); }
+.rhythm > div:nth-last-child(-n+2) { border-bottom: 0; }
+.rhythm .when { background: var(--cream); font-weight: 800; font-size: .9rem; }
+.rhythm .when small { display: block; font-weight: 500; color: var(--muted); font-size: .78rem; }
+@media (max-width: 520px) { .rhythm { grid-template-columns: 1fr; } .rhythm .when { border-bottom: 0; padding-bottom: 4px; } }
+
+.sem { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 620px) { .sem { grid-template-columns: 1fr; } }
+.dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
+.dot.v { background: var(--ok); } .dot.a { background: var(--warn); } .dot.r { background: var(--bad); }
+
+.tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 16px; background: var(--card); }
+table { width: 100%; border-collapse: collapse; font-size: .94rem; min-width: 520px; }
+th, td { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); background: var(--cream); }
+tr:last-child td { border-bottom: 0; }
+
+.rules { counter-reset: r; list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+.rules li { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px 16px; }
+.rules b { color: var(--terra); }
+
+details { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px 16px; }
+details + details { margin-top: 8px; }
+summary { cursor: pointer; font-weight: 700; }
+summary:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; border-radius: 6px; }
+details p { margin-top: 8px; color: var(--ink2); }
+
+.note { background: var(--terra-bg); border-radius: 14px; padding: 14px 16px; font-size: .95rem; }
+.wa { display: inline-flex; align-items: center; gap: 10px; background: #1F7A44; color: #FFFFFF; font-weight: 700; text-decoration: none; border-radius: 14px; padding: 12px 18px; margin-top: 4px; }
+.wa:hover, .wa:focus-visible { background: #17643A; outline: none; }
+.wa svg { flex: 0 0 22px; }
+.contact { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+.phone { font-variant-numeric: tabular-nums; font-weight: 700; user-select: all; }
+.foot { margin-top: 40px; text-align: center; color: var(--muted); font-size: .85rem; }
+.foot b { color: var(--gold); }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+html { scroll-behavior: smooth; }
+</style>
+
+<div class="wrap">
+  <header class="head">
+    <div class="brand">
+      <svg width="40" height="24" viewBox="0 0 40 24" aria-hidden="true"><path d="M2 18 C 10 2, 18 22, 26 8 S 36 6, 38 4" fill="none" stroke="#B89860" stroke-width="2.4" stroke-linecap="round"/><circle cx="38" cy="4" r="2.6" fill="#C75D3A"/></svg>
+      <span><b>ARIADNA</b><small>by Oscar Márquez Seminars</small></span>
+    </div>
+    <div class="r2"><b>R²CP ELITE</b><br><i>Sigue el hilo</i></div>
+  </header>
+
+  <span class="eyebrow">Playbook para la oficina</span>
+  <h1>Cómo usar Ariadna en tu oficina</h1>
+
+  <div class="intro">
+    <img src="data:image/jpeg;base64,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" alt="Ariadna" width="64" height="64">
+    <p><b>Ariadna es la Team Leader digital de tus asesores durante el curso Fast Track Residencial (5 semanas).</b> Les dice qué hacer cada día, les comparte los videos y les pide que registren su día. Tu trabajo es que lo usen, darles los temas internos de la oficina y atender a quien Ariadna te señale.</p>
+  </div>
+
+  <p style="margin:0 0 14px"><a href="Playbook_Ariadna.pdf" download style="font-weight:600;color:#A84A2B">Descargar en PDF para imprimir o compartir</a></p>
+  <nav class="toc" aria-label="Contenido">
+    <a href="#quien">Quién hace qué</a>
+    <a href="#entrar">Cómo entrar</a>
+    <a href="#antes">Antes de arrancar</a>
+    <a href="#alta">Alta de un asesor</a>
+    <a href="#citas">Citas y Reto del video</a>
+    <a href="#ritmo">Tu ritmo</a>
+    <a href="#semaforo">Semáforo</a>
+    <a href="#correos">Correos</a>
+    <a href="#reglas">Reglas de oro</a>
+    <a href="#dudas">Dudas comunes</a>
+  </nav>
+
+  <section id="quien">
+    <h2>1. Quién hace qué</h2>
+    <div class="grid2">
+      <div class="card role"><h3>Director</h3><p>Da de alta asesores, configura la oficina, revisa el reporte del viernes y decide en el punto de control. Puede dar de baja.</p></div>
+      <div class="card role"><h3>Gerente</h3><p>Igual que el director. Da las sesiones de oficina que le toquen. Puede dar de baja.</p></div>
+      <div class="card role"><h3>Team Leader de la oficina</h3><p>Recibe a cada asesor en sus <b>citas semanales en la oficina</b>, da las sesiones acompañadas (llamadas, inventario), atiende a quien Ariadna sugiere y puede registrar el punto de control. No da de baja.</p></div>
+      <div class="card role"><h3>Asesor</h3><p>Entra con su enlace, sigue «Esto te toca hoy» y registra su día en menos de 2 minutos. Lleva sus contactos en su agenda, celular o CRM.</p></div>
+    </div>
+  </section>
+
+  <section id="entrar">
+    <h2>2. Cómo entras a Ariadna</h2>
+    <div class="card">
+      <ol class="list">
+        <li>Oscar te manda por WhatsApp tu <b>correo</b> y tu <b>contraseña inicial</b>.</li>
+        <li>Abre <a href="https://ariadna.oscarmarquez.com"><b>ariadna.oscarmarquez.com</b></a> en tu celular o en tu computadora.</li>
+        <li>Escribe tu correo y tu contraseña y toca <b>Entrar</b>. Verás solo el panel de <b>tu oficina</b>.</li>
+        <li>Ve a <b>Mi cuenta</b> y <b>cambia tu contraseña</b> por una tuya (mínimo 10 caracteres).</li>
+        <li>En el celular, toca <b>Agregar a pantalla de inicio</b> para tenerla como una app más.</li>
+      </ol>
+      <p class="where" style="margin-top:10px">Este enlace es para director, gerente y team leader. Los asesores <b>no</b> lo usan: cada uno entra con su enlace personal. ¿Olvidaste tu contraseña? Escríbele a Oscar y te da una nueva.</p>
+    </div>
+  </section>
+
+  <section id="antes">
+    <h2>3. Antes de arrancar (una sola vez)</h2>
+    <div class="card">
+      <ul class="check">
+        <li><input type="checkbox" id="c1"><label for="c1">Entrar a Ariadna y <b>cambiar tu contraseña</b>. <span class="where">Mi cuenta</span></label></li>
+        <li><input type="checkbox" id="c2"><label for="c2">Marcar los <b>días hábiles</b> de la oficina. <span class="where">Configuración</span></label></li>
+        <li><input type="checkbox" id="c3"><label for="c3">Poner el día de <b>capacitación interna</b> (políticas y documentos). <span class="where">Configuración</span></label></li>
+        <li><input type="checkbox" id="c4"><label for="c4">Revisar la hora de los <b>avisos</b> a los asesores (9 am y 8 pm). <span class="where">Configuración</span></label></li>
+        <li><input type="checkbox" id="c5"><label for="c5">Programar los <b>11 temas de oficina</b> con fecha, hora y quién los da, marcando «Repetir cada semana». <span class="where">Sesiones</span></label></li>
+        <li><input type="checkbox" id="c6"><label for="c6">Elegir <b>Open House</b>, <b>Recorrido en vivo</b> o <b>Jornada de opinión de valor</b> (para oficinas que no hacen eventos: el asesor recorre las dos cuadras alrededor de una propiedad ofreciendo una opinión de valor sin costo). <span class="where">Sesiones</span></label></li>
+        <li><input type="checkbox" id="c7"><label for="c7">Tener impresas las hojas de <b>Mi Mapa</b> y del <b>Impulsor de Memoria</b> para entregarlas.</label></li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="alta">
+    <h2>4. Alta de un asesor</h2>
+    <div class="card">
+      <ol class="list">
+        <li><b>Asesores → Alta de asesor:</b> nombre, celular y fecha de inicio (puede ser hoy).</li>
+        <li>Toca <b>Enviar enlace por WhatsApp</b>. Ese enlace es personal: que no lo comparta.</li>
+        <li>Pídele que lo abra en su celular, lo <b>agregue a su pantalla de inicio</b> y toque <b>Activar avisos de Ariadna</b>.</li>
+        <li>Entrégale <b>Mi Mapa</b> y el <b>Impulsor de Memoria</b> impresos.</li>
+        <li>Dile: <i>«Ariadna es tu Team Leader estas 5 semanas. Cada noche cuéntale cómo te fue.»</i></li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="citas">
+    <h2>5. Citas con el Team Leader y Reto del video</h2>
+    <div class="note" style="margin-bottom:12px"><b>Por qué importan:</b> Ariadna acompaña al asesor todos los días, pero <b>quien va a su oficina es quien se queda en el negocio</b>. Por eso cada semana tiene citas con su Team Leader.</div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Semana</th><th>Reto, después de ver el video</th><th>Cierre de semana</th></tr></thead>
+        <tbody>
+          <tr><td><b>1</b></td><td>Día 1: bienvenida, conoce la oficina y agenda sus horarios contigo<br>Día 2: Módulo 1<br>Día 4: conceptos básicos<br>Día 5: Módulo 2 (en el cierre)</td><td>Día 5</td></tr>
+          <tr><td><b>2</b></td><td>Día 3: Módulo 3</td><td>Día 5: revisen sus mínimos</td></tr>
+          <tr><td><b>3</b></td><td>Día 1: Módulo 4<br>Día 2: opinión de valor<br>Día 3: perfilamiento</td><td>Día 5: punto de control</td></tr>
+          <tr><td><b>4</b></td><td>Día 1: Módulo 5</td><td>Día 5</td></tr>
+          <tr><td><b>5</b></td><td>Día 1: Módulo 6<br>Día 4: Módulo 7</td><td>Día 5: cierre del curso y plan de 30 días</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <ol class="list">
+        <li>La hora la <b>acuerdan el asesor y su Team Leader</b>. La oficina no tiene que programarla en Sesiones.</li>
+        <li>El Reto es <b>el mismo día del video</b>: el asesor lo ve y después va a la oficina. Así sabemos si de verdad entendió cada video.</li>
+        <li><b>Cómo aplicar el Reto:</b> abre al asesor en Ariadna y toca <b>Aplicar Reto</b> (también aparece en «Hoy vienen a la oficina»). Hazle las 5 preguntas <b>de palabra</b>; cada una trae su <b>respuesta clave</b> y el minuto del video donde está. Marca «La entendió» o «Hay que repasar». Son unos 10 minutos.</li>
+        <li><b>Cómo cuenta:</b> 4 o 5 de 5 = 1 punto · 3 de 5 = medio punto · 2 o menos = repasa el video. En su cierre de semana le vuelves a preguntar las que no supo. Los Retos valen <b>10 puntos</b> de su evaluación.</li>
+        <li>En tu panel verás <b>«Hoy vienen a la oficina con su Team Leader»</b> y las columnas <b>Citas con TL</b> y <b>Retos</b>.</li>
+        <li>Si un asesor falta a una cita, Ariadna te lo sugiere; si falta a <b>2</b>, se pone en <b>amarillo</b>.</li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="ritmo">
+    <h2>6. Tu ritmo con Ariadna</h2>
+    <div class="rhythm">
+      <div class="when">Cada mañana<small>5 minutos</small></div>
+      <div>Abre tu panel: revisa quién <b>viene hoy a su cita con el Team Leader</b> y lee <b>«Ariadna te sugiere atender hoy a»</b>. Llama primero a los rojos y luego a los amarillos. Si quieres, toca <b>Copiar recordatorio del día</b> y pégalo en el grupo de WhatsApp.</div>
+      <div class="when">Cada semana<small>lunes</small></div>
+      <div>Revisa en <b>Sesiones</b> que ningún tema diga «Sin fecha». Si un asesor necesita un tema sin programar, Ariadna te avisa por correo.</div>
+      <div class="when">Viernes<small>6 pm</small></div>
+      <div>Llega el <b>reporte semanal</b>. Revísalo con tu gerente y Team Leader; si quieres, toca <b>Copiar reporte para WhatsApp</b>.</div>
+      <div class="when">Semana 3<small>de cada asesor</small></div>
+      <div>Llega el correo de <b>punto de control</b>. Habla con el asesor y registra en su detalle si <b>continúa o no continúa</b> (si no continúa, escribe el motivo).</div>
+      <div class="when">Semana 5<small>cierre</small></div>
+      <div>Ariadna calcula su <b>evaluación de 100 puntos</b>. Revisen juntos su plan de los próximos 30 días.</div>
+    </div>
+  </section>
+
+  <section id="semaforo">
+    <h2>7. El semáforo</h2>
+    <div class="sem">
+      <div class="card"><h3><span class="dot v"></span>Verde</h3><p>Registra y avanza. <b>Reconócelo.</b> Un mensaje de «vas muy bien» vale mucho.</p></div>
+      <div class="card"><h3><span class="dot a"></span>Amarillo</h3><p>Lleva <b>2 días hábiles sin registrar</b>. Llámale hoy: casi siempre es un olvido o una duda.</p></div>
+      <div class="card"><h3><span class="dot r"></span>Rojo</h3><p>No cumplió al cierre de su semana: sin actividad en la 1, sin mínimos en la 2 o sin citas ni captaciones en la 3. <b>Reunión hoy.</b></p></div>
+    </div>
+  </section>
+
+  <section id="correos">
+    <h2>8. Correos que vas a recibir</h2>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Correo</th><th>Cuándo llega</th><th>Qué haces</th></tr></thead>
+        <tbody>
+          <tr><td><b>Reporte semanal</b></td><td>Viernes 6 pm</td><td>Revísalo con tu equipo.</td></tr>
+          <tr><td><b>Asesor en rojo</b></td><td>Al cerrar su semana</td><td>Habla con él hoy.</td></tr>
+          <tr><td><b>Metas bajas</b></td><td>Cuando se pone metas por debajo del mínimo</td><td>Revisen juntos su Mi Mapa.</td></tr>
+          <tr><td><b>Temas sin fecha</b></td><td>Cuando un asesor necesita una sesión</td><td>Prográmala en Sesiones.</td></tr>
+          <tr><td><b>Punto de control</b></td><td>Al cerrar su Semana 3</td><td>Decide si continúa.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="reglas">
+    <h2>9. Reglas de oro</h2>
+    <ul class="rules">
+      <li><b>Que vengan a la oficina.</b> Cada semana el asesor tiene citas con su Team Leader: no las canceles ni dejes que las salte.</li>
+      <li><b>Acompaña, no vigiles.</b> Ariadna te dice a quién ayudar, no a quién regañar.</li>
+      <li><b>Da las sesiones a tiempo.</b> Si un tema no tiene fecha, el asesor se atora.</li>
+      <li><b>Los registros detallados no van en Ariadna.</b> Nombres, teléfonos y seguimiento van en la agenda, el celular o el CRM de la oficina.</li>
+      <li><b>Toda baja lleva motivo.</b> Queda en «Movimientos» con tu nombre y fecha.</li>
+      <li><b>Las primeras 20 llamadas son lo más importante.</b> Si en la Semana 1 no llama, en la Semana 3 no habrá citas.</li>
+    </ul>
+  </section>
+
+  <section id="dudas">
+    <h2>10. Dudas comunes</h2>
+    <div>
+      <details><summary>El asesor perdió su enlace</summary><p>En su detalle toca <b>Enviar enlace por WhatsApp</b>. Si crees que alguien más lo tiene, usa <b>Generar enlace nuevo</b>; el anterior deja de funcionar.</p></details>
+      <details><summary>Se le olvidó su PIN</summary><p>En su detalle toca <b>Restablecer PIN</b>. La próxima vez que entre, Ariadna le pide crear uno nuevo. Lo puede hacer el director, el gerente o el team leader.</p></details>
+      <details><summary>Se le olvidó registrar su día</summary><p>A la mañana siguiente, hasta las 12:00, Ariadna le propone registrar el día anterior.</p></details>
+      <details><summary>Trabaja otros días que la oficina</summary><p>En su detalle marca sus <b>días hábiles</b> propios. Ariadna recorre sus actividades a esos días.</p></details>
+      <details><summary>No le llegan los avisos</summary><p>Que abra Ariadna desde la pantalla de inicio y toque <b>Activar avisos de Ariadna</b>. Si no los activa, le llegan por correo si diste de alta su correo.</p></details>
+      <details><summary>Un video no se reproduce</summary><p>Escríbele a Oscar por WhatsApp (botón de abajo) con el nombre del video y el día en que aparece.</p></details>
+    </div>
+    <div class="note contact">
+      <p><b>¿Tienes una pregunta o un comentario?</b> Escríbele directo a Oscar. Si ves algo que se puede mejorar, cuéntalo: Ariadna se actualiza con lo que vivimos en las oficinas.</p>
+      <a class="wa" href="https://wa.me/525562154614" target="_blank" rel="noopener"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.4.1-.6.3-.2.2-.8.8-.8 1.9s.8 2.2.9 2.4c.1.2 1.6 2.5 4 3.5 1.5.6 2.1.7 2.8.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2l-.5-.2z"/></svg>Escríbele a Oscar por WhatsApp</a>
+      <p class="muted">WhatsApp: <span class="phone">+52 55 6215 4614</span></p>
+    </div>
+  </section>
+
+  <p class="foot"><b>Ariadna · Sigue el hilo</b><br>Team Leader del curso Fast Track Residencial · R²CP Elite · Oscar Márquez Seminars</p>
+</div>
+
+</body>
+</html>
