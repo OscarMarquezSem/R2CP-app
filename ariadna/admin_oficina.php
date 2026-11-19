@@ -19,8 +19,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $act = post('action');
     if ($act === 'office') {
         $tz = array_key_exists(post('timezone'), $tzs) ? post('timezone') : 'America/Cancun';
-        q('UPDATE offices SET name = ?, city = ?, timezone = ?, active = ? WHERE id = ?',
-            [post('name') ?: $office['name'], post('city'), $tz, !empty($_POST['active']) ? 1 : 0, $id]);
+        $progs = array_values(array_intersect(array_keys(PROGRAMS), (array)($_POST['programs'] ?? [])));
+        q('UPDATE offices SET name = ?, city = ?, timezone = ?, active = ?, programs = ? WHERE id = ?',
+            [post('name') ?: $office['name'], post('city'), $tz, !empty($_POST['active']) ? 1 : 0, implode(',', $progs ?: ['residencial']), $id]);
         flash('Oficina actualizada.');
     } elseif ($act === 'add_user') {
         $email = mb_strtolower(post('email'));
@@ -67,6 +68,12 @@ page_start($office['name'], ['nav' => $u, 'active' => 'admin']);
     <label>Ciudad<input name="city" value="<?= h($office['city'] ?? '') ?>"></label>
     <label>Zona horaria
       <select name="timezone"><?php foreach ($tzs as $k => $v): ?><option value="<?= h($k) ?>" <?= $office['timezone'] === $k ? 'selected' : '' ?>><?= h($v) ?></option><?php endforeach; ?></select></label>
+    <fieldset class="progs"><legend><b>Programas de esta oficina</b></legend>
+      <?php foreach (PROGRAMS as $pk => $pd): ?>
+        <label class="check"><input type="checkbox" name="programs[]" value="<?= h($pk) ?>" <?= in_array($pk, office_programs($office), true) ? 'checked' : '' ?>> <span><b><?= h($pd['name'] . ' · ' . $pd['area']) ?></b><br><span class="small muted"><?= h($pd['course'] . ', ' . $pd['weeks'] . ' semanas') ?></span></span></label>
+      <?php endforeach; ?>
+      <p class="small muted">Si una oficina no tiene un programa, no le aparece en ningún lado. Sus directores, gerentes y TL usan el mismo usuario para los dos.</p>
+    </fieldset>
     <label class="check"><input type="checkbox" name="active" value="1" <?= (int)$office['active'] ? 'checked' : '' ?>> Oficina activa (si la desactivas, nadie de la oficina puede entrar)</label>
     <button class="btn btn-main">Guardar</button>
   </form>

@@ -22,12 +22,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && post('action') === 'add') {
     elseif ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) $err = 'El correo no es válido.';
     elseif (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $start)) $err = 'La fecha de inicio no es válida.';
     if ($err) { flash($err, 'err'); redirect('oficina.php' . ($qs ? '?' . $qs : '') . '#alta'); }
-    $id = create_advisor($office, $name, $phone, $email ?: null, $start);
+    $prog = in_array(post('program'), office_programs($office), true) ? post('program') : office_programs($office)[0];
+    $id = create_advisor($office, $name, $phone, $email ?: null, $start, $prog);
     flash('Listo, diste de alta a ' . $name . '. Ahora envíale su enlace por WhatsApp.');
     redirect('asesor.php?id=' . $id . $amp);
 }
 
-$rows = office_advisors_stats($office);
+$rowsAll = office_advisors_stats($office);
+// Pestañas Todos · Ariadna · Edalo (solo si la oficina tiene los dos programas)
+$progs = office_programs($office);
+$multi = count($progs) > 1;
+$tab = $multi && in_array($_GET['p'] ?? '', $progs, true) ? $_GET['p'] : ($multi ? 'todos' : $progs[0]);
+$rows = $tab === 'todos' ? $rowsAll : array_values(array_filter($rowsAll, fn($r) => advisor_program($r['adv']) === $tab));
+$tabUrl = fn(string $p) => 'oficina.php?' . ltrim(($qs ? $qs . '&' : '') . 'p=' . $p, '&');
 $counts = ['verde' => 0, 'amarillo' => 0, 'rojo' => 0];
 $inProgram = 0;
 foreach ($rows as $r) { $counts[$r['stats']['status']['color']]++; if (!$r['stats']['finished']) $inProgram++; }
@@ -35,7 +42,7 @@ $noTraining = advisors_without_training($office);
 $reminder = daily_reminder_text($office);
 $attention = array_values(array_filter($rows, fn($r) => $r['stats']['status']['action'] !== ''));
 $unscheduled = office_unscheduled($office, $rows);
-$waReport = weekly_report_text($office, $rows);
+$waReport = weekly_report_text($office, $rowsAll);
 
 page_start('Asesores', ['nav' => $u, 'office' => $office, 'active' => 'oficina', 'wide' => true]);
 ?>
@@ -58,6 +65,14 @@ page_start('Asesores', ['nav' => $u, 'office' => $office, 'active' => 'oficina',
     <a href="config_oficina.php<?= $qs ? '?' . $qs : '' ?>">Prográmala aquí</a>.</div>
 <?php endif; ?>
 
+<?php if ($multi): ?>
+<nav class="prog-tabs" aria-label="Programa">
+  <a class="<?= $tab === 'todos' ? 'on' : '' ?>" href="<?= h($tabUrl('todos')) ?>">Todos · <?= count($rowsAll) ?></a>
+  <?php foreach ($progs as $pk): $n = count(array_filter($rowsAll, fn($r) => advisor_program($r['adv']) === $pk)); ?>
+    <a class="<?= $tab === $pk ? 'on' : '' ?>" href="<?= h($tabUrl($pk)) ?>"><?= h(P($pk)['name'] . ' · ' . P($pk)['area'] . ' · ' . $n) ?></a>
+  <?php endforeach; ?>
+</nav>
+<?php endif; ?>
 <div class="summary">
   <div class="kpi"><span class="kpi-v"><?= $inProgram ?></span><span class="kpi-l">En el programa</span></div>
   <div class="kpi"><span class="kpi-v"><?= $counts['verde'] ?></span><span class="kpi-l"><?= status_badge('verde') ?></span></div>
@@ -73,7 +88,10 @@ foreach ($rows as $r) {
         if ($it['kind'] !== 'tl') continue;
         $retoLink = null;
         foreach ($r['stats']['retos']['list'] as $rv) {
-            if ((int)$rv['activity']['week_no'] === (int)$it['week'] && (int)$rv['activity']['day_no'] === (int)$it['day']) $retoLink = 'reto.php?id=' . (int)$r['adv']['id'] . '&a=' . (int)$rv['activity']['id'] . $amp;
+            if ((int)$rv['activity']['week_no'] !== (int)$it['week'] || (int)$rv['activity']['day_no'] !== (int)$it['day']) continue;
+            $link = 'reto.php?id=' . (int)$r['adv']['id'] . '&a=' . (int)$rv['activity']['id'] . $amp;
+            if (!$rv['row'] && !$retoLink) $retoLink = $link;   // con dos videos el mismo día: primero el que falta
+            if (!$retoLink) $retoLink = $link;
         }
         $tlToday[] = [$r['adv'], $it, $retoLink];
     }
@@ -83,7 +101,7 @@ if ($tlToday): ?>
     <h2>Hoy vienen a la oficina con su Team Leader</h2>
     <ul class="attn">
       <?php foreach ($tlToday as [$x, $it, $retoLink]): ?>
-        <li><a href="asesor.php?id=<?= (int)$x['id'] . $amp ?>"><b><?= h($x['name']) ?></b></a> · <?= h($it['title']) ?><?= $it['origin'] ? ' <span class="small muted">(' . h(mb_strtolower($it['origin'])) . ')</span>' : '' ?>
+        <li><?php if ($multi): ?><span class="prog-chip p-<?= h(advisor_program($x)) ?>"><?= h(P(advisor_program($x))['name']) ?></span> <?php endif; ?><a href="asesor.php?id=<?= (int)$x['id'] . $amp ?>"><b><?= h($x['name']) ?></b></a> · <?= h($it['title']) ?><?= $it['origin'] ? ' <span class="small muted">(' . h(mb_strtolower($it['origin'])) . ')</span>' : '' ?>
           <?php if ($retoLink): ?> <a class="btn btn-sm btn-main" href="<?= h($retoLink) ?>">Aplicar Reto</a><?php endif; ?></li>
       <?php endforeach; ?>
     </ul>
@@ -92,7 +110,7 @@ if ($tlToday): ?>
 
 <?php if ($attention): ?>
   <div class="card">
-    <h2>Ariadna te sugiere atender hoy a</h2>
+    <h2><?= $tab === 'todos' ? 'Te sugiero atender hoy a' : h(P($tab)['name']) . ' te sugiere atender hoy a' ?></h2>
     <ul class="attn">
       <?php foreach ($attention as $r): ?>
         <li><?= status_badge($r['stats']['status']['color']) ?> <a href="asesor.php?id=<?= (int)$r['adv']['id'] . $amp ?>"><?= h($r['stats']['status']['action']) ?></a></li>
@@ -104,24 +122,34 @@ if ($tlToday): ?>
 <div class="tbl-wrap">
 <table class="tbl responsive">
   <thead><tr>
-    <th>Asesor</th><th>Semáforo</th><th>Semana</th><th>Actividades</th>
-    <th>Citas con TL</th><th>Retos</th><th>Contactos</th><th>Citas</th><th>Captaciones</th><th>Último registro</th><th></th>
+    <th>Asesor</th><?php if ($tab === 'todos'): ?><th>Programa</th><?php endif; ?><th>Semáforo</th><th>Semana</th><th>Actividades</th>
+    <th>Citas con TL</th><th>Retos</th>
+    <?php if ($tab === 'residencial'): ?><th>Contactos</th><th>Citas</th><th>Captaciones</th><?php elseif ($tab === 'industrial'): ?><th>Llamadas</th><th>Recorridos</th><th>Leads</th><th>Captación</th><?php endif; ?>
+    <th>Último registro</th><th></th>
   </tr></thead>
   <tbody>
-  <?php if (!$rows): ?><tr><td colspan="11" class="muted">Aún no tienes asesores. Da de alta al primero abajo.</td></tr><?php endif; ?>
+  <?php if (!$rows): ?><tr><td colspan="12" class="muted">Aún no tienes asesores. Da de alta al primero abajo.</td></tr><?php endif; ?>
   <?php foreach ($rows as $r): $a = $r['adv']; $s = $r['stats']; $st = $s['status']; ?>
     <tr>
       <td class="first"><a href="asesor.php?id=<?= (int)$a['id'] . $amp ?>"><b><?= h($a['name']) ?></b></a>
         <?php if ($st['action']): ?><span class="action-hint"><?= h($st['action']) ?></span><?php endif; ?>
         <?php if ($a['decision'] === 'no_continua'): ?><span class="action-hint">No continúa en el programa</span><?php endif; ?></td>
+      <?php if ($tab === 'todos'): ?><td data-l="Programa"><span class="prog-chip p-<?= h(advisor_program($a)) ?>"><?= h(P(advisor_program($a))['name']) ?></span></td><?php endif; ?>
       <td data-l="Semáforo"><?= status_badge($st['color'], $st['reason']) ?></td>
-      <td data-l="Semana"><?= !$s['started'] ? 'Inicia ' . h(fecha_corta($a['start_date'])) : ($s['finished'] ? 'Terminó' : 'S' . (int)$s['week'] . ' · ' . h($s['ctx'] ? ctx_label($s['ctx']) : '')) ?></td>
+      <td data-l="Semana"><?= !$s['started'] ? 'Inicia ' . h(fecha_corta($a['start_date'])) : ($s['finished'] ? 'Terminó' : 'S' . (int)$s['week'] . (!empty($s['ctx']['repeat']) ? ' (repite)' : '') . ' · ' . h($s['ctx'] ? ctx_label($s['ctx']) : '')) ?></td>
       <td data-l="Actividades" class="n"><?= (int)$s['pct'] ?>%</td>
       <td data-l="Citas con TL" class="n"><?= $s['tl']['due'] ? (int)$s['tl']['done'] . ' de ' . (int)$s['tl']['due'] : '—' ?></td>
       <td data-l="Retos" class="n"><?= $s['retos']['due'] ? h(reto_points_label($s['retos']['points'])) . ' de ' . (int)$s['retos']['due'] : '—' ?></td>
+      <?php if ($tab === 'residencial'): ?>
       <td data-l="Contactos" class="n"><?= (int)$s['totals']['contactos'] ?></td>
       <td data-l="Citas" class="n"><?= (int)$s['totals']['citas'] ?></td>
       <td data-l="Captaciones" class="n"><?= (int)$s['totals']['captaciones'] ?></td>
+      <?php elseif ($tab === 'industrial'): ?>
+      <td data-l="Llamadas" class="n"><?= (int)$s['totals']['llamadas'] ?></td>
+      <td data-l="Recorridos" class="n"><?= (int)$s['totals']['recorridos'] ?></td>
+      <td data-l="Leads" class="n"><?= (int)$s['totals']['leads'] ?></td>
+      <td data-l="Captación" class="n"><?= (int)$a['ind_cap_done'] ? 'Sí' : '—' ?></td>
+      <?php endif; ?>
       <td data-l="Último registro"><?= h(fecha_corta($s['last_log'])) ?></td>
       <td data-l=""><a class="btn btn-sm btn-wa" href="<?= h(wa_link($a, $office)) ?>" target="_blank" rel="noopener">WhatsApp</a></td>
     </tr>
@@ -141,6 +169,13 @@ if ($inactive): ?>
     <form method="post" class="form">
       <?= csrf_field() ?><input type="hidden" name="action" value="add">
       <?php if (is_admin($u)): ?><input type="hidden" name="office" value="<?= (int)$office['id'] ?>"><?php endif; ?>
+      <?php if (count(office_programs($office)) > 1): ?>
+      <fieldset class="progs"><legend><b>Programa</b></legend>
+        <?php foreach (office_programs($office) as $i => $pk): ?>
+          <label class="check"><input type="radio" name="program" value="<?= h($pk) ?>" <?= $i === 0 ? 'checked' : '' ?> required> <span><b><?= h(P($pk)['name']) ?></b> · <?= h(P($pk)['area']) ?></span></label>
+        <?php endforeach; ?>
+      </fieldset>
+      <?php else: ?><input type="hidden" name="program" value="<?= h(office_programs($office)[0]) ?>"><?php endif; ?>
       <label>Nombre completo<input name="name" required maxlength="150"></label>
       <label>Celular (10 dígitos)<input type="tel" name="phone" required inputmode="tel" placeholder="998 123 4567"></label>
       <label>Correo (opcional)<input type="email" name="email"></label>

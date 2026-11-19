@@ -18,7 +18,12 @@ $canDecide = in_array($u['role'], ['admin', 'director', 'gerente'], true);
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
     $act = post('action');
-    if ($act === 'edit') {
+    if ($act === 'knowledge' && advisor_program($adv) === 'industrial') {
+        $v = fn($k) => ($_POST[$k] ?? '') === '' ? null : max(0, min(7, (int)$_POST[$k]));
+        q('UPDATE advisors SET know_props = ?, know_zones = ? WHERE id = ?', [$v('know_props'), $v('know_zones'), $adv['id']]);
+        flash('Guardé la calificación de conocimiento.');
+        redirect($self . '#evaluacion');
+    } elseif ($act === 'edit') {
         $name = post('name'); $phone = post('phone'); $email = mb_strtolower(post('email'));
         $start = post('start_date');
         $wd = array_map('intval', (array)($_POST['workdays'] ?? []));
@@ -152,19 +157,46 @@ page_start($adv['name'], ['nav' => $u, 'office' => $office, 'active' => 'oficina
     <p class="small"><?= $s['tl']['due'] ? 'Fue a <b>' . (int)$s['tl']['done'] . ' de ' . (int)$s['tl']['due'] . '</b> citas que ya le tocaban' : 'Aún no le toca ninguna' ?> (son <?= (int)$s['tl']['total'] ?> en el curso).</p>
     <?php if ($s['tl']['missed']): ?><ul class="small"><?php foreach ($s['tl']['missed'] as $c): ?><li>⬜ Semana <?= (int)$c['week'] ?> · <?= h(fecha_corta($c['date'])) ?> · <?= h($c['title']) ?></li><?php endforeach; ?></ul><?php endif; ?>
     <h3>Logros</h3>
+    <?php if (advisor_program($adv) === 'industrial'): $dt = fn($k) => (int)$adv[$k . '_done'] ? 'Sí, ' . h(fecha_corta($adv[$k . '_date'])) : 'Aún no'; ?>
+    <ul>
+      <li>Captación autorizada por el propietario: <?= $dt('ind_cap') ?></li>
+      <li>Oferta formal por escrito: <?= $dt('ind_oferta') ?></li>
+      <li>Inquilino calificado con visita: <?= $dt('ind_inq') ?></li>
+      <li>Renta cerrada: <?= (int)$adv['renta_closed'] ? 'Sí, ' . h(fecha_corta($adv['renta_date'])) : 'Aún no' ?></li>
+    </ul>
+    <?php if (!empty($s['filtro']) && $s['filtro']['evaluated']): $f = $s['filtro']; ?>
+    <h3>Filtro de la Semana 2</h3>
+    <p class="small"><?= $f['repeating'] ? '<b>Repite su Semana 2:</b> ' . h(filtro_falta_frase($f['faltan'])) . '.' : ($f['failed'] ? '<b>Repitió su Semana 2 y no completó su filtro.</b> Decide con él o ella si continúa.' : '✅ Pasó su filtro.') ?>
+      Llamadas <?= (int)$f['sums']['llamadas'] ?> de 100 · recorridos <?= (int)$f['sums']['recorridos'] ?> de 4 · leads <?= (int)$f['sums']['leads'] ?> de 2.</p>
+    <?php endif; ?>
+    <?php else: ?>
     <ul>
       <li><?= h(oh_label($office)) ?>: <?= (int)$adv['oh_done'] ? 'Sí, ' . h(fecha_corta($adv['oh_date'])) . ' · ' . (int)$adv['oh_attendees'] . ' ' . OH_MODES[oh_mode($office)]['plural'] : 'Aún no' ?></li>
       <li>Calidad de la captación: precio <?= (int)$adv['cap_precio'] ? '✅' : '⬜' ?> · documentos <?= (int)$adv['cap_docs'] ? '✅' : '⬜' ?> · disponibilidad <?= (int)$adv['cap_disp'] ? '✅' : '⬜' ?></li>
       <li>Renta cerrada: <?= (int)$adv['renta_closed'] ? 'Sí ' . h(fecha_corta($adv['renta_date'])) : 'Aún no' ?></li>
     </ul>
+    <?php endif; ?>
   </div>
   <div class="card">
     <h2>Evaluación: <?= (int)$s['evaluation']['total'] ?> / 100</h2>
     <p class="muted"><?= h($s['evaluation']['level_text']) ?></p>
     <div class="tbl-wrap"><?php eval_table($s['evaluation']); ?></div>
+    <?php if (advisor_program($adv) === 'industrial'): ?>
+    <form method="post" class="form" id="evaluacion" style="margin-top:12px">
+      <?= csrf_field() ?><input type="hidden" name="action" value="knowledge"><input type="hidden" name="id" value="<?= (int)$adv['id'] ?>">
+      <?php if (is_admin($u)): ?><input type="hidden" name="office" value="<?= (int)$office['id'] ?>"><?php endif; ?>
+      <p class="small muted">Conocimiento (lo califica el Team Leader en la evaluación final, con apoyo de sus Retos del video). De 0 a 7 cada uno.</p>
+      <div class="grid2">
+        <label>Conoce las propiedades que levantó<input type="number" name="know_props" min="0" max="7" value="<?= h($adv['know_props'] ?? '') ?>"></label>
+        <label>Conoce las zonas y parques<input type="number" name="know_zones" min="0" max="7" value="<?= h($adv['know_zones'] ?? '') ?>"></label>
+      </div>
+      <button class="btn">Guardar calificación</button>
+    </form>
+    <?php endif; ?>
   </div>
 </div>
 
+<?php if (advisor_program($adv) === 'residencial'): ?>
 <h2 class="sec">Metas de cada semana</h2>
 <div class="tbl-wrap">
 <table class="tbl">
@@ -181,6 +213,7 @@ page_start($adv['name'], ['nav' => $u, 'office' => $office, 'active' => 'oficina
 </table>
 </div>
 
+<?php endif; ?>
 <h2 class="sec">Historial diario</h2>
 <div class="tbl-wrap">
 <table class="tbl">

@@ -13,6 +13,7 @@ $office = panel_office($u);
 $qs = office_qs($office);
 $amp = $qs ? '&' . $qs : '';
 $adv = office_advisor($office, (int)($_GET['id'] ?? $_POST['id'] ?? 0));
+prog_set(advisor_program($adv));
 $videos = reto_videos();
 $aid = (int)($_GET['a'] ?? $_POST['a'] ?? 0);
 $act = $videos[$aid] ?? null;

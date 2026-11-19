@@ -8,8 +8,10 @@ ensure_schema();
 
 enforce_https();
 $u = require_user(['admin']);
+prog_set((string)($_GET['prog'] ?? $_POST['prog'] ?? 'residencial'));
+$pg = prog();
 $w = max(1, min(prog_weeks(), (int)($_GET['w'] ?? $_POST['w'] ?? 1)));
-$self = 'admin_plan.php?w=' . $w;
+$self = 'admin_plan.php?prog=' . $pg . '&w=' . $w;
 $KINDS = KIND_LABELS;
 
 $clean = function (array $a) use ($KINDS): array {
@@ -33,37 +35,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
     db()->beginTransaction();
     $m = fn($k) => max(0, (int)($_POST['meta'][$k] ?? 0));
-    q('UPDATE plan_weeks SET title = ?, objective = ?, material = ?, remember = ?, review_questions = ?, routine_start_day = ?,
-        meta_contactos = ?, meta_tratos = ?, meta_analizadas = ?, meta_promovidas = ?, meta_citas = ? WHERE week_no = ?', [
+    $mf = $pg === 'industrial' ? array_keys(result_fields()) : ['contactos', 'tratos', 'analizadas', 'promovidas', 'citas'];
+    q('UPDATE plan_weeks SET title = ?, objective = ?, material = ?, remember = ?, review_questions = ?, routine_start_day = ?, '
+        . implode(', ', array_map(fn($f) => "meta_$f = ?", $mf)) . ' WHERE program = ? AND week_no = ?', array_merge([
         post('title'), post('objective'), post('material'), post('remember'), post('review_questions'),
         max(1, min(PLAN_DAYS_PER_WEEK, (int)post('routine_start_day'))),
-        $m('contactos'), $m('tratos'), $m('analizadas'), $m('promovidas'), $m('citas'), $w,
-    ]);
+    ], array_map($m, $mf), [$pg, $w]));
     foreach ((array)($_POST['act'] ?? []) as $id => $a) {
         $id = (int)$id;
-        if (!empty($a['delete'])) { q('UPDATE plan_activities SET active = 0 WHERE id = ? AND week_no = ?', [$id, $w]); continue; }
+        if (!empty($a['delete'])) { q('UPDATE plan_activities SET active = 0 WHERE id = ? AND program = ? AND week_no = ?', [$id, $pg, $w]); continue; }
         $title = trim((string)($a['title'] ?? ''));
         if ($title === '') continue;
         [$kind, $min, $video, $help, $reto] = $clean($a);
-        q('UPDATE plan_activities SET day_no = ?, sort = ?, title = ?, guide = ?, minutes = ?, kind = ?, video_url = ?, help_links = ?, reto = ? WHERE id = ? AND week_no = ?', [
-            max(1, min(PLAN_DAYS_PER_WEEK, (int)$a['day_no'])), (int)$a['sort'], mb_substr($title, 0, 255), trim((string)$a['guide']), $min, $kind, $video, $help, $reto, $id, $w]);
+        q('UPDATE plan_activities SET day_no = ?, sort = ?, title = ?, guide = ?, minutes = ?, kind = ?, video_url = ?, help_links = ?, reto = ? WHERE id = ? AND program = ? AND week_no = ?', [
+            max(1, min(PLAN_DAYS_PER_WEEK, (int)$a['day_no'])), (int)$a['sort'], mb_substr($title, 0, 255), trim((string)$a['guide']), $min, $kind, $video, $help, $reto, $id, $pg, $w]);
     }
     foreach ((array)($_POST['new'] ?? []) as $a) {
         $title = trim((string)($a['title'] ?? ''));
         if ($title === '') continue;
         [$kind, $min, $video, $help, $reto] = $clean($a);
         $day = max(1, min(PLAN_DAYS_PER_WEEK, (int)$a['day_no']));
-        $sort = (int)val('SELECT COALESCE(MAX(sort), 0) + 10 FROM plan_activities WHERE week_no = ? AND day_no = ?', [$w, $day]);
-        q('INSERT INTO plan_activities (week_no, day_no, sort, title, guide, minutes, kind, video_url, help_links, reto) VALUES (?,?,?,?,?,?,?,?,?,?)',
-            [$w, $day, $sort, mb_substr($title, 0, 255), trim((string)$a['guide']), $min, $kind, $video, $help, $reto]);
+        $sort = (int)val('SELECT COALESCE(MAX(sort), 0) + 10 FROM plan_activities WHERE program = ? AND week_no = ? AND day_no = ?', [$pg, $w, $day]);
+        q('INSERT INTO plan_activities (program, week_no, day_no, sort, title, guide, minutes, kind, video_url, help_links, reto) VALUES (?,?,?,?,?,?,?,?,?,?,?)',
+            [$pg, $w, $day, $sort, mb_substr($title, 0, 255), trim((string)$a['guide']), $min, $kind, $video, $help, $reto]);
     }
     db()->commit();
     flash('Semana ' . $w . ' guardada. Los cambios ya se ven en la app de los asesores.');
     redirect($self);
 }
 
-$week = one('SELECT * FROM plan_weeks WHERE week_no = ?', [$w]);
-$acts = all('SELECT * FROM plan_activities WHERE week_no = ? AND active = 1 ORDER BY day_no, sort, id', [$w]);
+$week = one('SELECT * FROM plan_weeks WHERE program = ? AND week_no = ?', [$pg, $w]);
+$acts = all('SELECT * FROM plan_activities WHERE program = ? AND week_no = ? AND active = 1 ORDER BY day_no, sort, id', [$pg, $w]);
 $byDay = [];
 foreach ($acts as $a) $byDay[(int)$a['day_no']][] = $a;
 page_start('Plan', ['nav' => $u, 'active' => 'plan', 'wide' => true]);
@@ -82,13 +84,14 @@ $actFields = function (string $n, array $a) use ($KINDS): void { ?>
   <label>Reto del video (solo tipo «Video del curso»: 5 renglones, cada uno «Pregunta | Respuesta clave | minuto»)<textarea name="<?= $n ?>[reto]" rows="<?= ($a['kind'] ?? '') === 'video' ? 6 : 1 ?>" placeholder="¿Qué cuenta como un contacto? | Decir uno de los diálogos, no solo saludar. | 20-23"><?= h($a['reto'] ?? '') ?></textarea></label>
 <?php };
 ?>
-<div class="page-head"><div><span class="eyebrow">Administrador</span><h1>Plan del curso Fast Track Residencial</h1></div>
-  <div class="actions"><a class="btn" href="admin_preview.php?w=<?= $w ?>&amp;d=1">Ver esta semana como asesor</a></div></div>
-<div class="tabs"><?php for ($i = 1; $i <= prog_weeks(); $i++): ?><a class="<?= $i === $w ? 'on' : '' ?>" href="admin_plan.php?w=<?= $i ?>">Semana <?= $i ?></a><?php endfor; ?></div>
+<div class="page-head"><div><span class="eyebrow">Administrador · <?= h(P()['name']) ?></span><h1>Plan del curso <?= h(P()['course']) ?></h1></div>
+  <div class="actions"><a class="btn" href="admin_preview.php?prog=<?= h($pg) ?>&amp;w=<?= $w ?>&amp;d=1">Ver esta semana como asesor</a></div></div>
+<nav class="prog-tabs" aria-label="Programa"><?php foreach (PROGRAMS as $pk => $pd): ?><a class="<?= $pk === $pg ? 'on' : '' ?>" href="admin_plan.php?prog=<?= h($pk) ?>"><?= h($pd['name'] . ' · ' . $pd['area']) ?></a><?php endforeach; ?></nav>
+<div class="tabs"><?php for ($i = 1; $i <= prog_weeks(); $i++): ?><a class="<?= $i === $w ? 'on' : '' ?>" href="admin_plan.php?prog=<?= h($pg) ?>&amp;w=<?= $i ?>">Semana <?= $i ?></a><?php endfor; ?></div>
 <p class="small muted">Los días son días hábiles de la semana personal de cada asesor (Día 1 a Día 5). La rutina diaria (llamadas y registro) se agrega sola; se edita en Ajustes. Tipos: <b>Sesión en tu oficina</b> la da el TL o el gerente y la oficina le pone fecha y hora; <b>Video del curso</b> se reproduce dentro de Ariadna; si no tiene enlace, el asesor ve «Este video estará listo muy pronto». Escribe {OH} donde deba decir «Open House», «Recorrido en vivo» o «Jornada de opinión de valor» según la oficina, y {ASISTENTES} para «asistentes», «interesados» o «propietarios interesados». Lo que va entre {jornada} y {/jornada} solo lo ven las oficinas con Jornada; lo que va entre {evento} y {/evento}, solo las de Open House o Recorrido.</p>
 
 <form method="post" class="form">
-<?= csrf_field() ?><input type="hidden" name="w" value="<?= $w ?>">
+<?= csrf_field() ?><input type="hidden" name="w" value="<?= $w ?>"><input type="hidden" name="prog" value="<?= h($pg) ?>">
 <div class="card">
   <h2>Semana <?= $w ?></h2>
   <label>Título<input name="title" required value="<?= h($week['title']) ?>"></label>
@@ -103,7 +106,7 @@ $actFields = function (string $n, array $a) use ($KINDS): void { ?>
   <h3>Mínimos del programa en esta semana</h3>
   <p class="small muted">Se usan para el semáforo, la evaluación y el aviso de metas bajas. Los contactos son el total de la semana; el mínimo diario está en Ajustes.</p>
   <div class="grid2">
-    <?php foreach (['contactos', 'tratos', 'analizadas', 'promovidas', 'citas'] as $f): ?>
+    <?php foreach ($pg === 'industrial' ? array_keys(result_fields()) : ['contactos', 'tratos', 'analizadas', 'promovidas', 'citas'] as $f): ?>
       <label><?= h(result_fields()[$f]) ?><input type="number" min="0" name="meta[<?= $f ?>]" value="<?= (int)$week['meta_' . $f] ?>"></label>
     <?php endforeach; ?>
   </div>

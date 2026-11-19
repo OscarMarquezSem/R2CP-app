@@ -14,7 +14,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && post('action') === 'add_office') {
     if ($name === '') { flash('Escribe el nombre de la oficina.', 'err'); redirect('admin.php'); }
     $tz = post('timezone') ?: 'America/Cancun';
     if (!in_array($tz, DateTimeZone::listIdentifiers(), true)) $tz = 'America/Cancun';
-    q('INSERT INTO offices (name, city, timezone) VALUES (?,?,?)', [$name, post('city'), $tz]);
+    $progs = array_values(array_intersect(array_keys(PROGRAMS), (array)($_POST['programs'] ?? [])));
+    q('INSERT INTO offices (name, city, timezone, programs) VALUES (?,?,?,?)', [$name, post('city'), $tz, implode(',', $progs ?: ['residencial'])]);
     $id = (int)db()->lastInsertId();
     flash('Oficina creada. Ahora da de alta a su director, gerente y team leader.');
     redirect('admin_oficina.php?id=' . $id);
@@ -103,6 +104,12 @@ page_start('Oficinas', ['nav' => $u, 'active' => 'admin', 'wide' => true]);
           <option value="<?= h($k) ?>"><?= h($v) ?></option>
         <?php endforeach; ?>
       </select></label>
+    <fieldset class="progs"><legend><b>Programas de esta oficina</b></legend>
+      <?php foreach (PROGRAMS as $pk => $pd): ?>
+        <label class="check"><input type="checkbox" name="programs[]" value="<?= h($pk) ?>" <?= in_array($pk, ['residencial'], true) ? 'checked' : '' ?>> <span><b><?= h($pd['name'] . ' · ' . $pd['area']) ?></b><br><span class="small muted"><?= h($pd['course'] . ', ' . $pd['weeks'] . ' semanas') ?></span></span></label>
+      <?php endforeach; ?>
+      <p class="small muted">Si una oficina no tiene un programa, no le aparece en ningún lado. Sus directores, gerentes y TL usan el mismo usuario para los dos.</p>
+    </fieldset>
     <button class="btn btn-main">Crear oficina</button>
   </form>
 </div>

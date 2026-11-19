@@ -885,11 +885,14 @@ function advisors_without_training(array $office): int
 /** Temas de oficina que algún asesor ya necesita y no tienen fecha. [[activity, [nombres]], …] */
 function office_unscheduled(array $office, ?array $rows = null): array
 {
+    $was = prog();
     $rows = $rows ?? office_advisors_stats($office);
     $need = [];
     foreach ($rows as $r) {
         $a = $r['adv']; $s = $r['stats'];
         if (!$s['started'] || $s['finished'] || $a['decision'] === 'no_continua') continue;
+        if (advisor_program($a) !== 'residencial') continue;   // Edalo no tiene temas que programe la oficina
+        prog_set('residencial');
         $done = done_keys($s['logs']);
         foreach (office_activities() as $act) {
             if ((int)$act['week_no'] > $s['week']) continue;
@@ -899,6 +902,7 @@ function office_unscheduled(array $office, ?array $rows = null): array
             $need[(int)$act['id']]['advisors'][] = (int)$a['id'];
         }
     }
+    prog_set($was);
     return array_values($need);
 }
 

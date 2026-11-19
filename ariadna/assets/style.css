@@ -310,3 +310,4 @@ body.prog-industrial .thread path { stroke: #4F769C; }
 .prog-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin: 4px 0 14px; }
 .prog-tabs a { padding: 8px 14px; border-radius: 10px; border: 1px solid var(--line); background: #fff; text-decoration: none; font-weight: 600; font-size: .95rem; min-height: 44px; display: inline-flex; align-items: center; }
 .prog-tabs a.on { background: var(--navy); color: #fff; border-color: var(--navy); }
+.progs { border: 0; padding: 0; margin: 0 0 12px; display: flex; flex-direction: column; gap: 8px; } .progs legend { margin-bottom: 6px; }
