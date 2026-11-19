@@ -94,5 +94,6 @@
 
 | # | Cambio | Archivo |
 |---|---|---|
+| 5 | Correos marcados en español (Gmail ya no ofrece «traducir del inglés»). | Listo: `inc/mailer.php` |
 | 3 | Mensaje de bienvenida por WhatsApp editable en Ajustes ({nombre}, {oficina}, {enlace}), con el texto nuevo propuesto. | Pendiente de visto bueno del texto |
 | 1 | Preguntas del Reto para los 3 videos cortos (conceptos básicos, opinión de valor, perfilamiento), cuando estén grabados y transcritos. | Plan (se agregan desde el panel) |

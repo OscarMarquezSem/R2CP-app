@@ -116,6 +116,7 @@ function smtp_send(array $to, array $cc, string $subject, string $html): void
     $headers[] = 'Subject: ' . $enc($subject);
     $headers[] = 'Message-ID: <' . bin2hex(random_bytes(12)) . '@' . (explode('@', $from)[1] ?? 'ariadna') . '>';
     $headers[] = 'MIME-Version: 1.0';
+    $headers[] = 'Content-Language: es-MX';
     $headers[] = 'Content-Type: multipart/alternative; boundary="' . $boundary . '"';
     $body = "--$boundary\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n" . chunk_split(base64_encode($text))
         . "--$boundary\r\nContent-Type: text/html; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n" . chunk_split(base64_encode($html))
@@ -137,7 +138,7 @@ function email_wrap(string $title, string $content): string
     $bg = $ind ? '#F3F4F2' : '#FBF8F1';
     $line = $ind ? '#DCE1E6' : '#E6DECB';
     $foot = $pp['name'] . ' · Team Leader del curso ' . $pp['course'] . ' · R²CP Elite de Oscar Márquez';
-    return '<!doctype html><html><body style="margin:0;background:' . $bg . ';font-family:Arial,Helvetica,sans-serif;color:' . $navy . '">'
+    return '<!doctype html><html lang="es"><head><meta charset="utf-8"><meta http-equiv="Content-Language" content="es"></head><body style="margin:0;background:' . $bg . ';font-family:Arial,Helvetica,sans-serif;color:' . $navy . '">'
         . '<table width="100%" cellpadding="0" cellspacing="0" style="background:' . $bg . ';padding:24px 0"><tr><td align="center">'
         . '<table width="680" cellpadding="0" cellspacing="0" style="max-width:680px;width:100%;background:#ffffff;border:1px solid ' . $line . ';border-radius:12px">'
         . '<tr><td style="padding:20px 28px;border-bottom:3px solid #B89860"><table width="100%" cellpadding="0" cellspacing="0"><tr>'
