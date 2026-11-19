@@ -157,5 +157,7 @@ function prog_img(string $kind, ?string $p = null): string
     $base = P($p)['img'];
     $file = $kind === 'welcome' ? $base . '.jpg' : $base . '-' . $kind . '.jpg';
     if (is_file(APP_ROOT . '/assets/' . $file)) return 'assets/' . $file;
-    return is_file(APP_ROOT . '/assets/' . $base . '.svg') ? 'assets/' . $base . '.svg' : 'assets/ariadna-avatar.jpg';
+    // Mientras falte una imagen, usa la de bienvenida del mismo programa.
+    foreach ([$base . '.jpg', $base . '.svg'] as $f) if (is_file(APP_ROOT . '/assets/' . $f)) return 'assets/' . $f;
+    return 'assets/ariadna-avatar.jpg';
 }
