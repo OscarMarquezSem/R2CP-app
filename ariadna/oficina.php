@@ -84,6 +84,7 @@ page_start('Asesores', ['nav' => $u, 'office' => $office, 'active' => 'oficina',
 foreach ($rows as $r) {
     $ctx = $r['stats']['ctx'];
     if (!$ctx || $r['adv']['decision'] === 'no_continua') continue;
+    prog_set(advisor_program($r['adv']));   // cada asesor con el plan de su programa
     foreach (day_items($ctx, ['office' => $office, 'sessions' => $r['stats']['sessions'], 'done_elsewhere' => $ctx['type'] === 'catchup' ? done_keys($r['stats']['logs'], $r['stats']['today']) : []]) as $it) {
         if ($it['kind'] !== 'tl') continue;
         $retoLink = null;
@@ -93,9 +94,11 @@ foreach ($rows as $r) {
             if (!$rv['row'] && !$retoLink) $retoLink = $link;   // con dos videos el mismo día: primero el que falta
             if (!$retoLink) $retoLink = $link;
         }
+        if (mb_stripos($it['title'], 'Reto') !== 0) $retoLink = null;   // solo las citas de Reto llevan el botón
         $tlToday[] = [$r['adv'], $it, $retoLink];
     }
 }
+prog_set($tab === 'industrial' ? 'industrial' : 'residencial');
 if ($tlToday): ?>
   <div class="card">
     <h2>Hoy vienen a la oficina con su Team Leader</h2>

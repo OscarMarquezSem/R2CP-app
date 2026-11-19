@@ -593,7 +593,7 @@ function advisor_stats(array $adv, array $office, ?string $today = null): array
     $filtro = null;
     if (prog() === 'industrial' && $started) {
         $evalDay = add_days($adv['start_date'], 13);
-        $f = filtro_s2($adv, $evalDay < $today ? ($repeating ? add_days($today, -1) : $evalDay) : add_days($today, -1));
+        $f = filtro_s2($adv, $evalDay < $today ? ($repeating ? add_days($today, -1) : ($weekEnd[2] ?? $evalDay)) : add_days($today, -1));
         $failDay = null;
         foreach ($schedule as $d => $c) if (!empty($c['filtro_fail'])) $failDay = $d;
         $filtro = $f + ['evaluated' => $evalDay < $today, 'repeating' => $repeating, 'failed' => $failDay !== null, 'fail_day' => $failDay];

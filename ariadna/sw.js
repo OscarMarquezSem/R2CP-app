@@ -1,5 +1,5 @@
-/* ARIADNA · Service worker: guarda estilos e íconos y muestra los avisos de Ariadna. */
-const CACHE = 'ariadna-v5';
+/* ARIADNA · Service worker: guarda estilos e íconos y muestra los avisos de Ariadna y Edalo. */
+const CACHE = 'ariadna-v6';
 const ASSETS = ['assets/style.css', 'assets/app.js', 'assets/icon-192.png', 'assets/icon-512.png', 'assets/ariadna-avatar.jpg'];
 self.addEventListener('install', e => e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting())));
 self.addEventListener('activate', e => e.waitUntil(
@@ -19,7 +19,7 @@ self.addEventListener('push', e => {
   let d = {};
   try { d = e.data ? e.data.json() : {}; } catch (err) { d = { body: e.data ? e.data.text() : '' }; }
   e.waitUntil(self.registration.showNotification(d.title || 'Ariadna', {
-    body: d.body || '', icon: 'assets/icon-192.png', badge: 'assets/icon-192.png', data: { url: d.url || './' }, tag: 'ariadna'
+    body: d.body || '', icon: d.icon || 'assets/icon-192.png', badge: d.icon || 'assets/icon-192.png', data: { url: d.url || './' }, tag: 'ariadna'
   }));
 });
 self.addEventListener('notificationclick', e => {

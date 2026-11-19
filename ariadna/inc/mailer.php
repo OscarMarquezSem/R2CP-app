@@ -38,15 +38,31 @@ function mail_log_file(array $to, array $cc, string $subject, string $html): voi
     file_put_contents($dir . '/mail.log', $txt, FILE_APPEND | LOCK_EX);
 }
 
+/**
+ * Datos del remitente según el programa activo. Edalo usa 'mail_edalo' de config.php
+ * si está configurado (con su propio usuario); si no, usa el remitente general 'mail'.
+ */
+function mail_cfg(): array
+{
+    $base = (array)cfg('mail', []);
+    $key = P()['mail_key'] ?? 'mail';
+    if ($key !== 'mail') {
+        $own = (array)cfg($key, []);
+        if (!empty($own['user'])) return array_merge($base, $own);
+    }
+    return $base;
+}
+
 function smtp_send(array $to, array $cc, string $subject, string $html): void
 {
-    $host = (string)cfg('mail.host');
-    $port = (int)cfg('mail.port', 465);
-    $secure = (string)cfg('mail.secure', 'ssl');
-    $user = (string)cfg('mail.user');
-    $pass = (string)cfg('mail.pass');
-    $from = (string)cfg('mail.from', $user);
-    $fromName = (string)cfg('mail.from_name', 'Ariadna');
+    $m = mail_cfg();
+    $host = (string)($m['host'] ?? '');
+    $port = (int)($m['port'] ?? 465);
+    $secure = (string)($m['secure'] ?? 'ssl');
+    $user = (string)($m['user'] ?? '');
+    $pass = (string)($m['pass'] ?? '');
+    $from = (string)($m['from'] ?? $user);
+    $fromName = (string)($m['from_name'] ?? P()['name']);
 
     $remote = ($secure === 'ssl' ? 'ssl://' : 'tcp://') . $host . ':' . $port;
     $ctx = stream_context_create(['ssl' => ['verify_peer' => true, 'verify_peer_name' => true, 'SNI_enabled' => true]]);
@@ -114,15 +130,21 @@ function smtp_send(array $to, array $cc, string $subject, string $html): void
 /** Plantilla HTML de los correos (fondo claro, colores de la marca). */
 function email_wrap(string $title, string $content): string
 {
-    return '<!doctype html><html><body style="margin:0;background:#FBF8F1;font-family:Arial,Helvetica,sans-serif;color:#1F2A44">'
-        . '<table width="100%" cellpadding="0" cellspacing="0" style="background:#FBF8F1;padding:24px 0"><tr><td align="center">'
-        . '<table width="680" cellpadding="0" cellspacing="0" style="max-width:680px;width:100%;background:#ffffff;border:1px solid #E6DECB;border-radius:12px">'
+    $pp = P();
+    $ind = prog() === 'industrial';
+    $navy = $ind ? '#18263A' : '#1F2A44';
+    $bg = $ind ? '#F3F4F2' : '#FBF8F1';
+    $line = $ind ? '#DCE1E6' : '#E6DECB';
+    $foot = $pp['name'] . ' · Team Leader del curso ' . $pp['course'] . ' · R²CP Elite de Oscar Márquez';
+    return '<!doctype html><html><body style="margin:0;background:' . $bg . ';font-family:Arial,Helvetica,sans-serif;color:' . $navy . '">'
+        . '<table width="100%" cellpadding="0" cellspacing="0" style="background:' . $bg . ';padding:24px 0"><tr><td align="center">'
+        . '<table width="680" cellpadding="0" cellspacing="0" style="max-width:680px;width:100%;background:#ffffff;border:1px solid ' . $line . ';border-radius:12px">'
         . '<tr><td style="padding:20px 28px;border-bottom:3px solid #B89860"><table width="100%" cellpadding="0" cellspacing="0"><tr>'
-        . '<td><div style="font-size:22px;font-weight:bold;letter-spacing:2px;color:#1F2A44">ARIADNA</div><div style="font-size:12px;color:#5F6576">by Oscar Márquez Seminars</div></td>'
-        . '<td align="right"><div style="font-size:14px;font-weight:bold;letter-spacing:1px;color:#7A6235">R²CP ELITE</div><div style="font-size:12px;color:#7A6235;font-style:italic">Sigue el hilo</div></td>'
+        . '<td><div style="font-size:22px;font-weight:bold;letter-spacing:2px;color:' . $navy . '">' . h($pp['brand']) . '</div><div style="font-size:12px;color:#5F6576">by Oscar Márquez Seminars</div></td>'
+        . '<td align="right"><div style="font-size:14px;font-weight:bold;letter-spacing:1px;color:#7A6235">R²CP ELITE</div><div style="font-size:12px;color:#7A6235;font-style:italic">' . h($pp['tagline']) . '</div></td>'
         . '</tr></table></td></tr>'
-        . '<tr><td style="padding:24px 28px"><h1 style="font-size:20px;margin:0 0 14px;color:#1F2A44">' . h($title) . '</h1>' . $content . '</td></tr>'
-        . '<tr><td style="padding:16px 28px;font-size:12px;color:#5F6576;border-top:1px solid #E6DECB">Ariadna · Team Leader del curso Fast Track Residencial · R²CP Elite de Oscar Márquez</td></tr>'
+        . '<tr><td style="padding:24px 28px"><h1 style="font-size:20px;margin:0 0 14px;color:' . $navy . '">' . h($title) . '</h1>' . $content . '</td></tr>'
+        . '<tr><td style="padding:16px 28px;font-size:12px;color:#5F6576;border-top:1px solid ' . $line . '">' . h($foot) . '</td></tr>'
         . '</table></td></tr></table></body></html>';
 }
 

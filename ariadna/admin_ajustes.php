@@ -11,7 +11,9 @@ $u = require_user(['admin']);
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
     if (post('action') === 'test_mail') {
-        $ok = send_mail([$u['email']], 'Prueba de correo de Ariadna', email_wrap('¡Funciona!', '<p>Si lees esto, Ariadna ya puede enviar correos.</p>'), [], 'prueba');
+        prog_set(post('prog') === 'industrial' ? 'industrial' : 'residencial');
+        $nm = P()['name'];
+        $ok = send_mail([$u['email']], 'Prueba de correo de ' . $nm, email_wrap('¡Funciona!', '<p>Si lees esto, ' . h($nm) . ' ya puede enviar correos.</p>'), [], 'prueba');
         $err = $ok ? '' : (string)val("SELECT error FROM email_log WHERE kind = 'prueba' ORDER BY id DESC LIMIT 1");
         flash($ok ? 'Correo de prueba enviado a ' . $u['email'] . '.' : 'No se pudo enviar: ' . $err, $ok ? 'ok' : 'err');
         redirect('admin_ajustes.php');
@@ -112,7 +114,8 @@ page_start('Ajustes', ['nav' => $u, 'active' => 'ajustes']);
 
 <div class="card">
   <h2>Correos enviados</h2>
-  <form method="post" class="inline-form"><?= csrf_field() ?><input type="hidden" name="action" value="test_mail"><button class="btn btn-sm">Enviarme un correo de prueba</button></form>
+  <form method="post" class="inline-form"><?= csrf_field() ?><input type="hidden" name="action" value="test_mail"><button class="btn btn-sm">Correo de prueba de Ariadna</button></form>
+  <form method="post" class="inline-form"><?= csrf_field() ?><input type="hidden" name="action" value="test_mail"><input type="hidden" name="prog" value="industrial"><button class="btn btn-sm">Correo de prueba de Edalo</button></form>
   <div class="tbl-wrap" style="margin-top:12px">
   <table class="tbl"><thead><tr><th>Fecha</th><th>Tipo</th><th>Asunto</th><th>Estado</th></tr></thead><tbody>
   <?php if (!$mails): ?><tr><td colspan="4" class="muted">Aún no se envían correos.</td></tr><?php endif; ?>

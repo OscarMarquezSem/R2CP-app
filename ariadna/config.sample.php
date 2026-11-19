@@ -33,6 +33,15 @@ return [
         'from_name' => 'Ariadna · R²CP Elite',
     ],
 
+    // Edalo (Fast Track Industrial): su propia dirección y su propio buzón.
+    'edalo_url' => 'https://edalo.oscarmarquez.com',
+    'mail_edalo' => [
+        'user'      => 'edalo@oscarmarquez.com',
+        'pass'      => 'CONTRASEÑA-DEL-BUZÓN-DE-EDALO',
+        'from'      => 'edalo@oscarmarquez.com',
+        'from_name' => 'Edalo · R²CP Elite',
+    ],
+
     // Clave para ejecutar las tareas programadas desde una URL (si no usas el comando PHP)
     'cron_key' => 'CAMBIA-ESTO-POR-UNA-FRASE-LARGA',
 

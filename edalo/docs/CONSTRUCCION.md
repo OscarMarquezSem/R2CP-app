@@ -57,7 +57,7 @@ Edalo se escribe **sin acento** en todos lados: app, dominio (edalo.oscarmarquez
 2. ☑ Motor por programa: plan, campos, semanas, evaluación, punto de control y semáforo.
 3. ☑ Plan de Edalo (seed y actualizar_plan) y sus Retos.
 4. ☑ Calendario con el filtro de la S2 (repetición y apertura al día siguiente).
-5. ☐ Marca por programa en la pantalla del asesor: encabezado, colores, bienvenida, mensajes e imágenes.
-6. ☐ Oficina: programas por oficina (admin), programa en el alta, pestañas del panel, Plan y «Ver como asesor» por programa.
-7. ☐ Correos, recordatorios y reporte por programa. Aviso del punto de control (Ariadna y Edalo).
+5. ☑ Marca por programa en la pantalla del asesor: encabezado, colores, bienvenida, mensajes e imágenes.
+6. ☑ Oficina: programas por oficina (admin), programa en el alta, pestañas del panel, Plan y «Ver como asesor» por programa.
+7. ☑ Correos, recordatorios y reporte por programa. Aviso del punto de control (Ariadna y Edalo).
 8. ☐ Prueba completa y Actualización 7, con la guía para el subdominio y el correo.

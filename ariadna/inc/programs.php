@@ -118,6 +118,9 @@ const PROGRAM_TEXTS = [
         'saved'       => '¡Listo! Ya guardé tu día. Mañana seguimos. No sueltes el hilo.',
         'week_closed' => '¡Cerraste tu Semana %d! Estoy muy orgullosa de ti. Descansa y prepárate: la que viene es todavía mejor. No sueltes el hilo.',
         'celebrate_alt' => 'Ariadna celebra contigo',
+        'mail_sign'   => 'No sueltes el hilo.',
+        'mail_first'  => 'Antes que nada, tus contactos del día.',
+        'report_sign' => 'Seguimos el hilo.',
     ],
     'industrial' => [
         'msg_reto'    => 'Ve tu video en la oficina y quédate: tu Team Leader te hace las preguntas de tu Reto. No es para calificarte, es para asegurarnos de que dominas el tema.',
@@ -137,6 +140,9 @@ const PROGRAM_TEXTS = [
         'saved'       => '¡Listo! Ya guardé tu día. Mañana seguimos construyendo.',
         'week_closed' => '¡Cerraste tu Semana %d! Estoy muy orgulloso de ti. Descansa y prepárate: la que viene es todavía mejor.',
         'celebrate_alt' => 'Edalo celebra contigo',
+        'mail_sign'   => 'Sigue construyendo con método.',
+        'mail_first'  => 'Antes que nada, tus 10 llamadas del Impulsor.',
+        'report_sign' => 'Seguimos construyendo con método.',
     ],
 ];
 

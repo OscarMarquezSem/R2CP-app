@@ -81,6 +81,7 @@ function render_hoy(array $V): void
     echo '<a id="hoy"></a>';
     if ($ctx['type'] !== 'rest') echo ariadna_bubble(ariadna_message($ctx, $items, $office));
     if (!empty($stats['filtro']) && $stats['filtro']['repeating'] && !$preview) filtro_box($stats['filtro']);
+    if (!$preview && !$stats['finished'] && $stats['closed_weeks'] >= 3 && in_array($adv['decision'] ?? null, [null, '', 'pendiente'], true)) checkpoint_box($adv, $stats, $office);
 
     $pd = max(1, (int)($stats['program_days'] ?? 35)); $programPct = (int)round(min($pd, max(0, $stats['elapsed'] + 1)) / $pd * 100);
     $weekPct = !empty($stats['week_assigned'][$week]) ? (int)round(min(1, $stats['week_done'][$week] / $stats['week_assigned'][$week]) * 100) : 0;
@@ -269,6 +270,16 @@ function filtro_box(array $f): void
     }
     if ($f['faltan']) echo '<p class="lead"><b>' . h(ucfirst(filtro_falta_frase($f['faltan'], 'Te'))) . '.</b> En cuanto lo completes, te abro la Semana 3 al día siguiente.</p>';
     echo '<p class="small muted">Tus actividades de la Semana 2, tus 10 llamadas diarias y tus citas con tu Team Leader siguen igual. Tu oficina ya sabe que repites la semana y te va a apoyar.</p></div>';
+}
+
+/** Punto de control al cerrar la Semana 3: el asesor ve cómo quedó mientras su oficina decide. */
+function checkpoint_box(array $adv, array $stats, array $office): void
+{
+    $cp = checkpoint($adv, $stats, $office);
+    echo '<div class="card filtro"><span class="eyebrow">Tu punto de control · Semana 3</span>';
+    echo '<p>Cerraste tu Semana 3. ' . ($cp['pass'] ? '<b>Cumples tu punto de control.</b>' : '<b>Todavía no cumples tu punto de control.</b>') . '</p><ul>';
+    foreach ($cp['checks'] as [$label, $ok]) echo '<li>' . ($ok ? '✅' : '⬜') . ' ' . h($label) . '</li>';
+    echo '</ul><p class="small">Tu oficina va a platicar contigo para decidir juntos cómo sigues en el curso. Mientras tanto, sigue con tu plan de hoy: todo lo que hagas cuenta.</p></div>';
 }
 
 /** Edalo · Mis logros: captación, oferta, inquilino calificado con visita y renta cerrada. */

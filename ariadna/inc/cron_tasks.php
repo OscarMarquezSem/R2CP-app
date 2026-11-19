@@ -35,9 +35,17 @@ function cron_advisor(array $adv, array $office, callable $say): void
 
     if ($s['closed_weeks'] > (int)$adv['closed_weeks']) {
         for ($w = (int)$adv['closed_weeks'] + 1; $w <= $s['closed_weeks']; $w++) {
-            if ($w === 3) { send_checkpoint_email($adv, $office, $s); $say("Punto de control enviado: {$adv['name']}"); }
+            if ($w === 3) {
+                send_checkpoint_email($adv, $office, $s);
+                notice_once('cp_pendiente:' . $adv['id'] . ':' . $s['today']);   // el recordatorio diario empieza mañana
+                $say("Punto de control enviado: {$adv['name']}");
+            }
         }
         q('UPDATE advisors SET closed_weeks = ? WHERE id = ?', [$s['closed_weeks'], $adv['id']]);
+    } elseif ($s['closed_weeks'] >= 3 && !$s['finished'] && in_array($adv['decision'] ?? null, [null, '', 'pendiente'], true)
+        && (int)office_now($office)->format('G') >= 9 && notice_once('cp_pendiente:' . $adv['id'] . ':' . $s['today'])) {
+        send_checkpoint_reminder($adv, $office, $s);
+        $say("Recordatorio de punto de control: {$adv['name']}");
     }
     if ($st['color'] === 'rojo' && $adv['status_color'] !== 'rojo') { send_red_alert($adv, $office, $s); $say("Alerta roja enviada: {$adv['name']}"); }
     if ($st['color'] !== $adv['status_color'] || $st['reason'] !== $adv['status_reason']) {
@@ -76,7 +84,7 @@ function notify_advisor(array $adv, array $office, string $title, string $body, 
     $url = advisor_link($adv);
     if (push_to_advisor((int)$adv['id'], $title, $body, $url) > 0) return 'celular';
     if ($adv['email']) {
-        send_mail([$adv['email']], 'Ariadna · ' . $emailTitle, email_wrap($emailTitle, $emailHtml), [], $kind, (int)$office['id'], (int)$adv['id']);
+        send_mail([$adv['email']], P()['name'] . ' · ' . $emailTitle, email_wrap($emailTitle, $emailHtml), [], $kind, (int)$office['id'], (int)$adv['id']);
         return 'correo';
     }
     return 'sin medio';
@@ -87,30 +95,41 @@ function send_morning_reminder(array $adv, array $office, array $s): string
     $items = day_items($s['ctx'], ['office' => $office, 'sessions' => $s['sessions'], 'goal_contactos' => goal_for($s['goals'], $s['ctx']['week'], 'contactos')]);
     $name = first_name($adv['name']);
     $head = headline_activity($items);
-    $body = "Buen día, $name. Hoy te toca: $head. Antes que nada, tus contactos del día.";
+    $body = "Buen día, $name. Hoy te toca: $head. " . T('mail_first');
     $list = '';
     foreach ($items as $it) {
         $extra = $it['session'] ? ' (' . time_label($it['session']['stime']) . ')' : '';
         $txt = $it['pending_session'] ? 'Pide a tu oficina tu sesión de: ' . $it['title'] : (kind_prefix($it['kind']) . $it['title'] . $extra);
         $list .= '<li>' . h($txt) . '</li>';
     }
-    $html = '<p>Buen día, ' . h($name) . '. Soy Ariadna. Hoy es tu Semana ' . (int)$s['ctx']['week'] . ' · ' . h(ctx_label($s['ctx'])) . ' y esto te toca:</p><ul>' . $list . '</ul>'
+    $html = '<p>Buen día, ' . h($name) . '. Soy ' . h(P()['name']) . '. Hoy es tu Semana ' . (int)$s['ctx']['week'] . ' · ' . h(ctx_label($s['ctx'])) . ' y esto te toca:</p><ul>' . $list . '</ul>'
         . '<p>Cuando termines, cuéntame cómo te fue (menos de 2 minutos):</p>' . email_button(advisor_link($adv), 'Abrir mi día')
-        . '<p>No sueltes el hilo.<br>— Ariadna, tu Team Leader del Fast Track Residencial</p>';
-    return notify_advisor($adv, $office, 'Ariadna · Tu día de hoy', $body, 'Tu día de hoy', $html, 'recordatorio');
+        . '<p>' . h(T('mail_sign')) . '<br>— ' . h(P()['name']) . ', tu Team Leader del ' . h(P()['course']) . '</p>';
+    return notify_advisor($adv, $office, P()['name'] . ' · Tu día de hoy', $body, 'Tu día de hoy', $html, 'recordatorio');
 }
 
 function send_night_reminder(array $adv, array $office): string
 {
     $name = first_name($adv['name']);
-    $body = "$name, todavía no me cuentas cómo te fue hoy. Te toma menos de 2 minutos. No sueltes el hilo.";
-    $html = '<p>' . h($body) . '</p>' . email_button(advisor_link($adv), 'Abrir mi día') . '<p>— Ariadna</p>';
-    return notify_advisor($adv, $office, 'Ariadna', $body, 'Todavía no me cuentas cómo te fue', $html, 'aviso_noche');
+    $body = "$name, todavía no me cuentas cómo te fue hoy. Te toma menos de 2 minutos. " . T('mail_sign');
+    $html = '<p>' . h($body) . '</p>' . email_button(advisor_link($adv), 'Abrir mi día') . '<p>— ' . h(P()['name']) . '</p>';
+    return notify_advisor($adv, $office, P()['name'], $body, 'Todavía no me cuentas cómo te fue', $html, 'aviso_noche');
 }
 
 function email_button(string $url, string $label): string
 {
     return '<p><a href="' . h($url) . '" style="display:inline-block;background:#C75D3A;color:#fff;padding:12px 22px;border-radius:10px;text-decoration:none;font-weight:bold">' . h($label) . '</a></p>';
+}
+
+/** Totales del asesor en una línea, con los números de su programa. */
+function results_line(array $t): string
+{
+    $out = [];
+    $short = ['contactos' => 'Contactos', 'tratos' => 'Tratos', 'analizadas' => 'Analizadas', 'promovidas' => 'Promovidas', 'citas' => 'Citas',
+        'captaciones' => 'Captaciones', 'llamadas' => 'Llamadas', 'recorridos' => 'Recorridos', 'fichas' => 'Fichas', 'cadenas' => 'Cadenas',
+        'leads' => 'Leads', 'piezas' => 'Piezas'];
+    foreach (result_fields() as $k => $label) $out[] = ($short[$k] ?? $label) . ' ' . (int)($t[$k] ?? 0);
+    return implode(' · ', $out);
 }
 
 function director_name(int $officeId): string
@@ -123,10 +142,9 @@ function send_red_alert(array $adv, array $office, array $s): void
 {
     $html = '<p>' . h(director_name((int)$office['id'])) . ', te aviso que <b>' . h($adv['name']) . '</b> (' . h($office['name']) . ') pasó a ' . email_dot('rojo') . '.</p>'
         . '<p><b>Motivo:</b> ' . h($s['status']['reason']) . '</p><p><b>Te sugiero:</b> ' . h($s['status']['action']) . '</p>'
-        . '<p>Semana ' . (int)$s['week'] . ' · Actividades cumplidas: ' . $s['pct'] . '% · Contactos: ' . $s['totals']['contactos']
-        . ' · Citas: ' . $s['totals']['citas'] . ' · Captaciones: ' . $s['totals']['captaciones'] . '</p>'
-        . '<p><a href="' . h(panel_link($office, (int)$adv['id'])) . '" style="color:#C75D3A;font-weight:bold">Ver su detalle en Ariadna</a></p><p>— Ariadna</p>';
-    send_mail(office_recipients((int)$office['id'], ['director']), 'Ariadna · ' . $adv['name'] . ' pasó a rojo',
+        . '<p>Semana ' . (int)$s['week'] . ' · Actividades cumplidas: ' . $s['pct'] . '% · ' . h(results_line($s['totals'])) . '</p>'
+        . '<p><a href="' . h(panel_link($office, (int)$adv['id'])) . '" style="color:#C75D3A;font-weight:bold">Ver su detalle</a></p><p>— ' . h(P()['name']) . '</p>';
+    send_mail(office_recipients((int)$office['id'], ['director']), P()['name'] . ' · ' . $adv['name'] . ' pasó a rojo',
         email_wrap('Alerta: asesor en rojo', $html), admin_recipients(), 'alerta_rojo', (int)$office['id'], (int)$adv['id']);
 }
 
@@ -139,8 +157,8 @@ function send_low_goals_alert(array $adv, array $office, int $week, array $low):
     $html = '<p>' . h(director_name((int)$office['id'])) . ', te aviso que <b>' . h($adv['name']) . '</b> (Semana ' . $week . ') se puso metas por debajo del mínimo del programa. Se lo hice notar y decidió dejarlas así.</p>'
         . '<table cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;font-size:14px"><tr style="background:#F1EBDC;text-align:left"><th style="padding:8px">Meta</th><th style="padding:8px">Su meta</th><th style="padding:8px">Mínimo del programa</th></tr>' . $rows . '</table>'
         . '<p><b>Te sugiero:</b> hablar con él o ella hoy. Con estas metas es difícil que su arranque sea rentable; vale la pena revisar juntos su Mi Mapa y su compromiso con el curso.</p>'
-        . '<p><a href="' . h(panel_link($office, (int)$adv['id'])) . '" style="color:#C75D3A;font-weight:bold">Ver su detalle en Ariadna</a></p><p>— Ariadna</p>';
-    send_mail(office_recipients((int)$office['id'], ['director']), 'Ariadna · ' . $adv['name'] . ' se puso metas por debajo del mínimo',
+        . '<p><a href="' . h(panel_link($office, (int)$adv['id'])) . '" style="color:#C75D3A;font-weight:bold">Ver su detalle</a></p><p>— ' . h(P()['name']) . '</p>';
+    send_mail(office_recipients((int)$office['id'], ['director']), P()['name'] . ' · ' . $adv['name'] . ' se puso metas por debajo del mínimo',
         email_wrap('Metas por debajo del mínimo', $html), admin_recipients(), 'metas_bajas', (int)$office['id'], (int)$adv['id']);
 }
 
@@ -157,14 +175,15 @@ function send_checkpoint_email(array $adv, array $office, array $s): void
     }
     $html .= '<tr><td colspan="2"><b>Total</b></td><td align="center"><b>' . (int)$s['evaluation']['total'] . ' / 100</b></td></tr></table>'
         . '<p>' . h($s['evaluation']['level_text']) . '</p>'
-        . '<p><a href="' . h(panel_link($office, (int)$adv['id'])) . '" style="color:#C75D3A;font-weight:bold">Registrar la decisión en Ariadna</a></p><p>— Ariadna</p>';
-    send_mail(office_recipients((int)$office['id']), 'Ariadna · Punto de control de ' . $adv['name'] . ': ' . ($cp['pass'] ? 'cumple' : 'no cumple'),
+        . '<p><a href="' . h(panel_link($office, (int)$adv['id'])) . '" style="color:#C75D3A;font-weight:bold">Registrar la decisión</a></p><p>— ' . h(P()['name']) . '</p>';
+    send_mail(office_recipients((int)$office['id']), P()['name'] . ' · Punto de control de ' . $adv['name'] . ': ' . ($cp['pass'] ? 'cumple' : 'no cumple'),
         email_wrap('Punto de control · Semana 3', $html), admin_recipients(), 'punto_control', (int)$office['id'], (int)$adv['id']);
 }
 
 /** Avisa al director (una sola vez por asesor y tema) de los temas de oficina que faltan programar. */
 function cron_unscheduled_sessions(array $office, callable $say): void
 {
+    prog_set('residencial');
     $new = [];
     foreach (office_unscheduled($office) as $n) {
         foreach ($n['advisors'] as $i => $aid) {
@@ -199,15 +218,38 @@ function cron_weekly_report(array $office, callable $say, bool $force = false): 
 
 function send_weekly_report(array $office): bool
 {
+    // Un correo por programa: el de Ariadna (residencial) y el de Edalo (industrial), cada uno con su remitente.
     $all = office_advisors_stats($office);
-    $rows = array_values(array_filter($all, fn($r) => $r['stats']['started'] && $r['adv']['decision'] !== 'no_continua'
+    $progs = office_programs($office);
+    $sent = false;
+    foreach ($progs as $pg) {
+        $sub = array_values(array_filter($all, fn($r) => advisor_program($r['adv']) === $pg));
+        if (!$sub && count($progs) > 1) continue;
+        $sent = send_weekly_report_one($office, $all, $sub, $pg) || $sent;
+    }
+    prog_set('residencial');
+    return $sent;
+}
+
+function send_weekly_report_one(array $office, array $all, array $sub, string $pg): bool
+{
+    prog_set($pg);
+    $pp = P();
+    $ind = $pg === 'industrial';
+    $rows = array_values(array_filter($sub, fn($r) => $r['stats']['started'] && $r['adv']['decision'] !== 'no_continua'
         && $r['stats']['elapsed'] < $r['stats']['program_days'] + 7));
     $td = 'style="padding:8px;border-bottom:1px solid #E6DECB;font-size:13px;vertical-align:top"';
-    $html = '<p>Hola, ' . h(director_name((int)$office['id'])) . '. Soy Ariadna, la Team Leader de tus asesores en el curso Fast Track Residencial. Te cuento cómo van en <b>' . h($office['name']) . '</b> esta semana.</p>';
-    $nt = advisors_without_training($office);
-    if ($nt) $html .= '<p style="background:#FBE9DF;padding:10px;border-radius:8px">Tienes <b>' . $nt . '</b> asesores nuevos sin día de capacitación interna.</p>';
-    $un = office_unscheduled($office, $all);
-    if ($un) $html .= '<p style="background:#FBE9DF;padding:10px;border-radius:8px"><b>' . count($un) . '</b> temas de oficina sin fecha que tus asesores ya necesitan: ' . h(implode(' · ', array_map(fn($n) => $n['activity']['title'], $un))) . '.</p>';
+    $html = '<p>Hola, ' . h(director_name((int)$office['id'])) . '. Soy ' . h($pp['name']) . ', ' . ($ind ? 'el' : 'la')
+        . ' Team Leader de tus asesores en el curso ' . h($pp['course']) . '. Te cuento cómo van en <b>' . h($office['name']) . '</b> esta semana.</p>';
+    if ($pg === office_programs($office)[0]) {
+        $nt = advisors_without_training($office);
+        if ($nt) $html .= '<p style="background:#FBE9DF;padding:10px;border-radius:8px">Tienes <b>' . $nt . '</b> asesores nuevos sin día de capacitación interna.</p>';
+    }
+    if (!$ind) {
+        $un = office_unscheduled($office, $all);
+        prog_set($pg);
+        if ($un) $html .= '<p style="background:#FBE9DF;padding:10px;border-radius:8px"><b>' . count($un) . '</b> temas de oficina sin fecha que tus asesores ya necesitan: ' . h(implode(' · ', array_map(fn($n) => $n['activity']['title'], $un))) . '.</p>';
+    }
     if (!$rows) {
         $html .= '<p>No hay asesores activos en el curso.</p>';
     } else {
@@ -215,17 +257,33 @@ function send_weekly_report(array $office): bool
             . '<th align="left" ' . $td . '>Asesor</th><th ' . $td . '>Semáforo</th><th ' . $td . '>Semana</th><th ' . $td . '>Actividades</th>'
             . '<th align="left" ' . $td . '>Resultados</th><th align="left" ' . $td . '>Te sugiero</th></tr>';
         foreach ($rows as $r) {
-            $a = $r['adv']; $s = $r['stats']; $t = $s['totals'];
-            $res = 'Contactos ' . $t['contactos'] . ' · Tratos ' . $t['tratos'] . ' · Analizadas ' . $t['analizadas']
-                . ' · Promovidas ' . $t['promovidas'] . ' · Citas ' . $t['citas'] . ' · Captaciones ' . $t['captaciones'];
+            $a = $r['adv']; $s = $r['stats'];
+            prog_set($pg);
+            $wk = $s['finished'] ? 'Terminó' : (int)$s['week'] . (!empty($s['filtro']['repeating']) ? ' (repite)' : '');
             $html .= '<tr><td ' . $td . '><b>' . h($a['name']) . '</b></td><td ' . $td . '>' . email_dot($s['status']['color']) . '</td>'
-                . '<td ' . $td . ' align="center">' . ($s['finished'] ? 'Terminó' : (int)$s['week']) . '</td>'
+                . '<td ' . $td . ' align="center">' . h((string)$wk) . '</td>'
                 . '<td ' . $td . ' align="center">' . $s['done'] . ' de ' . $s['assigned'] . ' (' . $s['pct'] . '%)</td>'
-                . '<td ' . $td . '>' . h($res) . '</td><td ' . $td . '>' . h($s['status']['action'] ?: '—') . '</td></tr>';
+                . '<td ' . $td . '>' . h(results_line($s['totals'])) . '</td><td ' . $td . '>' . h($s['status']['action'] ?: '—') . '</td></tr>';
         }
         $html .= '</table>';
     }
-    $html .= '<p style="margin-top:16px"><a href="' . h(panel_link($office)) . '" style="color:#C75D3A;font-weight:bold">Abrir el panel de la oficina</a></p><p>Seguimos el hilo.<br>— Ariadna</p>';
-    return send_mail(office_recipients((int)$office['id']), 'Ariadna · Reporte semanal · ' . $office['name'],
+    $html .= '<p style="margin-top:16px"><a href="' . h(panel_link($office) . (count(office_programs($office)) > 1 ? '?p=' . $pg : '')) . '" style="color:#C75D3A;font-weight:bold">Abrir el panel de la oficina</a></p><p>'
+        . h(T('report_sign')) . '<br>— ' . h($pp['name']) . '</p>';
+    return send_mail(office_recipients((int)$office['id']), $pp['name'] . ' · Reporte semanal · ' . $office['name'],
         email_wrap('Reporte semanal', $html), admin_recipients(), 'reporte_semanal', (int)$office['id']);
+}
+
+/**
+ * Punto de control pendiente: mientras la oficina no registre «continúa» o «no continúa»,
+ * le recuerda una vez al día (a partir del día siguiente al correo del punto de control).
+ */
+function send_checkpoint_reminder(array $adv, array $office, array $s): void
+{
+    $cp = checkpoint($adv, $s, $office);
+    $html = '<p>' . h(director_name((int)$office['id'])) . ', sigue pendiente tu decisión sobre <b>' . h($adv['name']) . '</b>. Cerró su Semana 3 y su punto de control '
+        . ($cp['pass'] ? '<b style="color:#2E8B57">cumple</b>' : '<b style="color:#C0392B">no cumple</b>') . ' (' . (int)$cp['score'] . ' puntos).</p>'
+        . '<p>Platica con ' . h(first_name($adv['name'])) . ' y registra si continúa en el curso. Te lo recuerdo cada día hasta que lo registres.</p>'
+        . '<p><a href="' . h(panel_link($office, (int)$adv['id'])) . '" style="color:#C75D3A;font-weight:bold">Registrar la decisión</a></p><p>— ' . h(P()['name']) . '</p>';
+    send_mail(office_recipients((int)$office['id'], ['director', 'gerente']), P()['name'] . ' · Decisión pendiente: punto de control de ' . $adv['name'],
+        email_wrap('Decisión pendiente · Punto de control', $html), [], 'punto_control_pendiente', (int)$office['id'], (int)$adv['id']);
 }

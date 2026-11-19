@@ -115,7 +115,7 @@ function push_to_advisor(int $advisorId, string $title, string $body, string $ur
 {
     $sent = 0;
     foreach (all('SELECT * FROM push_subscriptions WHERE advisor_id = ?', [$advisorId]) as $s) {
-        $code = webpush_send($s, ['title' => $title, 'body' => $body, 'url' => $url]);
+        $code = webpush_send($s, ['title' => $title, 'body' => $body, 'url' => $url, 'icon' => prog() === 'industrial' ? 'assets/edalo-icon-192.png' : 'assets/icon-192.png']);
         if ($code >= 200 && $code < 300) $sent++;
         elseif (in_array($code, [404, 410], true)) q('DELETE FROM push_subscriptions WHERE id = ?', [$s['id']]);
     }
