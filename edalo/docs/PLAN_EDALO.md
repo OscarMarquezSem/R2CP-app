@@ -191,10 +191,28 @@ Se cuentan las semanas 1 y 2 juntas:
 
 ---
 
-## Preguntas para ti
+## Decisiones
 
-1. **Videos repetidos.** Los Videos 2, 3, 5, 6, 9 y 12 se llaman igual que módulos de Residencial: Matemática de tu éxito, Marca personal, Tratos directos, Vitrina digital, Seguimiento y Objeciones. ¿Son **los mismos videos** o vas a grabar versiones para industrial?
-2. **Los 6 videos que ya están en Bunny.** Ahí veo «Introducción», «Captando un local comercial», «Captando Nave», «Inquilino», «Números sencillos» y «Oferta, negociación y cierre». ¿La **Introducción** es el Video 1 (Mercado comercial e industrial)?
-3. **Reto del video y evaluación.** En tu evaluación no hay puntos para los Retos. Te propongo **no cambiar tu Cuadro**: que los Retos sirvan para que el TL califique los **14 puntos de Conocimiento** (propiedades y zonas) con información real. ¿De acuerdo?
-4. **Temas internos de la oficina.** Ariadna tiene capacitación interna (políticas y documentos) y temas que programa la oficina (legal, procesos…). Tus hojas de Industrial no los mencionan. ¿Los incluimos en Édalo o no?
-5. **Repetir la Semana 2.** ¿Quieres un límite? Por ejemplo, si a la segunda vez tampoco cumple, la oficina decide si continúa. ¿O puede repetirla las veces que necesite?
+1. **Videos 2, 3, 5, 6, 9 y 12:** son los mismos de Residencial (genéricos) y usan sus mismos Retos.
+2. **Video 1:** es la «Introducción» que ya está en Bunny. **Los 12 videos ya existen y están transcritos.** Quedan así:
+
+   | Video | En Bunny |
+   |---|---|
+   | 1 | fast_track_industrial__introducción |
+   | 2 | Módulo 1 de Residencial (Matemática de tu éxito) |
+   | 3 | Módulo 3 de Residencial (Marca personal) |
+   | 4 | Captando un local comercial |
+   | 5 | Módulo 5 de Residencial (Tratos directos) |
+   | 6 | Módulo 2 de Residencial (Vitrina digital) |
+   | 7 | Inquilino |
+   | 8 | Captando Nave |
+   | 9 | Módulo 6 de Residencial (Seguimiento) |
+   | 10 | Números sencillos |
+   | 11 | Oferta, negociación y cierre |
+   | 12 | Módulo 7 de Residencial (Objeciones) |
+
+3. **Retos:** le sirven al TL para calificar los 14 puntos de Conocimiento. Tu Cuadro de Evaluación no cambia. Borrador de las preguntas: `RETOS_EDALO.md`.
+4. **Temas internos de la oficina (propuesta):**
+   - Se queda **solo el día de capacitación interna** (políticas y documentos), igual que en Ariadna.
+   - **No** se agregan los temas que programa la oficina, porque tus hojas no los tienen.
+5. **Repetir la Semana 2 (propuesta):** se repite **una vez**. Si a la segunda tampoco cumple, Édalo no la detiene otra vez: avisa a la oficina y la oficina decide si continúa, igual que en el punto de control.
