@@ -68,11 +68,31 @@
 3. Entra como administrador y abre `https://ariadna.oscarmarquez.com/actualizar_plan.php`. Debe decir «Se aplicaron N cambios»: unos 52 si no subiste la 5, o unos 44 si ya la habías subido.
 4. Borra `actualizar_plan.php`, la carpeta `temporal` y el zip.
 
+## Actualización 7 (`ariadna_actualizacion_7.zip`) · Edalo
+
+**Qué trae:**
+1. **Edalo, el programa Fast Track Industrial (4 semanas, 12 videos)**, en la misma instalación de Ariadna. El administrador marca en **Oficinas** qué programas tiene cada oficina. La oficina elige el programa al dar de alta al asesor.
+2. **El asesor de Edalo** ve su propia marca, colores, bienvenida, plan, videos, números del día (llamadas, recorridos, fichas, cadenas, leads y piezas), filtro de la Semana 2, logros y evaluación.
+3. **Panel de la oficina con pestañas** Todos · Ariadna · Edalo, con la etiqueta del programa en cada asesor. Plan y «Ver como asesor» también se eligen por programa.
+4. **Correos por programa:** remitente, encabezado y firma de Edalo; el reporte semanal llega en un correo por programa.
+5. **Punto de control (Ariadna y Edalo):** al cerrar la Semana 3, el asesor ve en su pantalla qué cumplió y qué le faltó, sin detenerlo. La oficina recibe un recordatorio diario hasta registrar «continúa» o «no continúa».
+6. **Correcciones:** en «Hoy vienen», el botón «Aplicar Reto» ya no sale en la bienvenida.
+
+**Archivos (25):**
+- Sueltos en la carpeta de Ariadna: `actualizar_plan.php` (de un solo uso), `admin.php`, `admin_ajustes.php`, `admin_oficina.php`, `admin_plan.php`, `admin_preview.php`, `asesor.php`, `export.php`, `hoy.php`, `manifest.php`, `oficina.php`, `reto.php`, `sw.js`.
+- Dentro de `inc`: `app.php`, `cron_tasks.php`, `engine.php`, `hoy_view.php`, `layout.php`, `mailer.php`, `programs.php` (nuevo), `push.php`.
+- Dentro de `assets`: `style.css`, `edalo.svg`, `edalo-icon-192.png` y `edalo-icon-512.png` (nuevos).
+
+**Cómo aplicarla:**
+1. Sube y mueve **todos** los archivos antes de abrir el paso 3.
+2. Agrega a `config.php` la dirección y el correo de Edalo.
+3. Abre `actualizar_plan.php` como administrador. Debe decir «Plan de Edalo cargado: 4 semanas, 70 actividades y 12 videos con su Reto».
+4. Borra `actualizar_plan.php`, la carpeta `temporal` y el zip.
+5. En **Oficinas**, marca Edalo en las oficinas que lo van a usar.
+
 ## Próxima actualización (se junta con lo que salga de la prueba)
 
 | # | Cambio | Archivo |
 |---|---|---|
-| 2 | Punto de control visible para el asesor al inicio de la Semana 4 (qué cumplió, qué le faltó, «tu oficina lo revisa contigo»), sin detenerlo. Recordatorio diario a la oficina mientras no registre «continúa» o «no continúa». | Aprobado |
 | 3 | Mensaje de bienvenida por WhatsApp editable en Ajustes ({nombre}, {oficina}, {enlace}), con el texto nuevo propuesto. | Pendiente de visto bueno del texto |
-| 4 | Programas por oficina (Ariadna y/o Édalo) y programa por asesor; panel con pestañas Todos · Ariadna · Édalo. | Aprobado (opción A) |
 | 1 | Preguntas del Reto para los 3 videos cortos (conceptos básicos, opinión de valor, perfilamiento), cuando estén grabados y transcritos. | Plan (se agregan desde el panel) |
