@@ -3,10 +3,10 @@ declare(strict_types=1);
 require __DIR__ . '/inc/app.php';
 $t = isset($_GET['t']) && preg_match('/^[a-f0-9]{64}$/', (string)$_GET['t']) ? $_GET['t'] : '';
 $contact = setting('admin_email') ?: 'el correo de contacto de tu oficina';
-page_start('Aviso de privacidad', ['body' => 'auth']);
+page_start('Aviso de privacidad', ['body' => 'auth', 'brand' => 'Ariadna · Edalo']);
 ?>
 <div class="card narrow prose">
-  <div class="center"><?= brand_mark() ?></div>
+  <div class="center"><?= brand_mark('both') ?></div>
   <h1>Aviso de privacidad</h1>
   <p><b>Responsable.</b> Ariadna es la herramienta de acompañamiento del programa R²CP Elite de Oscar Márquez Seminars, que se usa junto con la oficina inmobiliaria a la que perteneces.</p>
   <p><b>Datos que usamos.</b> Tu nombre, celular, correo electrónico, fecha de inicio, las actividades y resultados que registras cada día, tus respuestas de repaso y las fotos que subas.</p>

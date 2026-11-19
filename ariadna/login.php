@@ -30,10 +30,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'El correo o la contraseña no coinciden.';
     }
 }
-page_start('Entrar', ['body' => 'auth']);
+page_start('Entrar', ['body' => 'auth', 'brand' => 'Ariadna · Edalo']);
 ?>
 <div class="card narrow">
-  <div class="center"><?= brand_mark() ?><p class="tagline">Sigue el hilo</p></div>
+  <div class="center"><?= brand_mark('both') ?><p class="tagline">Sigue el hilo · Construye con método</p></div>
   <h1 class="center">Panel de la oficina</h1>
   <p class="center muted">Para directores, gerentes y team leaders.</p>
   <?php if ($error): ?><div class="flash flash-err"><?= h($error) ?></div><?php endif; ?>
