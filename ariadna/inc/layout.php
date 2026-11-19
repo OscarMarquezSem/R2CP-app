@@ -89,7 +89,7 @@ function eval_table(array $ev): void
 function kpi_grid(array $s): void
 {
     echo '<div class="kpis">';
-    foreach (RESULT_FIELDS as $f => $label) {
+    foreach (result_fields() as $f => $label) {
         $meta = plan_meta_total($f);
         $v = $s['totals'][$f];
         echo '<div class="kpi"><span class="kpi-v">' . $v . ($meta ? '<small>/' . $meta . '</small>' : '') . '</span><span class="kpi-l">' . h($label) . '</span>'

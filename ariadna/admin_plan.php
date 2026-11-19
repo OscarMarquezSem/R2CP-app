@@ -8,7 +8,7 @@ ensure_schema();
 
 enforce_https();
 $u = require_user(['admin']);
-$w = max(1, min(PROGRAM_WEEKS, (int)($_GET['w'] ?? $_POST['w'] ?? 1)));
+$w = max(1, min(prog_weeks(), (int)($_GET['w'] ?? $_POST['w'] ?? 1)));
 $self = 'admin_plan.php?w=' . $w;
 $KINDS = KIND_LABELS;
 
@@ -84,7 +84,7 @@ $actFields = function (string $n, array $a) use ($KINDS): void { ?>
 ?>
 <div class="page-head"><div><span class="eyebrow">Administrador</span><h1>Plan del curso Fast Track Residencial</h1></div>
   <div class="actions"><a class="btn" href="admin_preview.php?w=<?= $w ?>&amp;d=1">Ver esta semana como asesor</a></div></div>
-<div class="tabs"><?php for ($i = 1; $i <= PROGRAM_WEEKS; $i++): ?><a class="<?= $i === $w ? 'on' : '' ?>" href="admin_plan.php?w=<?= $i ?>">Semana <?= $i ?></a><?php endfor; ?></div>
+<div class="tabs"><?php for ($i = 1; $i <= prog_weeks(); $i++): ?><a class="<?= $i === $w ? 'on' : '' ?>" href="admin_plan.php?w=<?= $i ?>">Semana <?= $i ?></a><?php endfor; ?></div>
 <p class="small muted">Los días son días hábiles de la semana personal de cada asesor (Día 1 a Día 5). La rutina diaria (llamadas y registro) se agrega sola; se edita en Ajustes. Tipos: <b>Sesión en tu oficina</b> la da el TL o el gerente y la oficina le pone fecha y hora; <b>Video del curso</b> se reproduce dentro de Ariadna; si no tiene enlace, el asesor ve «Este video estará listo muy pronto». Escribe {OH} donde deba decir «Open House», «Recorrido en vivo» o «Jornada de opinión de valor» según la oficina, y {ASISTENTES} para «asistentes», «interesados» o «propietarios interesados». Lo que va entre {jornada} y {/jornada} solo lo ven las oficinas con Jornada; lo que va entre {evento} y {/evento}, solo las de Open House o Recorrido.</p>
 
 <form method="post" class="form">
@@ -104,7 +104,7 @@ $actFields = function (string $n, array $a) use ($KINDS): void { ?>
   <p class="small muted">Se usan para el semáforo, la evaluación y el aviso de metas bajas. Los contactos son el total de la semana; el mínimo diario está en Ajustes.</p>
   <div class="grid2">
     <?php foreach (['contactos', 'tratos', 'analizadas', 'promovidas', 'citas'] as $f): ?>
-      <label><?= h(RESULT_FIELDS[$f]) ?><input type="number" min="0" name="meta[<?= $f ?>]" value="<?= (int)$week['meta_' . $f] ?>"></label>
+      <label><?= h(result_fields()[$f]) ?><input type="number" min="0" name="meta[<?= $f ?>]" value="<?= (int)$week['meta_' . $f] ?>"></label>
     <?php endforeach; ?>
   </div>
 </div>

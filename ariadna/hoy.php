@@ -107,7 +107,7 @@ $items = $ctx ? day_items($ctx, [
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && post('action') === 'save' && $ctx) {
     csrf_check();
     $nums = [];
-    foreach (RESULT_FIELDS as $f => $_) $nums[$f] = max(0, min(999, (int)($_POST['n'][$f] ?? 0)));
+    foreach (result_fields() as $f => $_) $nums[$f] = max(0, min(999, (int)($_POST['n'][$f] ?? 0)));
     $note = mb_substr(trim((string)($_POST['note'] ?? '')), 0, 2000);
     $analisis = $nums['analizadas'] > 0 ? mb_substr(trim((string)($_POST['analisis'] ?? '')), 0, 4000) : '';
     $flashMsg = $ctx['type'] === 'rest' ? '¡Gracias! Quedó anotado. Disfruta tu descanso.' : '¡Listo! Ya guardé tu día. Mañana seguimos. No sueltes el hilo.';
@@ -135,7 +135,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && post('action') === 'save' && $ctx) 
 
         if ($it['kind'] === 'metas' && isset($_POST['goals'])) {
             $g = [];
-            foreach (RESULT_FIELDS as $f => $_) $g[$f] = max(0, min(999, (int)($_POST['goals'][$f] ?? 0)));
+            foreach (result_fields() as $f => $_) $g[$f] = max(0, min(999, (int)($_POST['goals'][$f] ?? 0)));
             $low = goals_below_min($g, $it['week']);
             $accept = !empty($_POST['goals_accept_low']);
             if ($low && !$accept) {

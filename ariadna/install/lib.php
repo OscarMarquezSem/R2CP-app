@@ -133,10 +133,10 @@ function seed_demo(): array
 
 function demo_goals(array $adv, string $profile, int $ago): void
 {
-    $weeks = min(PROGRAM_WEEKS, intdiv($ago, 7) + 1);
+    $weeks = min(prog_weeks(), intdiv($ago, 7) + 1);
     for ($w = 2; $w <= $weeks; $w++) {
         $g = [];
-        foreach (array_keys(RESULT_FIELDS) as $f) $g[$f] = goal_minimum($w, $f);
+        foreach (array_keys(result_fields()) as $f) $g[$f] = goal_minimum($w, $f);
         $low = 0;
         if ($profile === 'constante') { $g['contactos'] = 25; $g['citas'] = max(1, $g['citas']); $g['captaciones'] = 1; }
         if ($profile === 'estrella') { $g['contactos'] = 30; $g['citas'] += 2; $g['captaciones'] = 1; }
@@ -170,7 +170,7 @@ function demo_logs(array $adv, array $office, string $profile, string $today): v
             'goal_contactos' => goal_for($goals, $ctx['week'], 'contactos')]);
         $doneP = ['constante' => 88, 'se_detuvo' => 75, 'sin_citas' => 65, 'estrella' => 95, 'tarde' => 55][$profile] ?? 70;
         $doneItems = [];
-        $n = array_fill_keys(array_keys(RESULT_FIELDS), 0);
+        $n = array_fill_keys(array_keys(result_fields()), 0);
         foreach ($items as $it) {
             $force = $it['routine'] && in_array($profile, ['constante', 'estrella', 'se_detuvo'], true);
             if ($it['pending_session']) continue;
@@ -201,7 +201,7 @@ function demo_logs(array $adv, array $office, string $profile, string $today): v
 
 function demo_insert_log(int $advId, string $date, array $ctx, array $n, array $items, string $note, string $analisis): void
 {
-    $n = array_merge(array_fill_keys(array_keys(RESULT_FIELDS), 0), $n);
+    $n = array_merge(array_fill_keys(array_keys(result_fields()), 0), $n);
     q('INSERT INTO daily_logs (advisor_id, log_date, week_no, day_type, day_label, contactos, tratos, analizadas, promovidas, citas, captaciones, analisis, note, created_at, updated_at)
        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)', [
         $advId, $date, $ctx['week'], $ctx['type'], ctx_label($ctx),

@@ -26,7 +26,7 @@ $global = ['asesores' => 0, 'verde' => 0, 'amarillo' => 0, 'rojo' => 0];
 foreach ($offices as $o) {
     $rows = office_advisors_stats($o);
     $c = ['verde' => 0, 'amarillo' => 0, 'rojo' => 0];
-    $t = array_fill_keys(array_keys(RESULT_FIELDS), 0);
+    $t = array_fill_keys(array_keys(result_fields()), 0);
     $pct = 0; $score = 0; $inProgram = 0;
     foreach ($rows as $r) {
         $c[$r['stats']['status']['color']]++;

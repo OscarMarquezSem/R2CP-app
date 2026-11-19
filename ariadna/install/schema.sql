@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS offices (
   remind_night TINYINT(1) NOT NULL DEFAULT 1,
   remind_night_hour TINYINT NOT NULL DEFAULT 20,
   last_report_date DATE NULL,
+  programs VARCHAR(40) NOT NULL DEFAULT 'residencial',
   active TINYINT(1) NOT NULL DEFAULT 1,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -89,6 +90,15 @@ CREATE TABLE IF NOT EXISTS advisors (
   cap_disp TINYINT(1) NOT NULL DEFAULT 0,
   renta_closed TINYINT(1) NOT NULL DEFAULT 0,
   renta_date DATE NULL,
+  program VARCHAR(20) NOT NULL DEFAULT 'residencial',
+  ind_cap_done TINYINT(1) NOT NULL DEFAULT 0,
+  ind_cap_date DATE NULL,
+  ind_oferta_done TINYINT(1) NOT NULL DEFAULT 0,
+  ind_oferta_date DATE NULL,
+  ind_inq_done TINYINT(1) NOT NULL DEFAULT 0,
+  ind_inq_date DATE NULL,
+  know_props TINYINT NULL,
+  know_zones TINYINT NULL,
   status_color ENUM('verde','amarillo','rojo') NOT NULL DEFAULT 'verde',
   status_reason VARCHAR(255) NULL,
   closed_weeks TINYINT NOT NULL DEFAULT 0,
@@ -134,7 +144,8 @@ CREATE TABLE IF NOT EXISTS push_subscriptions (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS plan_weeks (
-  week_no TINYINT NOT NULL PRIMARY KEY,
+  program VARCHAR(20) NOT NULL DEFAULT 'residencial',
+  week_no TINYINT NOT NULL,
   title VARCHAR(200) NOT NULL,
   objective TEXT NULL,
   material TEXT NULL,
@@ -146,7 +157,14 @@ CREATE TABLE IF NOT EXISTS plan_weeks (
   meta_analizadas INT NOT NULL DEFAULT 0,
   meta_promovidas INT NOT NULL DEFAULT 0,
   meta_citas INT NOT NULL DEFAULT 0,
-  meta_captaciones INT NOT NULL DEFAULT 0
+  meta_captaciones INT NOT NULL DEFAULT 0,
+  meta_llamadas INT NOT NULL DEFAULT 0,
+  meta_recorridos INT NOT NULL DEFAULT 0,
+  meta_fichas INT NOT NULL DEFAULT 0,
+  meta_cadenas INT NOT NULL DEFAULT 0,
+  meta_leads INT NOT NULL DEFAULT 0,
+  meta_piezas INT NOT NULL DEFAULT 0,
+  PRIMARY KEY (program, week_no)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS plan_activities (
@@ -161,8 +179,10 @@ CREATE TABLE IF NOT EXISTS plan_activities (
   video_url VARCHAR(500) NULL,
   help_links TEXT NULL,
   reto TEXT NULL,
+  program VARCHAR(20) NOT NULL DEFAULT 'residencial',
   active TINYINT(1) NOT NULL DEFAULT 1,
-  KEY idx_wd (week_no, day_no, sort)
+  KEY idx_wd (week_no, day_no, sort),
+  KEY idx_prog (program, week_no, day_no)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS daily_logs (
@@ -178,6 +198,12 @@ CREATE TABLE IF NOT EXISTS daily_logs (
   promovidas INT NOT NULL DEFAULT 0,
   citas INT NOT NULL DEFAULT 0,
   captaciones INT NOT NULL DEFAULT 0,
+  llamadas INT NOT NULL DEFAULT 0,
+  recorridos INT NOT NULL DEFAULT 0,
+  fichas INT NOT NULL DEFAULT 0,
+  cadenas INT NOT NULL DEFAULT 0,
+  leads INT NOT NULL DEFAULT 0,
+  piezas INT NOT NULL DEFAULT 0,
   analisis TEXT NULL,
   note TEXT NULL,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,

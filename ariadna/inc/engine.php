@@ -6,18 +6,8 @@
  */
 declare(strict_types=1);
 
-const PROGRAM_WEEKS = 5;
-const PROGRAM_DAYS  = 35;
+// Semanas, días y campos de cada programa: inc/programs.php (prog_weeks(), result_fields()).
 const PLAN_DAYS_PER_WEEK = 5;
-
-const RESULT_FIELDS = [
-    'contactos'   => 'Contactos',
-    'tratos'      => 'Tratos directos',
-    'analizadas'  => 'Propiedades analizadas',
-    'promovidas'  => 'Propiedades promovidas',
-    'citas'       => 'Citas agendadas',
-    'captaciones' => 'Captaciones',
-];
 
 const RESULT_HINTS = [
     'contactos'   => 'Personas con las que hablaste hoy. Cada llamada cuenta como contacto.',
@@ -26,6 +16,12 @@ const RESULT_HINTS = [
     'promovidas'  => 'Propiedades de la oficina que publicaste hoy',
     'citas'       => 'Citas que dejaste agendadas hoy',
     'captaciones' => 'Propiedades captadas con autorización del propietario',
+    'llamadas'    => 'Llamadas a tu Impulsor Industrial. Meta del día: 10',
+    'recorridos'  => 'Salidas a una zona, parque o corredor',
+    'fichas'      => 'Inmuebles de los que levantaste su ficha',
+    'cadenas'     => 'Obras donde empezaste tu cadena de contacto',
+    'leads'       => 'Solo cuentan con nombre, contacto y una necesidad concreta',
+    'piezas'      => 'Posts o flyers que creaste',
 ];
 
 const KIND_LABELS = [
@@ -44,24 +40,26 @@ const KIND_LABELS = [
 // ---------------------------------------------------------------------------
 function plan_weeks(): array
 {
-    static $w = null;
-    if ($w === null) {
-        $w = [];
-        foreach (all('SELECT * FROM plan_weeks ORDER BY week_no') as $r) $w[(int)$r['week_no']] = $r;
+    static $cache = [];
+    $p = prog();
+    if (!isset($cache[$p])) {
+        $cache[$p] = [];
+        foreach (all('SELECT * FROM plan_weeks WHERE program = ? ORDER BY week_no', [$p]) as $r) $cache[$p][(int)$r['week_no']] = $r;
     }
-    return $w;
+    return $cache[$p];
 }
 
 function plan_activities(): array
 {
-    static $acts = null;
-    if ($acts === null) {
-        $acts = [];
-        foreach (all('SELECT * FROM plan_activities WHERE active = 1 ORDER BY week_no, day_no, sort, id') as $r) {
-            $acts[(int)$r['week_no']][(int)$r['day_no']][] = $r;
+    static $cache = [];
+    $p = prog();
+    if (!isset($cache[$p])) {
+        $cache[$p] = [];
+        foreach (all('SELECT * FROM plan_activities WHERE active = 1 AND program = ? ORDER BY week_no, day_no, sort, id', [$p]) as $r) {
+            $cache[$p][(int)$r['week_no']][(int)$r['day_no']][] = $r;
         }
     }
-    return $acts;
+    return $cache[$p];
 }
 
 function plan_activity_by_id(int $id): ?array
@@ -84,7 +82,7 @@ function day_activities(int $week, int $day): array
 
 function routine_items(): array
 {
-    $r = json_decode((string)setting('routine_items'), true);
+    $r = json_decode((string)setting(P()['routine_key']), true);
     return is_array($r) ? $r : [];
 }
 
@@ -232,10 +230,11 @@ function time_label(?string $t): string
  */
 function build_schedule(array $adv, array $office): array
 {
+    prog_set(advisor_program($adv));
     $wd = advisor_workdays($adv, $office);
     $training = $adv['training_date'] ?: null;
     $out = [];
-    for ($w = 1; $w <= PROGRAM_WEEKS; $w++) {
+    for ($w = 1; $w <= prog_weeks(); $w++) {
         $dates = [];
         for ($i = 0; $i < 7; $i++) $dates[] = add_days($adv['start_date'], ($w - 1) * 7 + $i);
         $workDates = array_values(array_filter($dates, fn($d) => in_array(iso_weekday($d), $wd, true) && $d !== $training));
@@ -258,8 +257,8 @@ function build_schedule(array $adv, array $office): array
             }
         }
     }
-    // Rutina de arranque: N llamadas diarias durante los primeros N días hábiles con rutina.
-    $limit = max(0, (int)setting('arranque_dias'));
+    // Rutina de arranque (solo Ariadna): N llamadas diarias durante los primeros N días hábiles con rutina.
+    $limit = prog() === 'residencial' ? max(0, (int)setting('arranque_dias')) : 0;
     $k = 0;
     foreach ($out as $d => $ctx) {
         if ($k >= $limit) break;
@@ -407,7 +406,7 @@ function day_items(array $ctx, array $o = []): array
             $it = ['key' => $r['key'], 'id' => 0, 'title' => $r['title'], 'guide' => $r['guide'], 'minutes' => null,
                 'kind' => 'check', 'week' => $ctx['week'], 'day' => 0, 'origin' => 'RUTINA DIARIA', 'routine' => true,
                 'video_url' => null, 'help' => [], 'session' => null, 'pending_session' => false];
-            if ($r['key'] === 'R1') {
+            if ($r['key'] === 'R1' && prog() === 'residencial') {
                 if (!empty($ctx['arranque'])) {
                     $it['title'] = str_replace('{n}', (string)setting('arranque_llamadas'), (string)setting('r1_arranque_title'));
                     $it['origin'] = 'RUTINA DE ARRANQUE · ' . $ctx['arranque'] . ' DE ' . setting('arranque_dias');
@@ -479,7 +478,7 @@ function advisor_logs(int $advisorId): array
 
 function log_has_activity(array $log): bool
 {
-    foreach (RESULT_FIELDS as $f => $_) if ((int)$log[$f] > 0) return true;
+    foreach (result_fields() as $f => $_) if ((int)$log[$f] > 0) return true;
     foreach ($log['items'] as $it) if ((int)$it['done'] === 1 || trim((string)$it['result_text']) !== '') return true;
     return trim((string)($log['note'] ?? '')) !== '';
 }
@@ -517,7 +516,7 @@ function goal_minimum(int $week, string $field): int
 function goals_below_min(array $row, int $week): array
 {
     $low = [];
-    foreach (RESULT_FIELDS as $f => $label) {
+    foreach (result_fields() as $f => $label) {
         $min = goal_minimum($week, $f);
         if ((int)$row[$f] < $min) $low[] = [$f, $f === 'contactos' ? 'Contactos al día' : $label, (int)$row[$f], $min];
     }
@@ -529,6 +528,7 @@ function goals_below_min(array $row, int $week): array
 // ---------------------------------------------------------------------------
 function advisor_stats(array $adv, array $office, ?string $today = null): array
 {
+    prog_set(advisor_program($adv));
     $today = $today ?? office_today($office);
     $schedule = build_schedule($adv, $office);
     $logs = advisor_logs((int)$adv['id']);
@@ -536,18 +536,18 @@ function advisor_stats(array $adv, array $office, ?string $today = null): array
     $goals = advisor_goals((int)$adv['id']);
     $elapsed = days_between($adv['start_date'], $today);
     $started = $elapsed >= 0;
-    $finished = $elapsed >= PROGRAM_DAYS;
-    $week = $started ? min(PROGRAM_WEEKS, intdiv(max(0, $elapsed), 7) + 1) : 1;
-    $closed = $started ? min(PROGRAM_WEEKS, intdiv($elapsed, 7)) : 0;
+    $finished = $elapsed >= (prog_weeks() * 7);
+    $week = $started ? min(prog_weeks(), intdiv(max(0, $elapsed), 7) + 1) : 1;
+    $closed = $started ? min(prog_weeks(), intdiv($elapsed, 7)) : 0;
     $doneAll = done_keys($logs);
 
-    $totals = array_fill_keys(array_keys(RESULT_FIELDS), 0);
+    $totals = array_fill_keys(array_keys(result_fields()), 0);
     $weekTotals = [];
-    for ($w = 1; $w <= PROGRAM_WEEKS; $w++) $weekTotals[$w] = array_fill_keys(array_keys(RESULT_FIELDS), 0);
-    $weekHasActivity = array_fill(1, PROGRAM_WEEKS, false);
+    for ($w = 1; $w <= prog_weeks(); $w++) $weekTotals[$w] = array_fill_keys(array_keys(result_fields()), 0);
+    $weekHasActivity = array_fill(1, prog_weeks(), false);
     foreach ($logs as $date => $l) {
         $w = $schedule[$date]['week'] ?? null;
-        foreach (RESULT_FIELDS as $f => $_) {
+        foreach (result_fields() as $f => $_) {
             $totals[$f] += (int)$l[$f];
             if ($w) $weekTotals[$w][$f] += (int)$l[$f];
         }
@@ -556,7 +556,7 @@ function advisor_stats(array $adv, array $office, ?string $today = null): array
 
     // Asignadas vs. cumplidas
     $assignedA = []; $assignedOther = 0; $doneOther = 0;
-    $weekA = array_fill(1, PROGRAM_WEEKS, []); $weekOther = array_fill(1, PROGRAM_WEEKS, 0); $weekOtherDone = array_fill(1, PROGRAM_WEEKS, 0);
+    $weekA = array_fill(1, prog_weeks(), []); $weekOther = array_fill(1, prog_weeks(), 0); $weekOtherDone = array_fill(1, prog_weeks(), 0);
     $workdaysElapsed = 0; $workdaysLogged = 0;
     $tlFirst = [];   // cita con el TL (clave A#) → fecha en que le tocaba por primera vez
     $vidFirst = [];  // video (clave A#) → fecha en que le tocaba por primera vez
@@ -584,13 +584,13 @@ function advisor_stats(array $adv, array $office, ?string $today = null): array
     $assigned = count($assignedA) + $assignedOther;
     $done = count(array_intersect(array_keys($assignedA), $doneAll)) + $doneOther;
     $weekAssigned = []; $weekDone = [];
-    for ($w = 1; $w <= PROGRAM_WEEKS; $w++) {
+    for ($w = 1; $w <= prog_weeks(); $w++) {
         $weekAssigned[$w] = count($weekA[$w]) + $weekOther[$w];
         $weekDone[$w] = count(array_intersect(array_keys($weekA[$w]), $doneAll)) + $weekOtherDone[$w];
     }
 
     // Citas con el TL: cumplidas y las que ya pasaron sin cumplir
-    $tl = ['total' => count($tlFirst), 'due' => 0, 'done' => 0, 'missed' => [], 'week_due' => array_fill(1, PROGRAM_WEEKS, 0), 'week_done' => array_fill(1, PROGRAM_WEEKS, 0)];
+    $tl = ['total' => count($tlFirst), 'due' => 0, 'done' => 0, 'missed' => [], 'week_due' => array_fill(1, prog_weeks(), 0), 'week_done' => array_fill(1, prog_weeks(), 0)];
     $tlSince = (string)setting('tl_since');
     foreach ($tlFirst as $key => $c) {
         $isDone = in_array($key, $doneAll, true);
@@ -644,7 +644,7 @@ function advisor_stats(array $adv, array $office, ?string $today = null): array
 
 function cum_totals(array $stats, int $uptoWeek): array
 {
-    $t = array_fill_keys(array_keys(RESULT_FIELDS), 0);
+    $t = array_fill_keys(array_keys(result_fields()), 0);
     for ($w = 1; $w <= $uptoWeek; $w++) foreach ($t as $f => $_) $t[$f] += $stats['week_totals'][$w][$f];
     return $t;
 }
@@ -785,7 +785,7 @@ function checkpoint(array $adv, array $s, ?array $office = null): array
 function find_training_date(array $office, array $adv): ?string
 {
     $start = $adv['start_date'];
-    $end = add_days($start, PROGRAM_DAYS - 1);
+    $end = add_days($start, (prog_weeks() * 7) - 1);
     $wd = advisor_workdays($adv, $office);
     $cands = array_column(all('SELECT tdate FROM office_training_dates WHERE office_id = ? AND tdate > ? AND tdate <= ? ORDER BY tdate',
         [$office['id'], $start, $end]), 'tdate');
@@ -804,7 +804,7 @@ function reassign_training(array $office): void
     $today = office_today($office);
     foreach (all('SELECT * FROM advisors WHERE office_id = ? AND active = 1 AND training_manual = 0', [$office['id']]) as $a) {
         if ($a['training_date'] && $a['training_date'] < $today) continue;
-        if (days_between($a['start_date'], $today) >= PROGRAM_DAYS) continue;
+        if (days_between($a['start_date'], $today) >= (prog_weeks() * 7)) continue;
         $new = find_training_date($office, $a);
         if ($new !== $a['training_date']) q('UPDATE advisors SET training_date = ? WHERE id = ?', [$new, $a['id']]);
     }
@@ -814,7 +814,7 @@ function advisors_without_training(array $office): int
 {
     $today = office_today($office);
     return (int)val('SELECT COUNT(*) FROM advisors WHERE office_id = ? AND active = 1 AND training_date IS NULL
-        AND start_date > DATE_SUB(?, INTERVAL ' . PROGRAM_DAYS . ' DAY)', [$office['id'], $today]);
+        AND start_date > DATE_SUB(?, INTERVAL ' . (prog_weeks() * 7) . ' DAY)', [$office['id'], $today]);
 }
 
 /** Temas de oficina que algún asesor ya necesita y no tienen fecha. [[activity, [nombres]], …] */
@@ -974,7 +974,7 @@ function create_advisor(array $office, string $name, string $phone, ?string $ema
         [$office['id'], $name, $phone, $email ?: null, $start, new_token()]);
     $id = (int)db()->lastInsertId();
     $a = one('SELECT * FROM advisors WHERE id = ?', [$id]);
-    $closed = max(0, min(PROGRAM_WEEKS, intdiv(days_between($start, office_today($office)), 7)));
+    $closed = max(0, min(prog_weeks(), intdiv(days_between($start, office_today($office)), 7)));
     q('UPDATE advisors SET training_date = ?, closed_weeks = ? WHERE id = ?', [find_training_date($office, $a), $closed, $id]);
     return $id;
 }

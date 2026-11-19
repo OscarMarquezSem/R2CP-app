@@ -168,11 +168,11 @@ page_start($adv['name'], ['nav' => $u, 'office' => $office, 'active' => 'oficina
 <h2 class="sec">Metas de cada semana</h2>
 <div class="tbl-wrap">
 <table class="tbl">
-  <thead><tr><th>Semana</th><?php foreach (RESULT_FIELDS as $f => $l) echo '<th>' . h($f === 'contactos' ? 'Contactos al día' : $l) . '</th>'; ?><th></th></tr></thead>
+  <thead><tr><th>Semana</th><?php foreach (result_fields() as $f => $l) echo '<th>' . h($f === 'contactos' ? 'Contactos al día' : $l) . '</th>'; ?><th></th></tr></thead>
   <tbody>
-  <?php for ($w = 2; $w <= PROGRAM_WEEKS; $w++): $g = $s['goals'][$w] ?? null; ?>
+  <?php for ($w = 2; $w <= prog_weeks(); $w++): $g = $s['goals'][$w] ?? null; ?>
     <tr><td><b>S<?= $w ?></b></td>
-      <?php foreach (RESULT_FIELDS as $f => $l): $min = goal_minimum($w, $f); ?>
+      <?php foreach (result_fields() as $f => $l): $min = goal_minimum($w, $f); ?>
         <td class="n"><?php if ($g): ?><span style="<?= (int)$g[$f] < $min ? 'color:var(--terra-d);font-weight:700' : '' ?>"><?= (int)$g[$f] ?></span><?php else: ?><span class="muted">—</span><?php endif; ?><span class="small muted"> / mín. <?= $min ?></span></td>
       <?php endforeach; ?>
       <td class="small"><?= $g && (int)$g['low_accepted'] ? '<b style="color:var(--terra-d)">Metas bajas</b>' : ($g ? '' : '<span class="muted">Aún no las pone</span>') ?></td></tr>
@@ -214,7 +214,7 @@ page_start($adv['name'], ['nav' => $u, 'office' => $office, 'active' => 'oficina
           <?php if (trim((string)$l['note']) !== ''): ?><div class="small">📝 <?= h($l['note']) ?></div><?php endif; ?>
         <?php endif; ?>
       </td>
-      <td class="small"><?php if ($l) { $parts = []; foreach (RESULT_FIELDS as $f => $lab) if ((int)$l[$f]) $parts[] = $lab . ': ' . (int)$l[$f]; echo $parts ? h(implode(' · ', $parts)) : '—'; } ?></td>
+      <td class="small"><?php if ($l) { $parts = []; foreach (result_fields() as $f => $lab) if ((int)$l[$f]) $parts[] = $lab . ': ' . (int)$l[$f]; echo $parts ? h(implode(' · ', $parts)) : '—'; } ?></td>
     </tr>
   <?php endforeach; ?>
   <?php if (!$shown): ?><tr><td colspan="4" class="muted">Todavía no hay días que mostrar.</td></tr><?php endif; ?>

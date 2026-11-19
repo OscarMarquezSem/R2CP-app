@@ -16,13 +16,13 @@ $office = $office ?? ($offices[0] ?? ['id' => 0, 'name' => 'Tu oficina', 'oh_mod
 
 $screens = ['dia' => 'Día del curso', 'bienvenida' => 'Bienvenida (primera vez)', 'descanso' => 'Día de descanso', 'capacitacion' => 'Capacitación interna', 'celebracion' => 'Al guardar el día (celebración)', 'graduacion' => 'Fin del curso (graduación)'];
 $screen = array_key_exists($_GET['s'] ?? '', $screens) ? $_GET['s'] : 'dia';
-$w = max(1, min(PROGRAM_WEEKS, (int)($_GET['w'] ?? 1)));
+$w = max(1, min(prog_weeks(), (int)($_GET['w'] ?? 1)));
 $d = max(1, min(PLAN_DAYS_PER_WEEK, (int)($_GET['d'] ?? 1)));
 
 // Navegación anterior / siguiente
 $idx = ($w - 1) * PLAN_DAYS_PER_WEEK + ($d - 1);
 $link = function (int $i) use ($office): string {
-    $i = max(0, min(PROGRAM_WEEKS * PLAN_DAYS_PER_WEEK - 1, $i));
+    $i = max(0, min(prog_weeks() * PLAN_DAYS_PER_WEEK - 1, $i));
     return 'admin_preview.php?office=' . (int)$office['id'] . '&w=' . (intdiv($i, PLAN_DAYS_PER_WEEK) + 1) . '&d=' . ($i % PLAN_DAYS_PER_WEEK + 1);
 };
 
@@ -30,14 +30,14 @@ ob_start(); ?>
 <div class="preview-bar">
   <form method="get">
     <label>Pantalla<select name="s"><?php foreach ($screens as $k => $v) echo '<option value="' . $k . '"' . ($k === $screen ? ' selected' : '') . '>' . h($v) . '</option>'; ?></select></label>
-    <label>Semana<select name="w"><?php for ($i = 1; $i <= PROGRAM_WEEKS; $i++) echo '<option' . ($i === $w ? ' selected' : '') . '>' . $i . '</option>'; ?></select></label>
+    <label>Semana<select name="w"><?php for ($i = 1; $i <= prog_weeks(); $i++) echo '<option' . ($i === $w ? ' selected' : '') . '>' . $i . '</option>'; ?></select></label>
     <label>Día<select name="d"><?php for ($i = 1; $i <= PLAN_DAYS_PER_WEEK; $i++) echo '<option' . ($i === $d ? ' selected' : '') . '>' . $i . '</option>'; ?></select></label>
     <label>Oficina<select name="office"><?php foreach ($offices as $o) echo '<option value="' . (int)$o['id'] . '"' . ((int)$o['id'] === (int)$office['id'] ? ' selected' : '') . '>' . h($o['name']) . '</option>'; ?></select></label>
     <button class="btn btn-sm">Ver</button>
   </form>
   <?php if ($screen === 'dia'): ?>
   <div class="pv-nav"><?php if ($idx > 0): ?><a href="<?= h($link($idx - 1)) ?>">← Día anterior</a><?php endif; ?>
-    <?php if ($idx < PROGRAM_WEEKS * PLAN_DAYS_PER_WEEK - 1): ?><a href="<?= h($link($idx + 1)) ?>">Día siguiente →</a><?php endif; ?>
+    <?php if ($idx < prog_weeks() * PLAN_DAYS_PER_WEEK - 1): ?><a href="<?= h($link($idx + 1)) ?>">Día siguiente →</a><?php endif; ?>
     <a href="admin_plan.php?w=<?= $w ?>">Editar esta semana</a></div>
   <?php endif; ?>
   <p class="small" style="margin:8px 0 0;color:#D5D9E3">Vista previa: nada se guarda. Las sesiones en la oficina muestran dónde iría su fecha y hora.</p>
@@ -61,7 +61,7 @@ $type = ['dia' => 'plan', 'descanso' => 'rest', 'capacitacion' => 'training', 'c
 // Día de arranque (llamadas) para esta posición del plan
 $arr = null;
 $k = 0;
-for ($ww = 1; $ww <= PROGRAM_WEEKS && $arr === null; $ww++) {
+for ($ww = 1; $ww <= prog_weeks() && $arr === null; $ww++) {
     for ($dd = 1; $dd <= PLAN_DAYS_PER_WEEK; $dd++) {
         if ($dd < (int)(plan_weeks()[$ww]['routine_start_day'] ?? 1)) continue;
         $k++;
@@ -71,10 +71,10 @@ for ($ww = 1; $ww <= PROGRAM_WEEKS && $arr === null; $ww++) {
 }
 $ctx = ['type' => $type, 'week' => $w, 'day_no' => $type === 'plan' ? $d : 0, 'days' => $type === 'plan' ? [$d] : [], 'date' => date('Y-m-d'), 'arranque' => $arr ?: null];
 $items = day_items($ctx, ['office' => $office, 'preview' => true]);
-$zero = array_fill_keys(array_keys(RESULT_FIELDS), 0);
+$zero = array_fill_keys(array_keys(result_fields()), 0);
 $stats = ['started' => true, 'finished' => false, 'elapsed' => ($w - 1) * 7 + $d - 1, 'week' => $w,
-    'week_assigned' => array_fill(1, PROGRAM_WEEKS, 0), 'week_done' => array_fill(1, PROGRAM_WEEKS, 0),
-    'totals' => $zero, 'week_totals' => array_fill(1, PROGRAM_WEEKS, $zero), 'done' => 0, 'assigned' => 0, 'pct' => 0,
+    'week_assigned' => array_fill(1, prog_weeks(), 0), 'week_done' => array_fill(1, prog_weeks(), 0),
+    'totals' => $zero, 'week_totals' => array_fill(1, prog_weeks(), $zero), 'done' => 0, 'assigned' => 0, 'pct' => 0,
     'workdays_elapsed' => 0, 'workdays_logged' => 0];
 $stats['evaluation'] = evaluation($fakeAdv, $stats, $office);
 

@@ -575,7 +575,7 @@ foreach ($ALIGN['metas'] as $w => $m) {
     foreach ($m as $f => $v) {
         if ((int)val("SELECT meta_$f FROM plan_weeks WHERE week_no = ?", [$w]) === (int)$v) continue;
         q("UPDATE plan_weeks SET meta_$f = ? WHERE week_no = ?", [(int)$v, $w]);
-        $changes[] = 'Semana ' . $w . ' · mínimo de ' . RESULT_FIELDS[$f] . ': ' . $v;
+        $changes[] = 'Semana ' . $w . ' · mínimo de ' . result_fields()[$f] . ': ' . $v;
     }
 }
 foreach ($ALIGN['remember'] as [$w, $line]) {

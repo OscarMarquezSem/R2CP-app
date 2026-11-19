@@ -21,6 +21,7 @@ if (!is_file(APP_ROOT . '/config.php')) {
 date_default_timezone_set(cfg('timezone', 'America/Cancun'));
 mb_internal_encoding('UTF-8');
 
+require_once __DIR__ . '/programs.php';
 require_once __DIR__ . '/engine.php';
 require_once __DIR__ . '/mailer.php';
 require_once __DIR__ . '/push.php';
@@ -127,6 +128,12 @@ function setting_defaults(): array
             ['key' => 'R2', 'title' => 'Anota cada contacto en tu agenda, la lista de tu celular o el CRM de tu oficina',
              'guide' => 'Con lo que te respondió y el siguiente paso. Tus registros detallados viven ahí; en Ariadna solo me cuentas cuántos fueron.'],
         ], JSON_UNESCAPED_UNICODE),
+        'routine_items_industrial' => json_encode([
+            ['key' => 'R1', 'title' => 'Haz tus 10 llamadas del Impulsor Industrial',
+             'guide' => 'Antes de hacer cualquier otra cosa, haz tus 10 llamadas. Usa el diálogo a conocidos de tu Impulsor Industrial y cierra siempre pidiendo un referido. Prospectar todos los días es lo que mantiene tu semana en movimiento. Súmalas en «Llamadas del Impulsor».'],
+            ['key' => 'R2', 'title' => 'Anota tus llamadas en tu registro con el siguiente paso de cada contacto',
+             'guide' => 'Si hoy hiciste un recorrido o una visita, anota también lo que viste. Tus registros detallados viven en tu Mi Mapa Industrial; en Edalo solo me cuentas cuántos fueron.'],
+        ], JSON_UNESCAPED_UNICODE),
     ];
 }
 
@@ -160,7 +167,8 @@ function ensure_schema(): void
     if ($done) return;
     $done = true;
     $v = (int)setting('schema_version');
-    if ($v >= 3) return;
+    if ($v >= 4) return;
+    if ($v >= 3) { ensure_schema_v4(); return; }
     if ($v < 2) db()->exec("CREATE TABLE IF NOT EXISTS advisor_events (
         id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
         advisor_id INT UNSIGNED NOT NULL,
@@ -191,6 +199,33 @@ function ensure_schema(): void
   CONSTRAINT fk_reto_adv FOREIGN KEY (advisor_id) REFERENCES advisors(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
     set_setting('schema_version', '3');
+    ensure_schema_v4();
+}
+
+/** Versión 4: dos programas (Ariadna · Residencial y Edalo · Comercial e Industrial). */
+function ensure_schema_v4(): void
+{
+    $has = fn(string $t, string $c): bool => (bool)all("SHOW COLUMNS FROM `$t` LIKE '$c'");
+    if (!$has('offices', 'programs')) db()->exec("ALTER TABLE offices ADD COLUMN programs VARCHAR(40) NOT NULL DEFAULT 'residencial'");
+    if (!$has('advisors', 'program')) db()->exec("ALTER TABLE advisors ADD COLUMN program VARCHAR(20) NOT NULL DEFAULT 'residencial'");
+    foreach (['ind_cap_done' => 'TINYINT(1) NOT NULL DEFAULT 0', 'ind_cap_date' => 'DATE NULL', 'ind_oferta_done' => 'TINYINT(1) NOT NULL DEFAULT 0',
+              'ind_oferta_date' => 'DATE NULL', 'ind_inq_done' => 'TINYINT(1) NOT NULL DEFAULT 0', 'ind_inq_date' => 'DATE NULL',
+              'know_props' => 'TINYINT NULL', 'know_zones' => 'TINYINT NULL'] as $c => $def) {
+        if (!$has('advisors', $c)) db()->exec("ALTER TABLE advisors ADD COLUMN $c $def");
+    }
+    foreach (['llamadas', 'recorridos', 'fichas', 'cadenas', 'leads', 'piezas'] as $c) {
+        if (!$has('daily_logs', $c)) db()->exec("ALTER TABLE daily_logs ADD COLUMN $c INT NOT NULL DEFAULT 0");
+        if (!$has('plan_weeks', "meta_$c")) db()->exec("ALTER TABLE plan_weeks ADD COLUMN meta_$c INT NOT NULL DEFAULT 0");
+    }
+    if (!$has('plan_activities', 'program')) {
+        db()->exec("ALTER TABLE plan_activities ADD COLUMN program VARCHAR(20) NOT NULL DEFAULT 'residencial'");
+        db()->exec('ALTER TABLE plan_activities ADD KEY idx_prog (program, week_no, day_no)');
+    }
+    if (!$has('plan_weeks', 'program')) {
+        db()->exec("ALTER TABLE plan_weeks ADD COLUMN program VARCHAR(20) NOT NULL DEFAULT 'residencial' FIRST");
+        db()->exec('ALTER TABLE plan_weeks DROP PRIMARY KEY, ADD PRIMARY KEY (program, week_no)');
+    }
+    set_setting('schema_version', '4');
 }
 
 /** Registra un movimiento del asesor (baja, reactivación, decisión del punto de control). */
@@ -416,7 +451,8 @@ function wa_phone(string $phone): string
 
 function advisor_link(array $a): string
 {
-    return base_url('hoy.php?t=' . $a['token']);
+    $b = prog_base_url(advisor_program($a));
+    return ($b !== '' ? $b . '/' : base_url()) . 'hoy.php?t=' . $a['token'];
 }
 
 function wa_link(array $a, array $office): string
@@ -426,4 +462,9 @@ function wa_link(array $a, array $office): string
         . "Ábrelo en tu celular y agrégalo a tu pantalla de inicio. Cada día te dice qué hacer y registras tu avance en menos de 2 minutos.\n\n"
         . "Sigue el hilo. 🧵";
     return 'https://wa.me/' . wa_phone($a['phone']) . '?text=' . rawurlencode($msg);
+}
+
+// La base de datos se pone al día sola (columnas y tablas nuevas) la primera vez que se usa una versión nueva.
+if (!empty($GLOBALS['CONFIG']) && basename($_SERVER['SCRIPT_NAME'] ?? '') !== 'install.php') {
+    try { ensure_schema(); } catch (Throwable $e) { /* la instalación aún no termina */ }
 }

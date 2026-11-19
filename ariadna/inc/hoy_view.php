@@ -81,7 +81,7 @@ function render_hoy(array $V): void
     echo '<a id="hoy"></a>';
     if ($ctx['type'] !== 'rest') echo ariadna_bubble(ariadna_message($ctx, $items, $office));
 
-    $programPct = (int)round(min(PROGRAM_DAYS, max(0, $stats['elapsed'] + 1)) / PROGRAM_DAYS * 100);
+    $programPct = (int)round(min((prog_weeks() * 7), max(0, $stats['elapsed'] + 1)) / (prog_weeks() * 7) * 100);
     $weekPct = !empty($stats['week_assigned'][$week]) ? (int)round(min(1, $stats['week_done'][$week] / $stats['week_assigned'][$week]) * 100) : 0;
     echo '<section class="progress card"><div class="prog-row"><span>Tu semana</span><b>' . $weekPct . '%</b></div>' . bar($weekPct)
         . '<div class="prog-row"><span>Fast Track Residencial · Semana ' . (int)$week . ' de 5</span><b>' . $programPct . '%</b></div>' . bar($programPct, 'gold') . '</section>';
@@ -116,7 +116,7 @@ function render_hoy(array $V): void
     echo '</ol>';
 
     echo '<h2 class="sec">¿Cómo te fue hoy?</h2><div class="card nums">';
-    foreach (RESULT_FIELDS as $f => $label) {
+    foreach (result_fields() as $f => $label) {
         $goal = '';
         if ($f === 'contactos') {
             $goal = !empty($ctx['arranque']) ? 'Meta de arranque: ' . setting('arranque_llamadas') . ' llamadas' : 'Tu meta: ' . goal_for($goals, $week, 'contactos') . ' al día';
@@ -280,7 +280,7 @@ function goals_block(array $V, int $week): void
 {
     $goals = $V['goals'];
     echo '<div class="goals" data-goals>';
-    foreach (RESULT_FIELDS as $f => $label) {
+    foreach (result_fields() as $f => $label) {
         $min = goal_minimum($week, $f);
         $val = goal_for($goals, $week, $f);
         echo '<div class="goal-row"><div><span class="num-label">' . h($f === 'contactos' ? 'Contactos al día' : $label) . '</span><span class="num-hint">Mínimo del programa: ' . $min . '</span></div>'

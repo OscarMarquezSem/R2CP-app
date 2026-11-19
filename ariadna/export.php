@@ -17,7 +17,7 @@ if ($type === 'oficinas') {
     fputcsv($out, ['Oficina', 'Ciudad', 'Asesores activos', 'Verde', 'Amarillo', 'Rojo', '% actividades (promedio)', 'Contactos', 'Tratos directos', 'Propiedades analizadas', 'Propiedades promovidas', 'Citas', 'Captaciones', 'Evaluación promedio']);
     foreach ($offices as $o) {
         $rows = office_advisors_stats($o);
-        $c = ['verde' => 0, 'amarillo' => 0, 'rojo' => 0]; $t = array_fill_keys(array_keys(RESULT_FIELDS), 0); $pct = 0; $sc = 0;
+        $c = ['verde' => 0, 'amarillo' => 0, 'rojo' => 0]; $t = array_fill_keys(array_keys(result_fields()), 0); $pct = 0; $sc = 0;
         foreach ($rows as $r) { $c[$r['stats']['status']['color']]++; foreach ($t as $f => $_) $t[$f] += $r['stats']['totals'][$f]; $pct += $r['stats']['pct']; $sc += $r['stats']['evaluation']['total']; }
         $n = count($rows);
         fputcsv($out, array_merge([$o['name'], $o['city'], $n, $c['verde'], $c['amarillo'], $c['rojo'], $n ? round($pct / $n) : 0], array_values($t), [$n ? round($sc / $n) : 0]));
