@@ -90,11 +90,19 @@
 4. Borra `actualizar_plan.php`, la carpeta `temporal` y el zip.
 5. En **Oficinas**, marca Edalo en las oficinas que lo van a usar.
 
+## Actualización 8 (`ariadna_actualizacion_8.zip`)
+
+**Qué trae:**
+1. **Mensaje de bienvenida por WhatsApp nuevo**, uno por programa (Ariadna y Edalo), editable en **Ajustes** con {nombre}, {oficina} y {enlace}. Ya no lleva el emoji del hilo, que WhatsApp Web mostraba como «�».
+2. **Edalo:** en el detalle del asesor, los Retos ya no dicen «valen 10 puntos».
+3. **Correos marcados en español:** Gmail ya no ofrece traducirlos.
+
+**Archivos (4):** `admin_ajustes.php` y `asesor.php` sueltos en la carpeta de Ariadna; `app.php` y `mailer.php` dentro de `inc`.
+
+**Cómo aplicarla:** sube el zip a la carpeta de Ariadna → Extract con nombre de carpeta `ariadna`, destino `public_html` y ☑ «Overwrite existing files». No lleva `actualizar_plan.php` ni cambios en `config.php`.
+
 ## Próxima actualización (se junta con lo que salga de la prueba)
 
 | # | Cambio | Archivo |
 |---|---|---|
-| 6 | Edalo: en el detalle del asesor, los Retos ya no dicen «valen 10 puntos» (en Edalo apoyan la calificación de Conocimiento). | Listo: `asesor.php` |
-| 5 | Correos marcados en español (Gmail ya no ofrece «traducir del inglés»). | Listo: `inc/mailer.php` |
-| 3 | Mensaje de bienvenida por WhatsApp editable en Ajustes ({nombre}, {oficina}, {enlace}), con el texto nuevo propuesto. | Pendiente de visto bueno del texto |
 | 1 | Preguntas del Reto para los 3 videos cortos (conceptos básicos, opinión de valor, perfilamiento), cuando estén grabados y transcritos. | Plan (se agregan desde el panel) |

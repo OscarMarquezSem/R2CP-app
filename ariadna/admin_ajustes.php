@@ -41,6 +41,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $routine[] = ['key' => 'R' . (count($routine) + 1), 'title' => trim((string)$r['title']), 'guide' => trim((string)$r['guide'])];
     }
     set_setting('routine_items', json_encode($routine, JSON_UNESCAPED_UNICODE));
+    foreach (['residencial', 'industrial'] as $pg) {
+        $txt = str_replace("\r\n", "\n", trim((string)post('wa_welcome_' . $pg)));
+        set_setting('wa_welcome_' . $pg, $txt === WA_WELCOME_DEFAULTS[$pg] ? '' : mb_substr($txt, 0, 2000));
+    }
     flash('Ajustes guardados.');
     redirect('admin_ajustes.php');
 }
@@ -108,6 +112,12 @@ page_start('Ajustes', ['nav' => $u, 'active' => 'ajustes']);
       <label>Guía<textarea name="routine[<?= $i ?>][guide]" rows="2"><?= h($r['guide']) ?></textarea></label>
     </div>
   <?php endforeach; ?>
+</div>
+<div class="card">
+  <h2>Mensaje de bienvenida por WhatsApp</h2>
+  <p class="small muted">Es el mensaje que se abre con el botón «Enviar enlace por WhatsApp». Usa {nombre} para el nombre del asesor, {oficina} para su oficina y {enlace} para su enlace personal. Si lo dejas vacío, se usa el texto original.</p>
+  <label>Ariadna · Fast Track Residencial<textarea name="wa_welcome_residencial" rows="11"><?= h(wa_welcome_template('residencial')) ?></textarea></label>
+  <label>Edalo · Fast Track Industrial<textarea name="wa_welcome_industrial" rows="11"><?= h(wa_welcome_template('industrial')) ?></textarea></label>
 </div>
 <div class="savebar"><button class="btn btn-main btn-block btn-xl">Guardar ajustes</button></div>
 </form>

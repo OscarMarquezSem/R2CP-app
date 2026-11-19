@@ -455,12 +455,23 @@ function advisor_link(array $a): string
     return ($b !== '' ? $b . '/' : base_url()) . 'hoy.php?t=' . $a['token'];
 }
 
+const WA_WELCOME_DEFAULTS = [
+    'residencial' => "Hola {nombre}, soy Ariadna, tu Team Leader del curso Fast Track Residencial en {oficina}. Te doy la bienvenida.\n\nEste es tu enlace personal (no lo compartas):\n{enlace}\n\n1. Ábrelo en tu celular.\n2. Agrégalo a tu pantalla de inicio.\n3. Cada día te digo qué te toca y registras tu avance en menos de 2 minutos.\n\nSigue el hilo.",
+    'industrial'  => "Hola {nombre}, soy Edalo, tu Team Leader del curso Fast Track Industrial en {oficina}. Te doy la bienvenida.\n\nEste es tu enlace personal (no lo compartas):\n{enlace}\n\n1. Ábrelo en tu celular.\n2. Agrégalo a tu pantalla de inicio.\n3. Cada día te digo qué te toca, empezando por tus 10 llamadas, y registras tu avance en menos de 2 minutos.\n\nConstruye con método.",
+];
+
+/** Texto de bienvenida por WhatsApp del programa (editable en Ajustes). */
+function wa_welcome_template(string $prog): string
+{
+    $t = trim((string)setting('wa_welcome_' . $prog));
+    return $t !== '' ? $t : (WA_WELCOME_DEFAULTS[$prog] ?? WA_WELCOME_DEFAULTS['residencial']);
+}
+
 function wa_link(array $a, array $office): string
 {
-    $msg = "Hola " . first_name($a['name']) . ", te doy la bienvenida a Ariadna, tu acompañamiento de arranque en " . $office['name'] . ".\n\n"
-        . "Este es tu enlace personal (no lo compartas):\n" . advisor_link($a) . "\n\n"
-        . "Ábrelo en tu celular y agrégalo a tu pantalla de inicio. Cada día te dice qué hacer y registras tu avance en menos de 2 minutos.\n\n"
-        . "Sigue el hilo. 🧵";
+    $tpl = wa_welcome_template(advisor_program($a));
+    if (strpos($tpl, '{enlace}') === false) $tpl .= "\n\n{enlace}";   // el enlace nunca puede faltar
+    $msg = strtr($tpl, ['{nombre}' => first_name($a['name']), '{oficina}' => $office['name'], '{enlace}' => advisor_link($a)]);
     return 'https://wa.me/' . wa_phone($a['phone']) . '?text=' . rawurlencode($msg);
 }
 
