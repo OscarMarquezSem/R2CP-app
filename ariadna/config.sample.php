@@ -33,11 +33,10 @@ return [
         'from_name' => 'Ariadna · R²CP Elite',
     ],
 
-    // Edalo (Fast Track Industrial): su propia dirección y su propio buzón.
+    // Edalo (Fast Track Industrial): su dirección y su remitente.
+    // Envía con el mismo buzón de Ariadna; solo cambia el remitente (edalo@ es un alias de ariadna@).
     'edalo_url' => 'https://edalo.oscarmarquez.com',
     'mail_edalo' => [
-        'user'      => 'edalo@oscarmarquez.com',
-        'pass'      => 'CONTRASEÑA-DEL-BUZÓN-DE-EDALO',
         'from'      => 'edalo@oscarmarquez.com',
         'from_name' => 'Edalo · R²CP Elite',
     ],

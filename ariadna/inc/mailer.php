@@ -39,16 +39,17 @@ function mail_log_file(array $to, array $cc, string $subject, string $html): voi
 }
 
 /**
- * Datos del remitente según el programa activo. Edalo usa 'mail_edalo' de config.php
- * si está configurado (con su propio usuario); si no, usa el remitente general 'mail'.
+ * Datos del remitente según el programa activo. Edalo usa 'mail_edalo' de config.php si existe.
+ * Lo que no ponga ahí (servidor, usuario, contraseña) lo toma de 'mail': así Edalo puede enviar
+ * con el mismo buzón de Ariadna y solo cambiar el remitente (un alias como edalo@).
  */
 function mail_cfg(): array
 {
     $base = (array)cfg('mail', []);
     $key = P()['mail_key'] ?? 'mail';
     if ($key !== 'mail') {
-        $own = (array)cfg($key, []);
-        if (!empty($own['user'])) return array_merge($base, $own);
+        $own = array_filter((array)cfg($key, []), fn($v) => $v !== '' && $v !== null);
+        if ($own) return array_merge($base, $own);
     }
     return $base;
 }

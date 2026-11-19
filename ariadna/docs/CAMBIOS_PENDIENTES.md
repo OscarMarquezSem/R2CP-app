@@ -85,7 +85,7 @@
 
 **Cómo aplicarla:**
 1. Sube y mueve **todos** los archivos antes de abrir el paso 3.
-2. Agrega a `config.php` la dirección y el correo de Edalo.
+2. Agrega a `config.php` la dirección de Edalo y su remitente (`edalo@` es un alias de `ariadna@`: envía con el mismo buzón, sin otra contraseña).
 3. Abre `actualizar_plan.php` como administrador. Debe decir «Plan de Edalo cargado: 4 semanas, 70 actividades y 12 videos con su Reto».
 4. Borra `actualizar_plan.php`, la carpeta `temporal` y el zip.
 5. En **Oficinas**, marca Edalo en las oficinas que lo van a usar.

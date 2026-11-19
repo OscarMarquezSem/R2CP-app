@@ -771,7 +771,7 @@ if (val('SELECT v FROM settings WHERE k = ?', ['routine_items_industrial']) === 
 $log[] = 'Base de datos en la versión ' . h((string)setting('schema_version')) . '.';
 $log[] = (string)cfg('edalo_url', '') !== '' ? 'Dirección de Edalo: ' . h((string)cfg('edalo_url')) . '.'
     : 'Falta agregar la dirección de Edalo en config.php (edalo_url). Mientras tanto, los enlaces usan la de Ariadna.';
-$log[] = !empty(cfg('mail_edalo.user')) ? 'Correo de Edalo: ' . h((string)cfg('mail_edalo.user')) . '.'
+$log[] = !empty(cfg('mail_edalo.from')) ? 'Correo de Edalo: ' . h((string)cfg('mail_edalo.from')) . '.'
     : 'Falta agregar el correo de Edalo en config.php (mail_edalo). Mientras tanto, Edalo envía desde el correo de Ariadna.';
 
 page_start('Actualización 7', ['nav' => $u]);
