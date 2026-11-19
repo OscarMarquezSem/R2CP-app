@@ -6,7 +6,7 @@
 declare(strict_types=1);
 
 define('APP_ROOT', dirname(__DIR__));
-define('APP_VERSION', '1.3.0');
+define('APP_VERSION', '1.4.0');
 
 if (!is_file(APP_ROOT . '/config.php')) {
     if (PHP_SAPI !== 'cli' && basename($_SERVER['SCRIPT_NAME'] ?? '') !== 'install.php') {

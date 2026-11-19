@@ -107,4 +107,5 @@
 
 | # | Cambio | Archivo |
 |---|---|---|
+| 7 | Plan: los botones Ariadna · Edalo se ven como botones, separados de las semanas (la versión de la app sube a 1.4.0 para que los navegadores carguen los estilos nuevos). Texto de ayuda propio para Edalo. | Listo: `admin_plan.php`, `inc/app.php`, `sw.js` |
 | 1 | Preguntas del Reto para los 3 videos cortos (conceptos básicos, opinión de valor, perfilamiento), cuando estén grabados y transcritos. | Plan (se agregan desde el panel) |

@@ -86,9 +86,13 @@ $actFields = function (string $n, array $a) use ($KINDS): void { ?>
 ?>
 <div class="page-head"><div><span class="eyebrow">Administrador · <?= h(P()['name']) ?></span><h1>Plan del curso <?= h(P()['course']) ?></h1></div>
   <div class="actions"><a class="btn" href="admin_preview.php?prog=<?= h($pg) ?>&amp;w=<?= $w ?>&amp;d=1">Ver esta semana como asesor</a></div></div>
-<nav class="prog-tabs" aria-label="Programa"><?php foreach (PROGRAMS as $pk => $pd): ?><a class="<?= $pk === $pg ? 'on' : '' ?>" href="admin_plan.php?prog=<?= h($pk) ?>"><?= h($pd['name'] . ' · ' . $pd['area']) ?></a><?php endforeach; ?></nav>
+<nav class="prog-tabs" aria-label="Programa" style="margin-bottom:18px"><?php foreach (PROGRAMS as $pk => $pd): ?><a class="<?= $pk === $pg ? 'on' : '' ?>" href="admin_plan.php?prog=<?= h($pk) ?>"><?= h($pd['name'] . ' · ' . $pd['area']) ?></a><?php endforeach; ?></nav>
 <div class="tabs"><?php for ($i = 1; $i <= prog_weeks(); $i++): ?><a class="<?= $i === $w ? 'on' : '' ?>" href="admin_plan.php?prog=<?= h($pg) ?>&amp;w=<?= $i ?>">Semana <?= $i ?></a><?php endfor; ?></div>
+<?php if ($pg === 'industrial'): ?>
+<p class="small muted">Los días son días hábiles de la semana personal de cada asesor (Día 1 a Día 5). Las 10 llamadas diarias del Impulsor Industrial se agregan solas. Tipos: <b>Video del curso</b> se reproduce dentro de Edalo; si no tiene enlace, el asesor ve «Este video estará listo muy pronto». <b>Cita con tu Team Leader</b> la acuerdan el asesor y su TL, sin fecha de la oficina. Las metas de cada semana se ponen abajo y son las mismas para todos los asesores.</p>
+<?php else: ?>
 <p class="small muted">Los días son días hábiles de la semana personal de cada asesor (Día 1 a Día 5). La rutina diaria (llamadas y registro) se agrega sola; se edita en Ajustes. Tipos: <b>Sesión en tu oficina</b> la da el TL o el gerente y la oficina le pone fecha y hora; <b>Video del curso</b> se reproduce dentro de Ariadna; si no tiene enlace, el asesor ve «Este video estará listo muy pronto». Escribe {OH} donde deba decir «Open House», «Recorrido en vivo» o «Jornada de opinión de valor» según la oficina, y {ASISTENTES} para «asistentes», «interesados» o «propietarios interesados». Lo que va entre {jornada} y {/jornada} solo lo ven las oficinas con Jornada; lo que va entre {evento} y {/evento}, solo las de Open House o Recorrido.</p>
+<?php endif; ?>
 
 <form method="post" class="form">
 <?= csrf_field() ?><input type="hidden" name="w" value="<?= $w ?>"><input type="hidden" name="prog" value="<?= h($pg) ?>">
