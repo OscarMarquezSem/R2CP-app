@@ -18,8 +18,9 @@ function page_start(string $title, array $opt = []): void
 <meta name="robots" content="noindex, nofollow">
 <title><?= h($title) ?> · <?= h($opt['brand'] ?? 'Ariadna') ?></title>
 <link rel="manifest" href="<?= h($manifest) ?>">
-<link rel="icon" type="image/png" href="assets/icon-192.png">
-<link rel="apple-touch-icon" href="assets/icon-192.png">
+<?php $ico = ($opt['brand'] ?? '') === 'Edalo' ? 'assets/edalo-icon-192.png' : 'assets/icon-192.png'; ?>
+<link rel="icon" type="image/png" href="<?= $ico ?>">
+<link rel="apple-touch-icon" href="<?= $ico ?>">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="<?= h($opt['brand'] ?? 'Ariadna') ?>">
 <link rel="stylesheet" href="assets/style.css?v=<?= APP_VERSION ?>">

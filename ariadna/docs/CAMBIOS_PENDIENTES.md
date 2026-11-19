@@ -78,10 +78,10 @@
 5. **Punto de control (Ariadna y Edalo):** al cerrar la Semana 3, el asesor ve en su pantalla qué cumplió y qué le faltó, sin detenerlo. La oficina recibe un recordatorio diario hasta registrar «continúa» o «no continúa».
 6. **Correcciones:** en «Hoy vienen», el botón «Aplicar Reto» ya no sale en la bienvenida.
 
-**Archivos (27):**
+**Archivos (30):**
 - Sueltos en la carpeta de Ariadna: `actualizar_plan.php` (de un solo uso), `admin.php`, `admin_ajustes.php`, `admin_oficina.php`, `admin_plan.php`, `admin_preview.php`, `asesor.php`, `export.php`, `hoy.php`, `manifest.php`, `oficina.php`, `reto.php`, `sw.js`.
 - Dentro de `inc`: `app.php`, `cron_tasks.php`, `engine.php`, `hoy_view.php`, `layout.php`, `mailer.php`, `programs.php` (nuevo), `push.php`.
-- Dentro de `assets`: `style.css`, `edalo.jpg`, `edalo-avatar.jpg`, `edalo.svg`, `edalo-icon-192.png` y `edalo-icon-512.png` (nuevos).
+- Dentro de `assets`: `style.css`, `edalo.jpg`, `edalo-avatar.jpg`, `edalo-celebra.jpg`, `edalo-descanso.jpg`, `edalo-graduacion.jpg`, `edalo.svg`, `edalo-icon-192.png` y `edalo-icon-512.png` (nuevos).
 
 **Cómo aplicarla:**
 1. Sube y mueve **todos** los archivos antes de abrir el paso 3.
