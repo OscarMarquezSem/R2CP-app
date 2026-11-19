@@ -6,7 +6,7 @@ declare(strict_types=1);
 
 function ariadna_bubble(string $html): string
 {
-    return '<div class="bubble"><img class="bubble-av" style="width:48px;height:48px;border-radius:50%;object-fit:cover;flex:0 0 48px" src="assets/ariadna-avatar.jpg" alt="" width="48" height="48"><p><b>Ariadna:</b> ' . $html . '</p></div>';
+    return '<div class="bubble"><img class="bubble-av" style="width:48px;height:48px;border-radius:50%;object-fit:cover;flex:0 0 48px" src="' . h(prog_img('avatar')) . '" alt="" width="48" height="48"><p><b>' . h(P()['name']) . ':</b> ' . $html . '</p></div>';
 }
 
 function advisor_header(string $dateLabel): void
@@ -19,15 +19,15 @@ function ariadna_message(array $ctx, array $items, ?array $office): string
 {
     if ($ctx['type'] === 'training') return 'Hoy te toca tu capacitación interna en la oficina. Pon mucha atención a sus políticas y documentos. Mañana seguimos juntos.';
     if ($ctx['type'] === 'catchup') return 'Hoy es un buen día para ponerte al corriente con lo que te quedó pendiente de la semana.';
-    foreach ($items as $it) if ($it['kind'] === 'tl' && strpos($it['title'], 'Reto ') === 0) return 'Hoy tienes tu ' . h(str_replace(' con tu Team Leader', '', $it['title'])) . ' con tu Team Leader. Ve el video con calma y después ve a tu oficina: te va a hacer 5 preguntas. No es para calificarte, es para asegurarnos de que agarraste el hilo.';
-    foreach ($items as $it) if ($it['kind'] === 'tl') return 'Hoy te espera tu Team Leader en la oficina. Yo te acompaño todos los días, pero tu equipo está allá: no faltes. Antes, tus contactos del día.';
-    foreach ($items as $it) if ($it['kind'] === 'oficina' && $it['session']) return 'Hoy tienes un tema con tu oficina. Lleva libreta y pregunta todo lo que no te quede claro. Antes, tus contactos del día.';
+    foreach ($items as $it) if ($it['kind'] === 'tl' && strpos($it['title'], 'Reto ') === 0) return 'Hoy tienes tu ' . h(str_replace(' con tu Team Leader', '', $it['title'])) . ' con tu Team Leader. ' . T('msg_reto');
+    foreach ($items as $it) if ($it['kind'] === 'tl') return 'Hoy te espera tu Team Leader en la oficina. Yo te acompaño todos los días, pero tu equipo está allá: no faltes. ' . T('msg_first');
+    foreach ($items as $it) if ($it['kind'] === 'oficina' && $it['session']) return 'Hoy tienes un tema con tu oficina. Lleva libreta y pregunta todo lo que no te quede claro. ' . T('msg_first');
     if (!empty($ctx['arranque'])) return 'Hoy tus ' . h((string)setting('arranque_llamadas')) . ' llamadas van primero. Cada llamada te quita un poco de miedo: haz de esto un hábito.';
     if (($ctx['days'][0] ?? 0) === 1) {
         $pw = plan_weeks()[$ctx['week']] ?? null;
-        return 'Empezamos tu Semana ' . (int)$ctx['week'] . ($pw ? ': ' . h(mb_strtolower(oh_text($pw['title'], $office))) : '') . '. Primero agenda tus horarios y pon tus metas; luego sigue la lista conmigo.';
+        return 'Empezamos tu Semana ' . (int)$ctx['week'] . ($pw ? ': ' . h(mb_strtolower(oh_text($pw['title'], $office))) : '') . '. ' . T('msg_week');
     }
-    return 'Empieza por tus contactos del día y luego sigue la lista conmigo.';
+    return T('msg_default');
 }
 
 /**
@@ -48,13 +48,13 @@ function render_hoy(array $V): void
 
     echo '<header class="hero"><h1>' . (!empty($V['ayer_offer']) ? '¡Buen día, ' . h($name) . '!' : 'Hola, ' . h($name)) . '</h1>';
     if (!$stats['started']) echo '<p class="hero-sub">Tu curso empieza el ' . h(fecha_larga($adv['start_date'])) . '.</p>';
-    elseif ($stats['finished'] && empty($V['ayer_mode'])) echo '<p class="hero-sub">Terminaste el curso Fast Track Residencial.</p>';
+    elseif ($stats['finished'] && empty($V['ayer_mode'])) echo '<p class="hero-sub">Terminaste el curso ' . h(P()['course']) . '.</p>';
     elseif (!empty($V['ayer_mode'])) echo '<p class="hero-sub">Registrando ' . h(fecha_larga($V['date'])) . ' · Semana ' . (int)$week . ' · ' . h(ctx_label($ctx)) . '</p>';
-    else echo '<p class="hero-sub">Semana ' . (int)$week . ' · ' . h(ctx_label($ctx)) . '</p>';
+    else echo '<p class="hero-sub">' . (!empty($ctx['repeat']) ? 'Repites tu Semana ' : 'Semana ') . (int)$week . ' · ' . h(ctx_label($ctx)) . '</p>';
     echo '<svg class="thread" viewBox="0 0 400 30" preserveAspectRatio="none" aria-hidden="true"><path d="M0 20 C 60 0, 110 30, 170 14 S 280 4, 330 18 S 390 22, 400 10" fill="none" stroke="#B89860" stroke-width="2"/></svg></header>';
 
     if (!empty($V['celebrate'])) {
-        echo '<div class="card celebrate"><img style="display:block;width:70%;max-width:280px;height:auto;border-radius:50%;margin:0 auto 10px" src="assets/ariadna-celebra.jpg" alt="Ariadna celebra contigo" width="600" height="600"><p>' . h($V['celebrate']) . '</p></div>';
+        echo '<div class="card celebrate"><img style="display:block;width:70%;max-width:280px;height:auto;border-radius:50%;margin:0 auto 10px" src="' . h(prog_img('celebra')) . '" alt="' . h(T('celebrate_alt')) . '" width="600" height="600"><p>' . h($V['celebrate']) . '</p></div>';
     }
     if (!empty($V['ayer_offer'])) {
         $o = $V['ayer_offer'];
@@ -68,27 +68,28 @@ function render_hoy(array $V): void
     if (!$stats['started']) { echo '<div class="card"><p>Cuando llegue tu primer día, aquí verás tus actividades. Guarda este enlace en tu pantalla de inicio.</p></div>'; install_hint(); return; }
     if ($stats['finished'] && empty($V['ayer_mode'])) {
         $ev = $stats['evaluation'];
-        echo '<div class="card"><img class="welcome-img" style="display:block;width:100%;max-width:100%;height:auto" src="assets/ariadna-graduacion.jpg" alt="Ariadna te felicita por terminar el curso" width="600" height="600">'
-            . ariadna_bubble('<b>¡Saliste del laberinto!</b> Terminaste el curso Fast Track Residencial. Estoy muy orgullosa de ti.')
+        echo '<div class="card"><img class="welcome-img" style="display:block;width:100%;max-width:100%;height:auto" src="' . h(prog_img('graduacion')) . '" alt="' . h(P()['name']) . ' te felicita por terminar el curso" width="600" height="600">'
+            . ariadna_bubble('<b>' . h(T('grad_title')) . '</b> ' . h(T('grad_text')))
             . '<h2>Tu evaluación final: ' . (int)$ev['total'] . ' puntos</h2><p class="lead">' . h($ev['level_text']) . '</p>';
         echo '<div class="tbl-wrap">';
         eval_table($ev);
         echo '</div>';
-        echo '<p>Gracias por seguir el hilo. Tu plan de los próximos 30 días lo revisas con tu oficina.</p></div>';
+        echo '<p>' . h(T('grad_end')) . '</p></div>';
         return;
     }
 
     echo '<a id="hoy"></a>';
     if ($ctx['type'] !== 'rest') echo ariadna_bubble(ariadna_message($ctx, $items, $office));
+    if (!empty($stats['filtro']) && $stats['filtro']['repeating'] && !$preview) filtro_box($stats['filtro']);
 
     $pd = max(1, (int)($stats['program_days'] ?? 35)); $programPct = (int)round(min($pd, max(0, $stats['elapsed'] + 1)) / $pd * 100);
     $weekPct = !empty($stats['week_assigned'][$week]) ? (int)round(min(1, $stats['week_done'][$week] / $stats['week_assigned'][$week]) * 100) : 0;
     echo '<section class="progress card"><div class="prog-row"><span>Tu semana</span><b>' . $weekPct . '%</b></div>' . bar($weekPct)
-        . '<div class="prog-row"><span>Fast Track Residencial · Semana ' . (int)$week . ' de 5</span><b>' . $programPct . '%</b></div>' . bar($programPct, 'gold') . '</section>';
+        . '<div class="prog-row"><span>' . h(P()['course']) . ' · Semana ' . (int)$week . ' de ' . prog_weeks() . '</span><b>' . $programPct . '%</b></div>' . bar($programPct, 'gold') . '</section>';
 
     if (!$preview) {
         echo '<div class="card push-card" id="pushCard" hidden><p><b>¿Te aviso por aquí?</b> Te mando un aviso en la mañana con lo que te toca y otro a las 8 pm solo si no me has contado cómo te fue.</p>'
-            . '<button type="button" class="btn btn-block" id="pushBtn" data-key="' . h(vapid_public_key()) . '" data-t="' . h($t) . '">Activar avisos de Ariadna</button></div>';
+            . '<button type="button" class="btn btn-block" id="pushBtn" data-key="' . h(vapid_public_key()) . '" data-t="' . h($t) . '">' . h(T('push_btn')) . '</button></div>';
     }
 
     echo '<form method="post" enctype="multipart/form-data" class="dayform" id="dayform"' . ($preview ? ' data-preview="1"' : '') . '>';
@@ -96,17 +97,18 @@ function render_hoy(array $V): void
     if (!empty($V['ayer_mode'])) echo '<input type="hidden" name="d" value="ayer">';
 
     if ($ctx['type'] === 'rest') {
-        echo '<div class="card rest"><img class="welcome-img" style="display:block;width:100%;max-width:100%;height:auto" src="assets/ariadna-descanso.jpg" alt="Ariadna descansando con un café" width="600" height="600"><h2>Hoy descansas, pero no sueltes el hilo.</h2><p>Si conoces a alguien que quiera comprar, vender o rentar, anótalo aquí.</p>';
-        num_field('contactos', 'Contactos', (int)($log['contactos'] ?? 0), '¿A cuántas personas detectaste?', '');
-        foreach (['tratos', 'analizadas', 'promovidas', 'citas', 'captaciones'] as $f) echo '<input type="hidden" name="n[' . $f . ']" value="' . (int)($log[$f] ?? 0) . '">';
-        echo '<label class="lbl">¿Quién es y qué busca? (opcional)<textarea name="note" rows="3" placeholder="Ej. Mi primo quiere vender su casa en la Región 15">' . h($log['note'] ?? '') . '</textarea></label>';
+        echo '<div class="card rest"><img class="welcome-img" style="display:block;width:100%;max-width:100%;height:auto" src="' . h(prog_img('descanso')) . '" alt="' . h(P()['name']) . ' descansando" width="600" height="600"><h2>' . h(T('rest_title')) . '</h2><p>' . h(T('rest_text')) . '</p>';
+        $rf = T('rest_field');
+        num_field($rf, result_fields()[$rf], (int)($log[$rf] ?? 0), T('rest_hint'), '');
+        foreach (array_keys(result_fields()) as $f) if ($f !== $rf) echo '<input type="hidden" name="n[' . $f . ']" value="' . (int)($log[$f] ?? 0) . '">';
+        echo '<label class="lbl">¿Quién es y qué busca? (opcional)<textarea name="note" rows="3" placeholder="' . h(T('rest_ph')) . '">' . h($log['note'] ?? '') . '</textarea></label>';
         echo '<button class="btn btn-main btn-block"' . ($preview ? ' disabled' : '') . '>Guardar</button></div></form>';
         install_hint();
         return;
     }
 
     if ($pw && $ctx['type'] !== 'training') {
-        echo '<div class="box objective"><span class="eyebrow">Fast Track Residencial · Semana ' . (int)$week . ' · ' . h(oh_text($pw['title'], $office)) . '</span><p>' . h(oh_text($pw['objective'], $office)) . '</p></div>';
+        echo '<div class="box objective"><span class="eyebrow">' . h(P()['course']) . ' · Semana ' . (int)$week . ' · ' . h(oh_text($pw['title'], $office)) . '</span><p>' . h(oh_text($pw['objective'], $office)) . '</p></div>';
     }
 
     echo '<h2 class="sec">Esto te toca hoy</h2>';
@@ -118,7 +120,11 @@ function render_hoy(array $V): void
     echo '<h2 class="sec">¿Cómo te fue hoy?</h2><div class="card nums">';
     foreach (result_fields() as $f => $label) {
         $goal = '';
-        if ($f === 'contactos') {
+        if (prog() === 'industrial') {
+            $min = week_min($week, $f);
+            $goal = $f === 'llamadas' ? 'Meta: 10 al día · ' . $min . ' esta semana · llevas ' . (int)($stats['week_totals'][$week][$f] ?? 0)
+                : ($min > 0 ? 'Meta de la semana: ' . $min . ' · llevas ' . (int)($stats['week_totals'][$week][$f] ?? 0) : '');
+        } elseif ($f === 'contactos') {
             $goal = !empty($ctx['arranque']) ? 'Meta de arranque: ' . setting('arranque_llamadas') . ' llamadas' : 'Tu meta: ' . goal_for($goals, $week, 'contactos') . ' al día';
         } else {
             $g = goal_for($goals, $week, $f);
@@ -127,9 +133,10 @@ function render_hoy(array $V): void
         num_field($f, $label, (int)($log[$f] ?? 0), RESULT_HINTS[$f], $goal);
     }
     echo '</div>';
-    echo '<div class="card analisis" id="analisisBox"><b>Cuéntame qué propiedades analizaste</b><p class="small muted">Qué propiedad es, qué opinas de su valor y por qué.</p>'
+    if (prog() === 'residencial') echo '<div class="card analisis" id="analisisBox"><b>Cuéntame qué propiedades analizaste</b><p class="small muted">Qué propiedad es, qué opinas de su valor y por qué.</p>'
         . '<textarea name="analisis" rows="4" placeholder="Ej. Casa en Región 15, 3 recámaras. Piden $2.8 M; creo que vale $2.5 M porque tres casas parecidas se ofrecen entre $2.4 y $2.6 M.">' . h($log['analisis'] ?? '') . '</textarea></div>';
 
+    if (prog() === 'industrial') { logros_industrial($adv); } else {
     $ohL = oh_label($office);
     echo '<details class="card logros"><summary><b>Mis logros</b> <span class="muted small">' . h($ohL) . ', captación y renta</span></summary><div class="logros-in">'
         . '<label class="check"><input type="checkbox" name="logros[oh_done]" value="1"' . ((int)$adv['oh_done'] ? ' checked' : '') . '> Ya realicé mi ' . h($ohL) . ', supervisado por mi oficina</label>'
@@ -141,6 +148,7 @@ function render_hoy(array $V): void
         . '<label class="check"><input type="checkbox" name="logros[cap_disp]" value="1"' . ((int)$adv['cap_disp'] ? ' checked' : '') . '> Disponibilidad para mostrarla</label>'
         . '<label class="check"><input type="checkbox" name="logros[renta_closed]" value="1"' . ((int)$adv['renta_closed'] ? ' checked' : '') . '> Cerré una renta</label>'
         . '<label class="lbl">Fecha de la renta<input type="date" name="logros[renta_date]" value="' . h($adv['renta_date'] ?? '') . '"></label></div></details>';
+    }
 
     echo '<div class="savebar"><button class="btn btn-main btn-block btn-xl"' . ($preview ? ' type="button" disabled' : '') . '>'
         . ($preview ? 'Vista previa: no se guarda' : ($log ? 'Actualizar mi día' : 'Guardar mi día')) . '</button></div></form>';
@@ -235,7 +243,7 @@ function reto_result_box(array $it, array $V): void
         if ((int)$r['activity']['id'] !== (int)$it['id'] || !$r['row']) continue;
         $row = $r['row']; $ok = (int)$row['ok_count'];
         if ($ok >= 4) {
-            echo '<div class="box reto-ok"><b>¡Superaste tu Reto del ' . h($r['label']) . '!</b> ' . $ok . ' de 5. Agarraste el hilo: sigue así.</div>';
+            echo '<div class="box reto-ok"><b>¡Superaste tu Reto del ' . h($r['label']) . '!</b> ' . $ok . ' de 5. ' . h(T('reto_ok')) . '</div>';
             return;
         }
         $qs = reto_questions($r['activity']); $mins = [];
@@ -246,6 +254,38 @@ function reto_result_box(array $it, array $V): void
             . '<br>En tu cierre de semana te vuelve a preguntar y puedes ganar el punto completo.</div>';
         return;
     }
+}
+
+/** Edalo · el asesor repite su Semana 2: qué le falta, con números exactos, para que no parezca un error. */
+function filtro_box(array $f): void
+{
+    $lab = ['llamadas' => 'Llamadas del Impulsor', 'recorridos' => 'Recorridos de zona', 'leads' => 'Leads válidos'];
+    echo '<div class="card filtro"><span class="eyebrow">Tu filtro de la Semana 2 · semanas 1 y 2 juntas</span>';
+    echo '<p>Esta semana repites tu Semana 2. No es un error: es el filtro de esfuerzo del programa. Lo industrial empieza en la Semana 3, y para llegar ahí primero necesitas el ritmo de prospección.</p>';
+    foreach (FILTRO_S2 as $k => $min) {
+        $v = (int)$f['sums'][$k];
+        $pct = (int)round(min(1, $v / $min) * 100);
+        echo '<div class="prog-row"><span>' . h($lab[$k]) . '</span><b>' . $v . ' de ' . $min . '</b></div>' . bar($pct, $v >= $min ? '' : 'gold');
+    }
+    if ($f['faltan']) echo '<p class="lead"><b>' . h(ucfirst(filtro_falta_frase($f['faltan'], 'Te'))) . '.</b> En cuanto lo completes, te abro la Semana 3 al día siguiente.</p>';
+    echo '<p class="small muted">Tus actividades de la Semana 2, tus 10 llamadas diarias y tus citas con tu Team Leader siguen igual. Tu oficina ya sabe que repites la semana y te va a apoyar.</p></div>';
+}
+
+/** Edalo · Mis logros: captación, oferta, inquilino calificado con visita y renta cerrada. */
+function logros_industrial(array $adv): void
+{
+    $row = function (string $k, string $label) use ($adv): string {
+        $done = (int)($adv[$k . '_done'] ?? 0) === 1;
+        return '<label class="check"><input type="checkbox" name="logros[' . $k . '_done]" value="1"' . ($done ? ' checked' : '') . '> ' . h($label) . '</label>'
+            . '<label class="lbl">Fecha<input type="date" name="logros[' . $k . '_date]" value="' . h($adv[$k . '_date'] ?? '') . '"></label>';
+    };
+    echo '<details class="card logros"><summary><b>Mis logros</b> <span class="muted small">captación, oferta, inquilino y renta</span></summary><div class="logros-in">'
+        . $row('ind_cap', 'Capté un inmueble con autorización del propietario (acuerdo de promoción firmado)')
+        . $row('ind_oferta', 'Presenté al propietario una oferta formal por escrito')
+        . $row('ind_inq', 'Hice una visita con un inquilino calificado')
+        . '<label class="check"><input type="checkbox" name="logros[renta_closed]" value="1"' . ((int)$adv['renta_closed'] ? ' checked' : '') . '> Cerré una renta (comercial o industrial)</label>'
+        . '<label class="lbl">Fecha de la renta<input type="date" name="logros[renta_date]" value="' . h($adv['renta_date'] ?? '') . '"></label>'
+        . '<p class="small muted">Una oferta formal va por escrito (renta, plazo y fecha de entrada), la presentaste tú al propietario y lleva nombre y contacto reales del cliente y del propietario.</p></div></details>';
 }
 
 /** En los videos, el tiempo es para el video y su tarea; así nadie piensa que el video dura eso. */
@@ -299,7 +339,12 @@ function repaso_block(array $V, int $week): void
     $adv = $V['adv']; $stats = $V['stats']; $office = $V['office'];
     $qs = array_values(array_filter(array_map('trim', explode("\n", oh_text(plan_weeks()[$week]['review_questions'] ?? '', $office)))));
     $saved = !empty($adv['id']) ? (json_decode((string)val('SELECT answers FROM week_reviews WHERE advisor_id = ? AND week_no = ?', [$adv['id'], $week]), true) ?: []) : [];
-    if ($week === 2) {
+    if ($week === 2 && prog() === 'industrial') {
+        $f = filtro_s2(['id' => (int)($adv['id'] ?? 0), 'start_date' => $adv['start_date'] ?? office_today($office)], office_today($office));
+        echo '<div class="mini"><b>Tu filtro para pasar a la Semana 3 (semanas 1 y 2 juntas)</b><ul>';
+        foreach (FILTRO_S2 as $k => $min) { $v = (int)$f['sums'][$k]; echo '<li>' . ($v >= $min ? '✅' : '⬜') . ' ' . h(result_fields()[$k]) . ': ' . $v . ' de ' . $min . '</li>'; }
+        echo '</ul></div>';
+    } elseif ($week === 2) {
         $c = cum_totals($stats, 2);
         $minC = (int)setting('s2_min_contactos'); $minP = (int)setting('s2_min_promovidas');
         echo '<div class="mini"><b>Tus mínimos (semanas 1 y 2)</b><ul>'
@@ -313,7 +358,7 @@ function repaso_block(array $V, int $week): void
         foreach ($cp['checks'] as [$label, $ok]) echo '<li>' . ($ok ? '✅' : '⬜') . ' ' . h($label) . '</li>';
         echo '</ul></div>';
     }
-    if ($week === 5) {
+    if ($week === prog_weeks()) {
         $ev = $stats['evaluation'];
         echo '<div class="mini"><b>Tu evaluación a hoy: ' . (int)$ev['total'] . ' de 100 puntos</b><p class="small">' . h($ev['level_text']) . '</p></div>';
     }
@@ -325,9 +370,26 @@ function install_hint(): void
     echo '<p class="hint small center muted" id="a2hs">Para tenerla a la mano: en tu navegador toca <b>Compartir</b> o <b>⋮</b> y elige <b>Agregar a pantalla de inicio</b>.</p>';
 }
 
+/** Bienvenida de Edalo: se presenta y explica su nombre (en honor a Dédalo, el arquitecto del laberinto). */
+function welcome_industrial(string $name, string $officeName): void
+{
+    echo '<div class="card narrow welcome">';
+    echo '<div class="adv-head">' . brand_mark('industrial') . '<span class="adv-head-r"><b>R²CP ELITE</b><span class="tagline">Construye con método</span></span></div>';
+    echo '<img class="welcome-img" style="display:block;width:100%;max-width:100%;height:auto" src="' . h(prog_img('welcome')) . '" alt="Edalo, tu Team Leader del curso Fast Track Industrial" width="600" height="600">';
+    echo '<h1>Hola, ' . h($name) . '. Soy Edalo.</h1>';
+    echo '<p>Soy tu Team Leader en el curso <b>Fast Track Industrial</b> y <b>te voy a acompañar en tu arranque en el mercado comercial e industrial</b> durante sus 4 semanas en <b>' . h($officeName) . '</b>.</p>';
+    echo '<p>Cada día te digo qué te toca hacer, te comparto los videos del curso y me cuentas tus números en menos de 2 minutos: llamadas, recorridos, fichas, cadenas, leads y piezas de promoción.</p>';
+    echo '<p><b>Yo te acompaño todos los días, pero tu equipo está en la oficina.</b> Después de cada video te espera tu Team Leader para tu Reto: unas preguntas para asegurarnos de que dominas el tema. Quienes van a su oficina son quienes se quedan en el negocio.</p>';
+    echo '<div class="myth"><div class="myth-h"><svg width="44" height="44" viewBox="0 0 48 48" aria-hidden="true"><rect x="4" y="4" width="40" height="40" rx="4" fill="none" stroke="#18263A" stroke-width="2"/><path d="M4 16 H30 M18 16 V30 M30 30 H44 M10 30 V44 M30 16 V24" fill="none" stroke="#18263A" stroke-width="2"/><circle cx="37" cy="37" r="3" fill="#B89860"/></svg><h2>¿Por qué me llamo Edalo?</h2></div>'
+        . '<p>Mi nombre viene de <b>Dédalo</b>, el gran arquitecto de la mitología griega. Él construyó el laberinto de Creta, y fue quien le dio a Ariadna la idea del hilo para que Teseo encontrara la salida.</p>'
+        . '<p>El mercado comercial e industrial también es un laberinto: naves, bodegas, locales, terrenos, contratos y números. Yo lo conozco como quien lo diseñó: cada pasillo, cada medida y cada regla.</p>'
+        . '<p class="myth-end">Por eso te voy a decir muchas veces: construye con método.</p></div>';
+}
+
 /** Bienvenida: Ariadna se presenta y explica su nombre. */
 function render_welcome(string $name, string $officeName, string $token, bool $preview = false): void
 {
+    if (prog() === 'industrial') { welcome_industrial($name, $officeName); } else {
     echo '<div class="card narrow welcome">';
     echo '<div class="adv-head">' . brand_mark() . '<span class="adv-head-r"><b>R²CP ELITE</b><span class="tagline">Sigue el hilo</span></span></div>';
     echo '<img class="welcome-img" style="display:block;width:100%;max-width:100%;height:auto" src="assets/ariadna.jpg" alt="Ariadna, tu Team Leader del curso Fast Track Residencial" width="720" height="720">';
@@ -339,6 +401,7 @@ function render_welcome(string $name, string $officeName, string $token, bool $p
         . '<p>En la mitología griega, Ariadna, hija del rey Minos de Creta, le dio a Teseo un ovillo de hilo antes de que entrara al laberinto del Minotauro. Teseo lo fue desenrollando a su paso y, siguiendo ese hilo, encontró la salida.</p>'
         . '<p>Los primeros meses en bienes raíces pueden sentirse como un laberinto. Yo soy tu hilo: cada día te doy el siguiente paso. Si lo sigues todos los días, vas a encontrar el camino.</p>'
         . '<p class="myth-end">Por eso te voy a decir muchas veces: sigue el hilo.</p></div>';
+    }
     echo '<div class="box"><h3>Aviso de privacidad (resumen)</h3><p>Uso tu nombre, celular, correo, lo que registras cada día y las fotos que subas solo para acompañarte en el curso y para que tu director, gerente y Team Leader de tu oficina vean tu avance. No comparto tus datos con nadie más.</p>'
         . '<p><a href="privacidad.php' . ($token ? '?t=' . h($token) : '') . '">Leer el aviso de privacidad completo</a></p></div>';
     echo '<form method="post" class="form">' . csrf_field() . '<input type="hidden" name="t" value="' . h($token) . '"><input type="hidden" name="action" value="consent">'

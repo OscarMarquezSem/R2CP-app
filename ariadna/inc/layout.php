@@ -16,12 +16,12 @@ function page_start(string $title, array $opt = []): void
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#F7F3EA">
 <meta name="robots" content="noindex, nofollow">
-<title><?= h($title) ?> · Ariadna</title>
+<title><?= h($title) ?> · <?= h($opt['brand'] ?? 'Ariadna') ?></title>
 <link rel="manifest" href="<?= h($manifest) ?>">
 <link rel="icon" type="image/png" href="assets/icon-192.png">
 <link rel="apple-touch-icon" href="assets/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Ariadna">
+<meta name="apple-mobile-web-app-title" content="<?= h($opt['brand'] ?? 'Ariadna') ?>">
 <link rel="stylesheet" href="assets/style.css?v=<?= APP_VERSION ?>">
 </head>
 <body class="<?= h($bodyClass) ?>">
@@ -36,8 +36,15 @@ function page_end(): void
     echo '</main><script src="assets/app.js?v=' . APP_VERSION . '"></script></body></html>';
 }
 
-function brand_mark(): string
+/** Marca: la del programa activo (asesor) o, en el panel, «ARIADNA · EDALO» si la oficina tiene los dos. */
+function brand_mark(?string $mode = null): string
 {
+    if ($mode === 'both') {
+        return '<span class="brand"><svg class="brand-thread" viewBox="0 0 40 24" aria-hidden="true"><path d="M2 18 C 10 2, 18 22, 26 8 S 36 6, 38 4" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><circle cx="38" cy="4" r="2.6" fill="#C75D3A"/></svg><span class="brand-txt"><b>ARIADNA · EDALO</b><small>by Oscar Márquez Seminars</small></span></span>';
+    }
+    if (($mode ?? prog()) === 'industrial') {
+        return '<span class="brand"><svg class="brand-thread" viewBox="0 0 30 30" aria-hidden="true"><rect x="1.5" y="1.5" width="27" height="27" rx="3" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M1.5 10 H18 M10 10 V20 M18 20 H28.5 M18 10 V15" fill="none" stroke="currentColor" stroke-width="2.2"/><circle cx="23" cy="25" r="2.2" fill="#B89860"/></svg><span class="brand-txt"><b>EDALO</b><small>by Oscar Márquez Seminars</small></span></span>';
+    }
     return '<span class="brand"><svg class="brand-thread" viewBox="0 0 40 24" aria-hidden="true"><path d="M2 18 C 10 2, 18 22, 26 8 S 36 6, 38 4" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><circle cx="38" cy="4" r="2.6" fill="#C75D3A"/></svg><span class="brand-txt"><b>ARIADNA</b><small>by Oscar Márquez Seminars</small></span></span>';
 }
 
@@ -45,7 +52,8 @@ function panel_nav(array $u, ?array $office, string $active): void
 {
     $qs = $office && is_admin($u) ? '?office=' . (int)$office['id'] : '';
     echo '<header class="topbar"><div class="topbar-in">';
-    echo '<a class="logo" href="' . (is_admin($u) && !$office ? 'admin.php' : 'oficina.php' . $qs) . '">' . brand_mark() . '</a>';
+    $both = $office ? in_array('industrial', office_programs($office), true) : is_admin($u);
+    echo '<a class="logo" href="' . (is_admin($u) && !$office ? 'admin.php' : 'oficina.php' . $qs) . '">' . brand_mark($both ? 'both' : 'residencial') . '</a>';
     echo '<nav>';
     if ($office) {
         echo '<a class="' . ($active === 'oficina' ? 'on' : '') . '" href="oficina.php' . $qs . '">Asesores</a>';

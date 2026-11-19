@@ -11,13 +11,14 @@ require __DIR__ . '/inc/cron_tasks.php';
 enforce_https();
 start_session();
 [$adv, $office] = advisor_from_token();
+prog_set(advisor_program($adv));
 $t = $adv['token'];
 $self = 'hoy.php?t=' . $t;
-$opts = ['body' => 'advisor', 'manifest' => 'manifest.php?t=' . $t];
+$opts = ['body' => 'advisor prog-' . prog(), 'manifest' => 'manifest.php?t=' . $t, 'brand' => P()['name']];
 
 // Curso detenido por la oficina
 if (!(int)$adv['active'] || $adv['decision'] === 'no_continua') {
-    page_start('Ariadna', $opts);
+    page_start(P()['name'], $opts);
     echo '<div class="card narrow center">' . brand_mark() . '<h2>Tu acompañamiento está en pausa</h2><p>Habla con tu director para saber cómo seguir.</p></div>';
     page_end();
     exit;
@@ -109,18 +110,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && post('action') === 'save' && $ctx) 
     $nums = [];
     foreach (result_fields() as $f => $_) $nums[$f] = max(0, min(999, (int)($_POST['n'][$f] ?? 0)));
     $note = mb_substr(trim((string)($_POST['note'] ?? '')), 0, 2000);
-    $analisis = $nums['analizadas'] > 0 ? mb_substr(trim((string)($_POST['analisis'] ?? '')), 0, 4000) : '';
-    $flashMsg = $ctx['type'] === 'rest' ? '¡Gracias! Quedó anotado. Disfruta tu descanso.' : '¡Listo! Ya guardé tu día. Mañana seguimos. No sueltes el hilo.';
+    $analisis = ($nums['analizadas'] ?? 0) > 0 ? mb_substr(trim((string)($_POST['analisis'] ?? '')), 0, 4000) : '';
+    $flashMsg = $ctx['type'] === 'rest' ? '¡Gracias! Quedó anotado. Disfruta tu descanso.' : T('saved');
     $flashType = 'ok';
 
     db()->beginTransaction();
-    q('INSERT INTO daily_logs (advisor_id, log_date, week_no, day_type, day_label, contactos, tratos, analizadas, promovidas, citas, captaciones, analisis, note, created_at, updated_at)
-       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,NOW(),NOW())
-       ON DUPLICATE KEY UPDATE week_no = VALUES(week_no), day_type = VALUES(day_type), day_label = VALUES(day_label),
-         contactos = VALUES(contactos), tratos = VALUES(tratos), analizadas = VALUES(analizadas), promovidas = VALUES(promovidas),
-         citas = VALUES(citas), captaciones = VALUES(captaciones), analisis = VALUES(analisis), note = VALUES(note), updated_at = NOW()',
-        [$adv['id'], $date, $week, $ctx['type'], ctx_label($ctx), $nums['contactos'], $nums['tratos'], $nums['analizadas'],
-         $nums['promovidas'], $nums['citas'], $nums['captaciones'], $analisis ?: null, $note ?: null]);
+    $fcols = array_keys($nums);
+    q('INSERT INTO daily_logs (advisor_id, log_date, week_no, day_type, day_label, ' . implode(', ', $fcols) . ', analisis, note, created_at, updated_at)
+       VALUES (?,?,?,?,?,' . implode(',', array_fill(0, count($fcols), '?')) . ',?,?,NOW(),NOW())
+       ON DUPLICATE KEY UPDATE week_no = VALUES(week_no), day_type = VALUES(day_type), day_label = VALUES(day_label), '
+        . implode(', ', array_map(fn($c) => "$c = VALUES($c)", $fcols)) . ', analisis = VALUES(analisis), note = VALUES(note), updated_at = NOW()',
+        array_merge([$adv['id'], $date, $week, $ctx['type'], ctx_label($ctx)], array_values($nums), [$analisis ?: null, $note ?: null]));
     $logId = (int)val('SELECT id FROM daily_logs WHERE advisor_id = ? AND log_date = ?', [$adv['id'], $date]);
     $done = (array)($_POST['done'] ?? []);
     $res = (array)($_POST['res'] ?? []);
@@ -165,7 +165,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && post('action') === 'save' && $ctx) 
                 [$adv['id'], $it['week'], json_encode(array_values($reviewAnswers), JSON_UNESCAPED_UNICODE)]);
         }
     }
-    if (isset($_POST['logros'])) {
+    if (isset($_POST['logros']) && prog() === 'industrial') {
+        $L = (array)$_POST['logros'];
+        $d = fn($k) => preg_match('/^\d{4}-\d{2}-\d{2}$/', (string)($L[$k] ?? '')) ? $L[$k] : null;
+        $vals = [];
+        foreach (['ind_cap', 'ind_oferta', 'ind_inq'] as $k) { $on = !empty($L[$k . '_done']) ? 1 : 0; $vals[] = $on; $vals[] = $on ? ($d($k . '_date') ?? $date) : null; }
+        $r = !empty($L['renta_closed']) ? 1 : 0;
+        q('UPDATE advisors SET ind_cap_done = ?, ind_cap_date = ?, ind_oferta_done = ?, ind_oferta_date = ?, ind_inq_done = ?, ind_inq_date = ?, renta_closed = ?, renta_date = ? WHERE id = ?',
+            array_merge($vals, [$r, $r ? ($d('renta_date') ?? $date) : null, $adv['id']]));
+    } elseif (isset($_POST['logros'])) {
         $L = (array)$_POST['logros'];
         $ohDate = preg_match('/^\d{4}-\d{2}-\d{2}$/', (string)($L['oh_date'] ?? '')) ? $L['oh_date'] : null;
         $rDate = preg_match('/^\d{4}-\d{2}-\d{2}$/', (string)($L['renta_date'] ?? '')) ? $L['renta_date'] : null;
@@ -185,7 +193,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && post('action') === 'save' && $ctx) 
         $closedWeek = false;
         foreach ($items as $it) if ($it['kind'] === 'repaso' && (!empty($done[$it['key']]) || array_filter($reviewAnswers))) $closedWeek = true;
         $_SESSION['celebrate'] = $closedWeek
-            ? '¡Cerraste tu Semana ' . (int)$week . '! Estoy muy orgullosa de ti. Descansa y prepárate: la que viene es todavía mejor. No sueltes el hilo.'
+            ? sprintf(T('week_closed'), (int)$week)
             : $flashMsg;
     } else {
         flash($flashMsg, $flashType);

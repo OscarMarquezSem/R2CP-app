@@ -286,3 +286,27 @@ img.bubble-av { width: 48px; height: 48px; flex: 0 0 48px; border-radius: 50%; o
 .card.celebrate { text-align: center; border: 2px solid var(--gold); }
 .card.celebrate img { width: 70%; max-width: 280px; height: auto; border-radius: 50%; display: block; margin: 0 auto 10px; }
 .card.celebrate p { font-size: 1.1rem; font-weight: 600; margin: 0; }
+
+/* EDALO · Construye con método. Mismo diseño, colores corporativos. */
+body.prog-industrial {
+  --navy: #18263A;
+  --navy-2: #2A3D57;
+  --terra: #2F5D8A;
+  --terra-d: #244A70;
+  --gold: #B89860;
+  --gold-l: #E2D6BC;
+  --cream: #E9EDF1;
+  --bg: #F3F4F2;
+  --line: #D8DCE0;
+  --muted: #55606F;
+}
+body.prog-industrial .thread path { stroke: #4F769C; }
+.card.filtro { border: 2px solid var(--gold); }
+.card.filtro .lead { margin-top: 10px; }
+/* Etiquetas de programa en el panel de la oficina */
+.prog-chip { display: inline-block; border-radius: 999px; padding: 2px 10px; font-size: .75rem; font-weight: 700; white-space: nowrap; }
+.prog-chip.p-residencial { background: #F6E3DA; color: #8C3A1E; }
+.prog-chip.p-industrial { background: #DCE6F0; color: #1E4468; }
+.prog-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin: 4px 0 14px; }
+.prog-tabs a { padding: 8px 14px; border-radius: 10px; border: 1px solid var(--line); background: #fff; text-decoration: none; font-weight: 600; font-size: .95rem; min-height: 44px; display: inline-flex; align-items: center; }
+.prog-tabs a.on { background: var(--navy); color: #fff; border-color: var(--navy); }
