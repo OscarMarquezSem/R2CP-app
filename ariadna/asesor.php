@@ -128,8 +128,13 @@ page_start($adv['name'], ['nav' => $u, 'office' => $office, 'active' => 'oficina
 
 <?php $rt = $s['retos']; if ($rt['total']): ?>
 <div class="card" id="retos">
+  <?php if (prog() === 'industrial'): ?>
+  <h2>Retos del video <span class="small muted">· <?= h(reto_points_label($rt['points'])) ?> de <?= (int)$rt['total'] ?></span></h2>
+  <p class="small muted">Después de cada video, su Team Leader le hace 5 preguntas de palabra. 4 o 5 de 5 = superado · 3 de 5 = a medias · 2 o menos = repasa el video. No suman puntos por sí solos: te sirven para calificar su Conocimiento (propiedades y zonas) en la evaluación final.</p>
+  <?php else: ?>
   <h2>Retos del video <span class="small muted">· <?= h(reto_points_label($rt['points'])) ?> de <?= (int)$rt['total'] ?> puntos</span></h2>
   <p class="small muted">Después de cada video, su Team Leader le hace 5 preguntas de palabra. 4 o 5 de 5 = 1 punto · 3 de 5 = medio punto. Valen 10 puntos de su evaluación.</p>
+  <?php endif; ?>
   <div class="tbl-wrap"><table class="tbl responsive">
     <thead><tr><th>Video</th><th>Cuándo</th><th>Resultado</th><th>Lo aplicó</th><th></th></tr></thead>
     <tbody>
