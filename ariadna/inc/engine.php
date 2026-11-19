@@ -233,15 +233,18 @@ function build_schedule(array $adv, array $office): array
     prog_set(advisor_program($adv));
     $wd = advisor_workdays($adv, $office);
     $training = $adv['training_date'] ?: null;
+    $start = $adv['start_date'];
     $out = [];
-    for ($w = 1; $w <= prog_weeks(); $w++) {
+    // Un bloque = una semana del plan en 7 días (o menos, si el filtro abre la siguiente semana antes).
+    $block = function (int $w, string $from, int $len, array $extra = []) use (&$out, $wd, $training): void {
         $dates = [];
-        for ($i = 0; $i < 7; $i++) $dates[] = add_days($adv['start_date'], ($w - 1) * 7 + $i);
-        $workDates = array_values(array_filter($dates, fn($d) => in_array(iso_weekday($d), $wd, true) && $d !== $training));
-        $W = count($workDates);
+        for ($i = 0; $i < $len; $i++) $dates[] = add_days($from, $i);
+        $full = [];
+        for ($i = 0; $i < 7; $i++) $full[] = add_days($from, $i);
+        $W = count(array_filter($full, fn($d) => in_array(iso_weekday($d), $wd, true) && $d !== $training));
         $n = 0;
         foreach ($dates as $d) {
-            $base = ['date' => $d, 'week' => $w, 'day_no' => 0, 'days' => [], 'arranque' => null];
+            $base = ['date' => $d, 'week' => $w, 'day_no' => 0, 'days' => [], 'arranque' => null] + $extra;
             if ($d === $training) {
                 $out[$d] = ['type' => 'training'] + $base;
             } elseif (!in_array(iso_weekday($d), $wd, true)) {
@@ -256,6 +259,31 @@ function build_schedule(array $adv, array $office): array
                 }
             }
         }
+    };
+    $weeks = prog_weeks();
+    if (prog() === 'industrial' && $weeks >= 3) {
+        // Edalo: filtro de esfuerzo al cerrar la Semana 2. Si no cumple, repite la Semana 2;
+        // en cuanto cumple (con lo registrado hasta el día anterior), la Semana 3 empieza al día siguiente.
+        // Se repite una vez: si tampoco cumple, sigue a la Semana 3 y decide la oficina.
+        $today = office_today($office);
+        $block(1, $start, 7);
+        $block(2, add_days($start, 7), 7);
+        $s3 = add_days($start, 14);
+        $evalDay = add_days($start, 13);
+        if ($evalDay < $today && !filtro_s2($adv, $evalDay)['ok']) {
+            $len = 7; $fail = true;
+            for ($i = 1; $i < 7; $i++) {
+                $prev = add_days($s3, $i - 1);
+                if ($prev >= $today) break;
+                if (filtro_s2($adv, $prev)['ok']) { $len = $i; $fail = false; break; }
+            }
+            $block(2, $s3, $len, ['repeat' => true]);
+            $s3 = add_days($s3, $len);
+            if ($len === 7 && $fail && add_days($s3, -1) < $today) $out[add_days($s3, -1)]['filtro_fail'] = true;
+        }
+        for ($w = 3; $w <= $weeks; $w++) $block($w, add_days($s3, ($w - 3) * 7), 7);
+    } else {
+        for ($w = 1; $w <= $weeks; $w++) $block($w, add_days($start, ($w - 1) * 7), 7);
     }
     // Rutina de arranque (solo Ariadna): N llamadas diarias durante los primeros N días hábiles con rutina.
     $limit = prog() === 'residencial' ? max(0, (int)setting('arranque_dias')) : 0;
@@ -265,6 +293,22 @@ function build_schedule(array $adv, array $office): array
         if (routine_applies($ctx)) { $k++; $out[$d]['arranque'] = $k; }
     }
     return $out;
+}
+
+const FILTRO_S2 = ['llamadas' => 100, 'recorridos' => 4, 'leads' => 2];
+
+/** Filtro de esfuerzo de Edalo (semanas 1 y 2 juntas) con lo registrado hasta $upto. */
+function filtro_s2(array $adv, string $upto): array
+{
+    $row = one('SELECT COALESCE(SUM(llamadas),0) llamadas, COALESCE(SUM(recorridos),0) recorridos, COALESCE(SUM(leads),0) leads
+        FROM daily_logs WHERE advisor_id = ? AND log_date >= ? AND log_date <= ?', [$adv['id'], $adv['start_date'], $upto]) ?: [];
+    $res = ['ok' => true, 'sums' => [], 'faltan' => []];
+    foreach (FILTRO_S2 as $f => $min) {
+        $v = (int)($row[$f] ?? 0);
+        $res['sums'][$f] = $v;
+        if ($v < $min) { $res['ok'] = false; $res['faltan'][$f] = $min - $v; }
+    }
+    return $res;
 }
 
 function ctx_label(array $ctx): string
@@ -536,9 +580,25 @@ function advisor_stats(array $adv, array $office, ?string $today = null): array
     $goals = advisor_goals((int)$adv['id']);
     $elapsed = days_between($adv['start_date'], $today);
     $started = $elapsed >= 0;
-    $finished = $elapsed >= (prog_weeks() * 7);
-    $week = $started ? min(prog_weeks(), intdiv(max(0, $elapsed), 7) + 1) : 1;
-    $closed = $started ? min(prog_weeks(), intdiv($elapsed, 7)) : 0;
+    $programDays = count($schedule);
+    $lastDate = $schedule ? array_key_last($schedule) : $adv['start_date'];
+    $finished = $started && $today > $lastDate;
+    // Semana actual y semanas cerradas, según el calendario (en Edalo la Semana 2 se puede repetir).
+    $weekEnd = [];
+    foreach ($schedule as $d => $c) $weekEnd[(int)$c['week']] = $d;
+    $week = !$started ? 1 : ($finished ? prog_weeks() : (int)($schedule[$today]['week'] ?? 1));
+    $closed = 0;
+    if ($started) foreach ($weekEnd as $w => $end) if ($end < $today) $closed = max($closed, $w);
+    $repeating = $started && !$finished && !empty($schedule[$today]['repeat']);
+    $filtro = null;
+    if (prog() === 'industrial' && $started) {
+        $evalDay = add_days($adv['start_date'], 13);
+        $f = filtro_s2($adv, $evalDay < $today ? ($repeating ? add_days($today, -1) : $evalDay) : add_days($today, -1));
+        $failDay = null;
+        foreach ($schedule as $d => $c) if (!empty($c['filtro_fail'])) $failDay = $d;
+        $filtro = $f + ['evaluated' => $evalDay < $today, 'repeating' => $repeating, 'failed' => $failDay !== null, 'fail_day' => $failDay];
+        if ($repeating) $closed = 1;   // mientras repite, la Semana 2 sigue abierta
+    }
     $doneAll = done_keys($logs);
 
     $totals = array_fill_keys(array_keys(result_fields()), 0);
@@ -634,7 +694,7 @@ function advisor_stats(array $adv, array $office, ?string $today = null): array
         'week_assigned' => $weekAssigned, 'week_done' => $weekDone,
         'missed' => $missed, 'last_log' => $logs ? max(array_keys($logs)) : null,
         'workdays_elapsed' => $workdaysElapsed, 'workdays_logged' => $workdaysLogged,
-        'low_goals' => [], 'tl' => $tl, 'retos' => $retos,
+        'low_goals' => [], 'tl' => $tl, 'retos' => $retos, 'filtro' => $filtro, 'program' => prog(), 'program_days' => $programDays,
     ];
     foreach ($goals as $w => $g) if ((int)$g['low_accepted'] === 1) $s['low_goals'][$w] = goals_below_min($g, $w);
     $s['evaluation'] = evaluation($adv, $s, $office);
@@ -655,7 +715,10 @@ function compute_status(array $adv, array $s): array
     $name = first_name($adv['name']);
     if (!$s['started']) return ['color' => 'verde', 'reason' => 'Aún no inicia', 'action' => '', 'rule' => null];
 
-    for ($w = min(3, $s['closed_weeks']); $w >= 1; $w--) {
+    if (($s['program'] ?? prog()) === 'industrial') {
+        $r = status_industrial($adv, $s);
+        if ($r) return $r;
+    } else for ($w = min(3, $s['closed_weeks']); $w >= 1; $w--) {
         if ($w === 1 && setting('red_s1_enabled') === '1') {
             if (!$s['week_has_activity'][1]) {
                 return ['color' => 'rojo', 'rule' => 1, 'reason' => 'Cerró su Semana 1 sin actividad registrada',
@@ -717,6 +780,7 @@ function compute_status(array $adv, array $s): array
 /** Cuadro de Evaluación del Asesor (100 puntos), calculado con lo que registra el asesor. */
 function evaluation(array $adv, array $s, ?array $office = null): array
 {
+    if (($s['program'] ?? prog()) === 'industrial') return evaluation_industrial($adv, $s);
     $t = $s['totals'];
     $prop = function (int $res, int $meta, float $max): float {
         if ($meta <= 0) return $res > 0 ? $max : 0.0;
@@ -763,6 +827,7 @@ function evaluation(array $adv, array $s, ?array $office = null): array
 /** Punto de control de la Semana 3. */
 function checkpoint(array $adv, array $s, ?array $office = null): array
 {
+    if (($s['program'] ?? prog()) === 'industrial') return checkpoint_industrial($adv, $s);
     $c = cum_totals($s, 3);
     $oh = (int)$adv['oh_done'] === 1;
     $capOrCita = $c['captaciones'] >= 1 || $c['citas'] >= 1;
@@ -785,7 +850,7 @@ function checkpoint(array $adv, array $s, ?array $office = null): array
 function find_training_date(array $office, array $adv): ?string
 {
     $start = $adv['start_date'];
-    $end = add_days($start, (prog_weeks() * 7) - 1);
+    $end = add_days($start, prog_weeks(advisor_program($adv)) * 7 - 1);
     $wd = advisor_workdays($adv, $office);
     $cands = array_column(all('SELECT tdate FROM office_training_dates WHERE office_id = ? AND tdate > ? AND tdate <= ? ORDER BY tdate',
         [$office['id'], $start, $end]), 'tdate');
@@ -804,7 +869,7 @@ function reassign_training(array $office): void
     $today = office_today($office);
     foreach (all('SELECT * FROM advisors WHERE office_id = ? AND active = 1 AND training_manual = 0', [$office['id']]) as $a) {
         if ($a['training_date'] && $a['training_date'] < $today) continue;
-        if (days_between($a['start_date'], $today) >= (prog_weeks() * 7)) continue;
+        if (days_between($a['start_date'], $today) >= prog_weeks(advisor_program($a)) * 7) continue;
         $new = find_training_date($office, $a);
         if ($new !== $a['training_date']) q('UPDATE advisors SET training_date = ? WHERE id = ?', [$new, $a['id']]);
     }
@@ -814,7 +879,7 @@ function advisors_without_training(array $office): int
 {
     $today = office_today($office);
     return (int)val('SELECT COUNT(*) FROM advisors WHERE office_id = ? AND active = 1 AND training_date IS NULL
-        AND start_date > DATE_SUB(?, INTERVAL ' . (prog_weeks() * 7) . ' DAY)', [$office['id'], $today]);
+        AND start_date > DATE_SUB(?, INTERVAL 35 DAY)', [$office['id'], $today]);
 }
 
 /** Temas de oficina que algún asesor ya necesita y no tienen fecha. [[activity, [nombres]], …] */
@@ -913,6 +978,103 @@ function reto_videos(): array
     return $out;
 }
 
+// ---------------------------------------------------------------------------
+// Edalo · semáforo, evaluación y punto de control (Fast Track Industrial)
+// ---------------------------------------------------------------------------
+/** «le faltan 23 llamadas y 1 recorrido» / «le falta 1 recorrido». */
+function filtro_falta_frase(array $faltan, string $quien = 'le'): string
+{
+    $verb = (count($faltan) === 1 && reset($faltan) === 1) ? 'falta' : 'faltan';
+    return $quien . ' ' . $verb . ' ' . filtro_faltan_text($faltan);
+}
+
+/** «23 llamadas y 1 recorrido» a partir de lo que falta del filtro. */
+function filtro_faltan_text(array $faltan): string
+{
+    $lab = ['llamadas' => ['llamada', 'llamadas'], 'recorridos' => ['recorrido', 'recorridos'], 'leads' => ['lead válido', 'leads válidos']];
+    $parts = [];
+    foreach ($faltan as $f => $n) $parts[] = $n . ' ' . $lab[$f][$n === 1 ? 0 : 1];
+    if (count($parts) > 1) { $last = array_pop($parts); return implode(', ', $parts) . ' y ' . $last; }
+    return $parts[0] ?? '';
+}
+
+function status_industrial(array $adv, array $s): ?array
+{
+    $name = first_name($adv['name']);
+    $f = $s['filtro'] ?? null;
+    if ($s['closed_weeks'] >= 3) {
+        $cp = checkpoint_industrial($adv, $s);
+        if (!$cp['pass'] && ($adv['decision'] ?? null) !== 'continua') {
+            return ['color' => 'rojo', 'rule' => 3, 'reason' => 'No cumple el punto de control de la Semana 3',
+                'action' => "Punto de control: revisa con $name sus resultados y decide si continúa."];
+        }
+    }
+    if ($f && $f['repeating']) {
+        return ['color' => 'amarillo', 'rule' => 'filtro', 'reason' => 'Repite la Semana 2: ' . filtro_falta_frase($f['faltan']),
+            'action' => "Ayuda hoy a $name con su filtro de la Semana 2: " . filtro_falta_frase($f['faltan']) . '.'];
+    }
+    if ($f && $f['failed'] && $s['closed_weeks'] < 3 && empty($adv['decision'])) {
+        return ['color' => 'amarillo', 'rule' => 'filtro', 'reason' => 'Repitió la Semana 2 y no completó su filtro',
+            'action' => "$name repitió su Semana 2 y no completó su filtro. Habla con él o ella y decide si continúa."];
+    }
+    if ($s['closed_weeks'] >= 1 && setting('red_s1_enabled') === '1' && !$s['week_has_activity'][1]) {
+        return ['color' => 'rojo', 'rule' => 1, 'reason' => 'Cerró su Semana 1 sin actividad registrada',
+            'action' => "Reúnete hoy con $name: cerró su Semana 1 sin registrar actividad."];
+    }
+    return null;
+}
+
+function evaluation_industrial(array $adv, array $s): array
+{
+    $t = $s['totals'];
+    $prop = function (int $res, int $meta, float $max): float {
+        if ($meta <= 0) return $res > 0 ? $max : 0.0;
+        return round(min(1, $res / $meta) * $max, 1);
+    };
+    $m = fn($f) => plan_meta_total($f);
+    $rows = [];
+    foreach (['llamadas' => 'Llamadas del Impulsor', 'recorridos' => 'Recorridos de zona', 'fichas' => 'Fichas de inmuebles levantadas', 'cadenas' => 'Cadenas de contacto iniciadas'] as $f => $l) {
+        $rows[] = ['group' => 'Prospección', 'label' => $l, 'meta' => $m($f), 'result' => $t[$f], 'max' => 5, 'pts' => $prop($t[$f], $m($f), 5)];
+    }
+    $rows[] = ['group' => 'Leads', 'label' => 'Leads válidos (4 puntos cada uno)', 'meta' => $m('leads'), 'result' => $t['leads'], 'max' => 20, 'pts' => $prop($t['leads'], $m('leads'), 20)];
+    $rt = $s['retos'] ?? ['due' => 0, 'points' => 0.0];
+    $retoTxt = $rt['due'] ? ' · Retos: ' . reto_points_label($rt['points']) . ' de ' . $rt['due'] : '';
+    foreach (['know_props' => 'Conoce las propiedades que levantó', 'know_zones' => 'Conoce las zonas y parques de su ciudad'] as $c => $l) {
+        $v = $adv[$c] ?? null;
+        $rows[] = ['group' => 'Conocimiento y contenido', 'label' => $l . ' (lo califica su Team Leader' . $retoTxt . ')', 'meta' => '0 a 7',
+            'result' => $v === null ? 'Pendiente' : (int)$v . ' de 7', 'max' => 7, 'pts' => $v === null ? 0.0 : (float)max(0, min(7, (int)$v))];
+    }
+    $rows[] = ['group' => 'Conocimiento y contenido', 'label' => 'Posts o flyers creados', 'meta' => $m('piezas'), 'result' => $t['piezas'], 'max' => 6, 'pts' => $prop($t['piezas'], $m('piezas'), 6)];
+    $yes = fn($v) => (int)$v === 1 ? 'Sí' : 'No';
+    $rows[] = ['group' => 'Resultados', 'label' => 'Captación autorizada por el propietario', 'meta' => 'Sí', 'result' => $yes($adv['ind_cap_done'] ?? 0), 'max' => 15, 'pts' => (int)($adv['ind_cap_done'] ?? 0) === 1 ? 15.0 : 0.0];
+    $rows[] = ['group' => 'Resultados', 'label' => 'Oferta formal por escrito', 'meta' => 'Sí', 'result' => $yes($adv['ind_oferta_done'] ?? 0), 'max' => 15, 'pts' => (int)($adv['ind_oferta_done'] ?? 0) === 1 ? 15.0 : 0.0];
+    $rows[] = ['group' => 'Resultados', 'label' => 'Renta cerrada (comercial o industrial)', 'meta' => 'Sí', 'result' => $yes($adv['renta_closed'] ?? 0), 'max' => 10, 'pts' => (int)($adv['renta_closed'] ?? 0) === 1 ? 10.0 : 0.0];
+    $total = (int)round(array_sum(array_column($rows, 'pts')));
+    if ($total >= 90)      $level = ['Top', 'Top: avanza con ritmo sobresaliente.'];
+    elseif ($total >= 70)  $level = ['Va bien', 'Va bien: sigue en el programa.'];
+    elseif ($total >= 50)  $level = ['Necesita apoyo', 'Necesita apoyo: seguimiento cercano del Team Leader.'];
+    else                   $level = ['No continúa', 'No continúa, salvo decisión del Team Leader.'];
+    return ['rows' => $rows, 'total' => $total, 'level' => $level[0], 'level_text' => $level[1]];
+}
+
+function checkpoint_industrial(array $adv, array $s): array
+{
+    $c = cum_totals($s, 3);
+    $cap = (int)($adv['ind_cap_done'] ?? 0) === 1;
+    $inq = (int)($adv['ind_inq_done'] ?? 0) === 1;
+    $leads = $c['leads'] >= 5;
+    $min = (int)setting('checkpoint_min_score');
+    $score = $s['evaluation']['total'];
+    return [
+        'checks' => [
+            ['Al menos una: 5 leads válidos (' . $c['leads'] . '), 1 captación autorizada (' . ($cap ? 'sí' : 'no') . ') o 1 inquilino calificado con visita (' . ($inq ? 'sí' : 'no') . ')', $leads || $cap || $inq],
+            ["Tiene $min puntos o más en su evaluación ($score puntos)", $score >= $min],
+        ],
+        'pass' => ($leads || $cap || $inq) && $score >= $min,
+        'score' => $score,
+    ];
+}
+
 /** Prefijo para las listas cortas (recordatorios, agenda). */
 function kind_prefix(string $kind): string
 {
@@ -941,21 +1103,33 @@ function daily_reminder_text(array $office): string
 /** Reporte semanal en texto, para pegarlo en WhatsApp. */
 function weekly_report_text(array $office, array $rows): string
 {
+    // Un reporte por programa (Ariadna y Edalo), uno tras otro.
+    $out = [];
+    foreach (office_programs($office) as $pg) {
+        $sub = array_values(array_filter($rows, fn($r) => advisor_program($r['adv']) === $pg));
+        if ($sub || count(office_programs($office)) === 1) $out[] = weekly_report_one($office, $sub, $pg);
+    }
+    return implode("\n\n", $out);
+}
+
+function weekly_report_one(array $office, array $rows, string $pg): string
+{
     $emoji = ['verde' => '🟢', 'amarillo' => '🟡', 'rojo' => '🔴'];
-    $txt = "🧵 *Ariadna · Reporte semanal*\n" . $office['name'] . ' · ' . fecha_larga(office_today($office)) . "\n";
+    $txt = "🧵 *" . P($pg)['name'] . " · Reporte semanal*\n" . $office['name'] . ' · ' . fecha_larga(office_today($office)) . "\n";
     foreach ($rows as $r) {
         $a = $r['adv']; $s = $r['stats'];
         if (!$s['started'] || $a['decision'] === 'no_continua') continue;
         $t = $s['totals'];
         $txt .= "\n" . $emoji[$s['status']['color']] . ' *' . $a['name'] . '* · ' . ($s['finished'] ? 'Terminó' : 'Semana ' . $s['week'])
-            . "\nActividades " . $s['pct'] . '% · Contactos ' . $t['contactos'] . ' · Tratos ' . $t['tratos'] . ' · Analizadas ' . $t['analizadas']
-            . ' · Promovidas ' . $t['promovidas'] . ' · Citas ' . $t['citas'] . ' · Captaciones ' . $t['captaciones']
+            . "\nActividades " . $s['pct'] . '%' . (($s['program'] ?? 'residencial') === 'industrial'
+                ? ' · Llamadas ' . $t['llamadas'] . ' · Recorridos ' . $t['recorridos'] . ' · Fichas ' . $t['fichas'] . ' · Cadenas ' . $t['cadenas'] . ' · Leads ' . $t['leads'] . ' · Piezas ' . $t['piezas']
+                : ' · Contactos ' . $t['contactos'] . ' · Tratos ' . $t['tratos'] . ' · Analizadas ' . $t['analizadas'] . ' · Promovidas ' . $t['promovidas'] . ' · Citas ' . $t['citas'] . ' · Captaciones ' . $t['captaciones'])
             . ($s['tl']['due'] ? "\nCitas con su TL: " . $s['tl']['done'] . ' de ' . $s['tl']['due'] : '')
             . ($s['retos']['due'] ? ' · Retos del video: ' . reto_points_label($s['retos']['points']) . ' de ' . $s['retos']['due'] : '');
         if ($s['status']['action']) $txt .= "\n👉 " . $s['status']['action'];
         $txt .= "\n";
     }
-    return $txt . "\n— Ariadna";
+    return $txt . "\n— " . P($pg)['name'];
 }
 
 // ---------------------------------------------------------------------------
@@ -968,13 +1142,14 @@ function create_user(?int $officeId, string $name, string $email, string $passwo
     return (int)db()->lastInsertId();
 }
 
-function create_advisor(array $office, string $name, string $phone, ?string $email, string $start): int
+function create_advisor(array $office, string $name, string $phone, ?string $email, string $start, string $program = 'residencial'): int
 {
-    q('INSERT INTO advisors (office_id, name, phone, email, start_date, token) VALUES (?,?,?,?,?,?)',
-        [$office['id'], $name, $phone, $email ?: null, $start, new_token()]);
+    if (!in_array($program, office_programs($office), true)) $program = office_programs($office)[0];
+    q('INSERT INTO advisors (office_id, name, phone, email, start_date, token, program) VALUES (?,?,?,?,?,?,?)',
+        [$office['id'], $name, $phone, $email ?: null, $start, new_token(), $program]);
     $id = (int)db()->lastInsertId();
     $a = one('SELECT * FROM advisors WHERE id = ?', [$id]);
-    $closed = max(0, min(prog_weeks(), intdiv(days_between($start, office_today($office)), 7)));
+    $closed = max(0, min(prog_weeks($program), intdiv(days_between($start, office_today($office)), 7)));
     q('UPDATE advisors SET training_date = ?, closed_weeks = ? WHERE id = ?', [find_training_date($office, $a), $closed, $id]);
     return $id;
 }

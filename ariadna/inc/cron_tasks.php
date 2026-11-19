@@ -201,7 +201,7 @@ function send_weekly_report(array $office): bool
 {
     $all = office_advisors_stats($office);
     $rows = array_values(array_filter($all, fn($r) => $r['stats']['started'] && $r['adv']['decision'] !== 'no_continua'
-        && $r['stats']['elapsed'] < (prog_weeks() * 7) + 7));
+        && $r['stats']['elapsed'] < $r['stats']['program_days'] + 7));
     $td = 'style="padding:8px;border-bottom:1px solid #E6DECB;font-size:13px;vertical-align:top"';
     $html = '<p>Hola, ' . h(director_name((int)$office['id'])) . '. Soy Ariadna, la Team Leader de tus asesores en el curso Fast Track Residencial. Te cuento cómo van en <b>' . h($office['name']) . '</b> esta semana.</p>';
     $nt = advisors_without_training($office);

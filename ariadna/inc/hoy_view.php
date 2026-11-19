@@ -81,7 +81,7 @@ function render_hoy(array $V): void
     echo '<a id="hoy"></a>';
     if ($ctx['type'] !== 'rest') echo ariadna_bubble(ariadna_message($ctx, $items, $office));
 
-    $programPct = (int)round(min((prog_weeks() * 7), max(0, $stats['elapsed'] + 1)) / (prog_weeks() * 7) * 100);
+    $pd = max(1, (int)($stats['program_days'] ?? 35)); $programPct = (int)round(min($pd, max(0, $stats['elapsed'] + 1)) / $pd * 100);
     $weekPct = !empty($stats['week_assigned'][$week]) ? (int)round(min(1, $stats['week_done'][$week] / $stats['week_assigned'][$week]) * 100) : 0;
     echo '<section class="progress card"><div class="prog-row"><span>Tu semana</span><b>' . $weekPct . '%</b></div>' . bar($weekPct)
         . '<div class="prog-row"><span>Fast Track Residencial · Semana ' . (int)$week . ' de 5</span><b>' . $programPct . '%</b></div>' . bar($programPct, 'gold') . '</section>';

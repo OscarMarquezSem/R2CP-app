@@ -16,26 +16,32 @@ function seed_plan(bool $replace = false): void
     if (!$replace && (int)val('SELECT COUNT(*) FROM plan_weeks') > 0) return;
     q('DELETE FROM plan_activities');
     q('DELETE FROM plan_weeks');
-    $plan = require __DIR__ . '/plan_seed.php';
-    $retos = require __DIR__ . '/retos_seed.php';
+    seed_program_plan('residencial', __DIR__ . '/plan_seed.php', __DIR__ . '/retos_seed.php');
+    seed_program_plan('industrial', __DIR__ . '/plan_seed_industrial.php', __DIR__ . '/retos_seed_industrial.php');
+    foreach (['routine_items', 'routine_items_industrial'] as $k) {
+        if (val('SELECT v FROM settings WHERE k = ?', [$k]) === null) set_setting($k, setting_defaults()[$k]);
+    }
+}
+
+/** Carga el plan de un programa (semanas, metas, actividades y preguntas del Reto). */
+function seed_program_plan(string $program, string $planFile, string $retosFile): void
+{
+    $plan = require $planFile;
+    $retos = require $retosFile;
     foreach ($plan as $w => $p) {
-        q('INSERT INTO plan_weeks (week_no, title, objective, material, remember, review_questions, routine_start_day,
-            meta_contactos, meta_tratos, meta_analizadas, meta_promovidas, meta_citas) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)', [
-            $w, $p['title'], $p['objective'], $p['material'], $p['remember'], $p['questions'], $p['routine_start_day'],
-            $p['metas']['contactos'], $p['metas']['tratos'], $p['metas']['analizadas'], $p['metas']['promovidas'], $p['metas']['citas'],
-        ]);
+        $cols = ['program', 'week_no', 'title', 'objective', 'material', 'remember', 'review_questions', 'routine_start_day'];
+        $vals = [$program, $w, $p['title'], $p['objective'], $p['material'], $p['remember'], $p['questions'], $p['routine_start_day']];
+        foreach ($p['metas'] as $f => $v) { $cols[] = 'meta_' . $f; $vals[] = (int)$v; }
+        q('INSERT INTO plan_weeks (' . implode(', ', $cols) . ') VALUES (' . implode(',', array_fill(0, count($cols), '?')) . ')', $vals);
         $sort = [];
         foreach ($p['acts'] as $a) {
             $d = (int)$a['d'];
             $sort[$d] = ($sort[$d] ?? 0) + 10;
             $help = '';
             foreach ($a['h'] ?? [] as [$t, $u]) $help .= $t . ' | ' . $u . "\n";
-            q('INSERT INTO plan_activities (week_no, day_no, sort, title, guide, minutes, kind, video_url, help_links, reto) VALUES (?,?,?,?,?,?,?,?,?,?)',
-                [$w, $d, $sort[$d], $a['t'], $a['g'] ?? '', $a['m'] ?? null, $a['k'], $a['v'] ?? null, trim($help) ?: null, $a['k'] === 'video' ? ($retos[$a['t']] ?? null) : null]);
+            q('INSERT INTO plan_activities (program, week_no, day_no, sort, title, guide, minutes, kind, video_url, help_links, reto) VALUES (?,?,?,?,?,?,?,?,?,?,?)',
+                [$program, $w, $d, $sort[$d], $a['t'], $a['g'] ?? '', $a['m'] ?? null, $a['k'], $a['v'] ?? null, trim($help) ?: null, $a['k'] === 'video' ? ($retos[$a['t']] ?? null) : null]);
         }
-    }
-    if (val("SELECT v FROM settings WHERE k = 'routine_items'") === null) {
-        set_setting('routine_items', setting_defaults()['routine_items']);
     }
 }
 
@@ -44,7 +50,7 @@ function seed_demo(): array
 {
     mt_srand(20261117);
     $pass = 'Demo2026!';
-    q("INSERT INTO offices (name, city, timezone, workdays, pin_enabled, training_weekday, oh_mode) VALUES ('Oficina Demo Cancún', 'Cancún', 'America/Cancun', '1,2,3,4,5', 0, 4, 'open_house')");
+    q("INSERT INTO offices (name, city, timezone, workdays, pin_enabled, training_weekday, oh_mode, programs) VALUES ('Oficina Demo Cancún', 'Cancún', 'America/Cancun', '1,2,3,4,5', 0, 4, 'open_house', 'residencial,industrial')");
     $o1 = one('SELECT * FROM offices WHERE id = ?', [db()->lastInsertId()]);
     q("INSERT INTO offices (name, city, timezone, workdays, pin_enabled, training_weekday, oh_mode) VALUES ('Oficina Demo Mérida', 'Mérida', 'America/Merida', '1,2,3,4,5,6', 1, NULL, 'recorrido')");
     $o2 = one('SELECT * FROM offices WHERE id = ?', [db()->lastInsertId()]);
@@ -115,6 +121,23 @@ function seed_demo(): array
         foreach ($st['low_goals'] as $w => $_) notice_once('metas_bajas:' . $id . ':' . $w);
         $created[] = ['name' => $name, 'link' => advisor_link($adv), 'office' => $office['name'], 'week' => $st['week']];
     }
+    // Edalo (Comercial e Industrial): uno que empieza hoy, una que repite su Semana 2 y uno que ya pasó el filtro.
+    foreach ([['Luis Herrera', '9981234507', 0, 'ind_nuevo'], ['Mariana Solís', '9981234508', 15, 'ind_repite'], ['Jorge Ibarra', '9981234509', 16, 'ind_paso']] as [$name, $phone, $ago, $profile]) {
+        $today = office_today($o1);
+        $start = add_days($today, -$ago);
+        $email = strtolower(str_replace(' ', '.', iconv('UTF-8', 'ASCII//TRANSLIT', $name))) . '@demo.mx';
+        $id = create_advisor($o1, $name, $phone, $email, $start, 'industrial');
+        q('UPDATE advisors SET consent_at = NOW(), consent_ip = ? WHERE id = ?', ['demo', $id]);
+        $adv = one('SELECT * FROM advisors WHERE id = ?', [$id]);
+        demo_logs_industrial($adv, $o1, $profile, $today);
+        if ($profile === 'ind_paso') q('UPDATE advisors SET ind_cap_done = 1, ind_cap_date = ? WHERE id = ?', [add_days($start, 9), $id]);
+        $adv = one('SELECT * FROM advisors WHERE id = ?', [$id]);
+        $st = advisor_stats($adv, $o1);
+        q('UPDATE advisors SET status_color = ?, status_reason = ? WHERE id = ?', [$st['status']['color'], $st['status']['reason'], $id]);
+        $created[] = ['name' => $name, 'link' => advisor_link($adv), 'office' => $o1['name'], 'week' => $st['week']];
+    }
+    prog_set('residencial');
+
     // Retos del video de ejemplo: los videos que ya pasaron, con resultados variados (el último, pendiente).
     ensure_schema();
     foreach (all('SELECT a.*, o.timezone FROM advisors a JOIN offices o ON o.id = a.office_id') as $adv) {
@@ -143,6 +166,33 @@ function demo_goals(array $adv, string $profile, int $ago): void
         if ($profile === 'se_detuvo') { $g['contactos'] = 8; $g['promovidas'] = 2; $low = 1; }
         q('INSERT INTO advisor_goals (advisor_id, week_no, contactos, tratos, analizadas, promovidas, citas, captaciones, low_accepted, updated_at)
            VALUES (?,?,?,?,?,?,?,?,?,NOW())', [$adv['id'], $w, $g['contactos'], $g['tratos'], $g['analizadas'], $g['promovidas'], $g['citas'], $g['captaciones'], $low]);
+    }
+}
+
+/** Registros de prueba de Edalo. El calendario se recalcula cada día, porque el filtro de la Semana 2 depende de lo registrado. */
+function demo_logs_industrial(array $adv, array $office, string $profile, string $today): void
+{
+    $calls = ['ind_repite' => [5, 8], 'ind_paso' => [11, 14]][$profile] ?? [10, 10];
+    for ($date = $adv['start_date']; $date < $today; $date = add_days($date, 1)) {
+        $schedule = build_schedule($adv, $office);
+        $ctx = $schedule[$date] ?? null;
+        if (!$ctx || $ctx['type'] === 'rest') continue;
+        $items = day_items($ctx, ['office' => $office, 'sessions' => [], 'done_elsewhere' => done_keys(advisor_logs((int)$adv['id']))]);
+        $n = array_fill_keys(array_keys(result_fields('industrial')), 0);
+        $done = [];
+        foreach ($items as $it) {
+            if (mt_rand(1, 100) > ($profile === 'ind_paso' ? 92 : 75) && !$it['routine']) continue;
+            $done[$it['key']] = '';
+            if ($it['key'] === 'R1') $n['llamadas'] += mt_rand($calls[0], $calls[1]);
+            if (str_starts_with($it['title'], 'Recorrido')) { $n['recorridos'] += 1; $n['fichas'] += mt_rand(1, 2); }
+            if (str_contains($it['title'], 'cadena de contacto') || str_starts_with($it['title'], 'Cadena de contacto')) $n['cadenas'] += 1;
+            if (str_contains($it['title'], 'pieza')) $n['piezas'] += 1;
+            if (str_starts_with($it['title'], 'Registra tus leads') || str_starts_with($it['title'], 'Visitas y seguimiento')) $n['leads'] += $profile === 'ind_paso' ? 2 : 1;
+            if ($it['kind'] === 'tl') $done[$it['key']] = 'Me pidió reforzar las 5 palabras del mercado.';
+        }
+        if ($profile === 'ind_repite' && $ctx['week'] === 2 && empty($ctx['repeat'])) $n['recorridos'] = min($n['recorridos'], 1);
+        if ($profile === 'ind_paso' && $ctx['week'] === 2 && $ctx['day_no'] === 2) { $n['recorridos'] += 1; $n['fichas'] += 1; }
+        demo_insert_log($adv['id'], $date, $ctx, $n, $done, '', '');
     }
 }
 
@@ -201,13 +251,11 @@ function demo_logs(array $adv, array $office, string $profile, string $today): v
 
 function demo_insert_log(int $advId, string $date, array $ctx, array $n, array $items, string $note, string $analisis): void
 {
-    $n = array_merge(array_fill_keys(array_keys(result_fields()), 0), $n);
-    q('INSERT INTO daily_logs (advisor_id, log_date, week_no, day_type, day_label, contactos, tratos, analizadas, promovidas, citas, captaciones, analisis, note, created_at, updated_at)
-       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)', [
-        $advId, $date, $ctx['week'], $ctx['type'], ctx_label($ctx),
-        $n['contactos'], $n['tratos'], $n['analizadas'], $n['promovidas'], $n['citas'], $n['captaciones'], $analisis ?: null, $note ?: null,
-        $date . ' 19:00:00', $date . ' 19:00:00',
-    ]);
+    $cols = []; $vals = [];
+    foreach (array_merge(array_keys(result_fields('residencial')), array_keys(result_fields('industrial'))) as $f) { $cols[] = $f; $vals[] = (int)($n[$f] ?? 0); }
+    q('INSERT INTO daily_logs (advisor_id, log_date, week_no, day_type, day_label, ' . implode(', ', $cols) . ', analisis, note, created_at, updated_at)
+       VALUES (?,?,?,?,?,' . implode(',', array_fill(0, count($cols), '?')) . ',?,?,?,?)',
+        array_merge([$advId, $date, $ctx['week'], $ctx['type'], ctx_label($ctx)], $vals, [$analisis ?: null, $note ?: null, $date . ' 19:00:00', $date . ' 19:00:00']));
     $logId = (int)db()->lastInsertId();
     foreach ($items as $k => $txt) q('INSERT INTO log_items (log_id, item_key, done, result_text) VALUES (?,?,1,?)', [$logId, $k, $txt ?: null]);
 }
