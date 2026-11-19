@@ -47,6 +47,10 @@ function cron_advisor(array $adv, array $office, callable $say): void
         send_checkpoint_reminder($adv, $office, $s);
         $say("Recordatorio de punto de control: {$adv['name']}");
     }
+    // Edalo: aviso a la oficina cuando el asesor repite la Semana 2 y si al terminar la repetición tampoco cumple.
+    $f = $s['filtro'] ?? null;
+    if ($f && $f['repeating'] && notice_once('filtro_repite:' . $adv['id'])) { send_filtro_email($adv, $office, $s, false); $say("Aviso de filtro (repite S2): {$adv['name']}"); }
+    if ($f && $f['failed'] && notice_once('filtro_falla:' . $adv['id'])) { send_filtro_email($adv, $office, $s, true); $say("Aviso de filtro (no cumplió): {$adv['name']}"); }
     if ($st['color'] === 'rojo' && $adv['status_color'] !== 'rojo') { send_red_alert($adv, $office, $s); $say("Alerta roja enviada: {$adv['name']}"); }
     if ($st['color'] !== $adv['status_color'] || $st['reason'] !== $adv['status_reason']) {
         q('UPDATE advisors SET status_color = ?, status_reason = ? WHERE id = ?', [$st['color'], $st['reason'], $adv['id']]);
@@ -178,6 +182,27 @@ function send_checkpoint_email(array $adv, array $office, array $s): void
         . '<p><a href="' . h(panel_link($office, (int)$adv['id'])) . '" style="color:#C75D3A;font-weight:bold">Registrar la decisión</a></p><p>— ' . h(P()['name']) . '</p>';
     send_mail(office_recipients((int)$office['id']), P()['name'] . ' · Punto de control de ' . $adv['name'] . ': ' . ($cp['pass'] ? 'cumple' : 'no cumple'),
         email_wrap('Punto de control · Semana 3', $html), admin_recipients(), 'punto_control', (int)$office['id'], (int)$adv['id']);
+}
+
+/** Edalo · Filtro de la Semana 2: avisa a la oficina que el asesor repite la semana, o que la repitió y no cumplió. */
+function send_filtro_email(array $adv, array $office, array $s, bool $failed): void
+{
+    $f = $s['filtro'];
+    $name = first_name($adv['name']);
+    $rows = '';
+    foreach (FILTRO_S2 as $k => $min) {
+        $v = (int)$f['sums'][$k];
+        $rows .= '<li>' . ($v >= $min ? '✅' : '❌') . ' ' . h(result_fields()[$k]) . ': ' . $v . ' de ' . $min . '</li>';
+    }
+    $html = '<p>' . h(director_name((int)$office['id'])) . ', ' . ($failed
+            ? '<b>' . h($adv['name']) . '</b> repitió su Semana 2 y tampoco completó su filtro. Ya pasa a la Semana 3; habla con ' . h($name) . ' y registra si continúa.'
+            : '<b>' . h($adv['name']) . '</b> no completó su filtro al cerrar la Semana 2, así que <b>repite la Semana 2</b>. En cuanto lo complete, empieza la Semana 3 al día siguiente.')
+        . '</p><p><b>Su filtro (semanas 1 y 2 juntas):</b></p><ul>' . $rows . '</ul>'
+        . ($failed ? '' : '<p><b>Te sugiero:</b> acompáñalo esta semana con sus llamadas y recorridos. ' . h(ucfirst(filtro_falta_frase($f['faltan']))) . '.</p>')
+        . '<p><a href="' . h(panel_link($office, (int)$adv['id'])) . '" style="color:#C75D3A;font-weight:bold">' . ($failed ? 'Registrar la decisión' : 'Ver su detalle') . '</a></p><p>— ' . h(P()['name']) . '</p>';
+    send_mail(office_recipients((int)$office['id'], ['director', 'gerente', 'team_leader']),
+        P()['name'] . ' · ' . $adv['name'] . ($failed ? ' no completó su filtro de la Semana 2' : ' repite la Semana 2'),
+        email_wrap($failed ? 'Filtro de la Semana 2 · no cumplió' : 'Filtro de la Semana 2 · repite la semana', $html), [], 'filtro_s2', (int)$office['id'], (int)$adv['id']);
 }
 
 /** Avisa al director (una sola vez por asesor y tema) de los temas de oficina que faltan programar. */

@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<link rel="icon" href="assets/edalo-icon-192.png">
+<title>Playbook de Edalo</title>
+</head>
+<body>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: una columna de lectura, secciones como fichas de trabajo de la oficina. */
+:root {
+  --bg: #F3F4F2; --card: #FFFFFF; --ink: #18263A; --ink2: #34465F; --muted: #5C6676;
+  --line: #DCE1E6; --cream: #E9EDF1; --terra: #2F5D8A; --terra-bg: #E3ECF5; --gold: #7A6235; --gold-l: #D9CFB8;
+  --ok: #2E8B57; --warn: #B08600; --bad: #C0392B;
+  --f: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #141A28; --card: #1C2436; --ink: #EEF0F5; --ink2: #C9CEDA; --muted: #A3AAB9;
+  --line: #2E3850; --cream: #232C42; --terra: #8DB4DE; --terra-bg: #1F2D40; --gold: #D9BE8A; --gold-l: #4A4030;
+  --ok: #5CC38A; --warn: #E5BD45; --bad: #F07A6A; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #141A28; --card: #1C2436; --ink: #EEF0F5; --ink2: #C9CEDA; --muted: #A3AAB9;
+  --line: #2E3850; --cream: #232C42; --terra: #8DB4DE; --terra-bg: #1F2D40; --gold: #D9BE8A; --gold-l: #4A4030;
+  --ok: #5CC38A; --warn: #E5BD45; --bad: #F07A6A; color-scheme: dark }
+
+body { background: var(--bg); color: var(--ink); font: 17px/1.55 var(--f); }
+.wrap { max-width: 760px; margin: 0 auto; padding-block: 28px 64px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h1, h2, h3 { line-height: 1.2; text-wrap: balance; margin: 0; }
+h1 { font-size: 2rem; font-weight: 800; letter-spacing: -0.01em; }
+h2 { font-size: 1.3rem; font-weight: 800; }
+h3 { font-size: 1.02rem; font-weight: 700; }
+p { margin: 0; }
+.eyebrow { font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; font-weight: 700; color: var(--gold); }
+.muted { color: var(--muted); }
+
+.head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 22px; }
+.brand { display: flex; align-items: center; gap: 8px; }
+.brand b { letter-spacing: .22em; font-size: .95rem; }
+.brand small { display: block; font-size: .66rem; color: var(--muted); letter-spacing: 0; font-weight: 500; }
+.r2 { text-align: right; font-size: .78rem; line-height: 1.3; color: var(--gold); }
+.r2 b { letter-spacing: .06em; }
+
+.intro { display: flex; gap: 16px; align-items: flex-start; background: var(--card); border: 1.5px solid var(--gold-l); border-radius: 18px; padding: 18px; margin: 18px 0 8px; }
+.intro img { width: 64px; height: 64px; border-radius: 50%; flex: 0 0 64px; object-fit: cover; }
+.intro p { font-size: 1rem; }
+
+.toc { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 6px; }
+.toc a { font-size: .86rem; font-weight: 600; color: var(--ink2); text-decoration: none; border: 1px solid var(--line); background: var(--card); border-radius: 99px; padding: 6px 12px; }
+.toc a:hover, .toc a:focus-visible { border-color: var(--gold); outline: none; }
+
+section { margin-top: 34px; display: flex; flex-direction: column; gap: 14px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 620px) { .grid2 { grid-template-columns: 1fr; } }
+
+ul.list, ol.list { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 6px; }
+.check { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+.check li { display: flex; gap: 10px; align-items: flex-start; }
+.check input { width: 20px; height: 20px; margin-top: 3px; flex: 0 0 20px; accent-color: var(--ink); }
+.check label { cursor: pointer; }
+.where { font-size: .82rem; color: var(--muted); display: block; }
+
+.role { border-top: 3px solid var(--gold); }
+.role h3 { margin-bottom: 2px; }
+
+.rhythm { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 0; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; background: var(--card); }
+.rhythm > div { padding: 14px 16px; border-bottom: 1px solid var(--line); }
+.rhythm > div:nth-last-child(-n+2) { border-bottom: 0; }
+.rhythm .when { background: var(--cream); font-weight: 800; font-size: .9rem; }
+.rhythm .when small { display: block; font-weight: 500; color: var(--muted); font-size: .78rem; }
+@media (max-width: 520px) { .rhythm { grid-template-columns: 1fr; } .rhythm .when { border-bottom: 0; padding-bottom: 4px; } }
+
+.sem { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 620px) { .sem { grid-template-columns: 1fr; } }
+.dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
+.dot.v { background: var(--ok); } .dot.a { background: var(--warn); } .dot.r { background: var(--bad); }
+
+.tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 16px; background: var(--card); }
+table { width: 100%; border-collapse: collapse; font-size: .94rem; min-width: 520px; }
+th, td { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); background: var(--cream); }
+tr:last-child td { border-bottom: 0; }
+
+.rules { counter-reset: r; list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+.rules li { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px 16px; }
+.rules b { color: var(--terra); }
+
+details { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px 16px; }
+details + details { margin-top: 8px; }
+summary { cursor: pointer; font-weight: 700; }
+summary:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; border-radius: 6px; }
+details p { margin-top: 8px; color: var(--ink2); }
+
+.note { background: var(--terra-bg); border-radius: 14px; padding: 14px 16px; font-size: .95rem; }
+.wa { display: inline-flex; align-items: center; gap: 10px; background: #1F7A44; color: #FFFFFF; font-weight: 700; text-decoration: none; border-radius: 14px; padding: 12px 18px; margin-top: 4px; }
+.wa:hover, .wa:focus-visible { background: #17643A; outline: none; }
+.wa svg { flex: 0 0 22px; }
+.contact { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+.phone { font-variant-numeric: tabular-nums; font-weight: 700; user-select: all; }
+.foot { margin-top: 40px; text-align: center; color: var(--muted); font-size: .85rem; }
+.foot b { color: var(--gold); }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+html { scroll-behavior: smooth; }
+</style>
+
+<div class="wrap">
+  <header class="head">
+    <div class="brand">
+      <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><rect x="1.5" y="1.5" width="27" height="27" rx="3" fill="none" stroke="#2F5D8A" stroke-width="2.2"/><path d="M1.5 10 H18 M10 10 V20 M18 20 H28.5 M18 10 V15" fill="none" stroke="#2F5D8A" stroke-width="2.2"/><circle cx="23" cy="25" r="2.2" fill="#B89860"/></svg>
+      <span><b>EDALO</b><small>by Oscar Márquez Seminars</small></span>
+    </div>
+    <div class="r2"><b>R²CP ELITE</b><br><i>Construye con método</i></div>
+  </header>
+
+  <span class="eyebrow">Playbook para la oficina</span>
+  <h1>Cómo usar Edalo en tu oficina</h1>
+
+  <div class="intro">
+    <img src="data:image/jpeg;base64,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" alt="Edalo" width="64" height="64">
+    <p><b>Edalo es el Team Leader digital de tus asesores durante el curso Fast Track Industrial (4 semanas): locales, oficinas, bodegas, naves y terrenos.</b> Les dice qué hacer cada día, les comparte los videos y les pide que registren su día. Tu trabajo es que lo usen, recibirlos en sus citas, aplicarles sus Retos y atender a quien Edalo te señale.</p>
+  </div>
+
+  <p class="pdf-link" style="margin:0 0 14px"><a href="Playbook_Edalo.pdf" download style="font-weight:600;color:#2F5D8A">Descargar en PDF para imprimir o compartir</a></p>
+  <nav class="toc" aria-label="Contenido">
+    <a href="#quien">Quién hace qué</a>
+    <a href="#entrar">Cómo entrar</a>
+    <a href="#antes">Antes de arrancar</a>
+    <a href="#alta">Alta de un asesor</a>
+    <a href="#numeros">Números y metas</a>
+    <a href="#citas">Citas y Retos</a>
+    <a href="#filtro">Filtro de la Semana 2</a>
+    <a href="#control">Punto de control</a>
+    <a href="#evaluacion">Evaluación</a>
+    <a href="#ritmo">Tu ritmo</a>
+    <a href="#semaforo">Semáforo</a>
+    <a href="#correos">Correos</a>
+    <a href="#reglas">Reglas de oro</a>
+    <a href="#dudas">Dudas comunes</a>
+  </nav>
+
+  <section id="quien">
+    <h2>1. Quién hace qué</h2>
+    <div class="grid2">
+      <div class="card role"><h3>Director</h3><p>Da de alta asesores, configura la oficina, revisa el reporte del viernes y decide en el filtro de la Semana 2 y en el punto de control. Puede dar de baja.</p></div>
+      <div class="card role"><h3>Gerente</h3><p>Igual que el director. Puede dar de baja.</p></div>
+      <div class="card role"><h3>Team Leader de la oficina</h3><p>Recibe a cada asesor en sus <b>citas en la oficina</b>, le aplica sus <b>Retos</b>, lo acompaña a prospectar y califica su <b>Conocimiento</b> en la evaluación final. No da de baja.</p></div>
+      <div class="card role"><h3>Asesor</h3><p>Entra con su enlace, sigue «Esto te toca hoy», hace sus <b>10 llamadas diarias</b> y registra su día en menos de 2 minutos.</p></div>
+    </div>
+  </section>
+
+  <section id="entrar">
+    <h2>2. Cómo entras a Edalo</h2>
+    <div class="card">
+      <ol class="list">
+        <li>Oscar te manda por WhatsApp tu <b>correo</b> y tu <b>contraseña inicial</b>.</li>
+        <li>Abre <a href="https://edalo.oscarmarquez.com"><b>edalo.oscarmarquez.com</b></a> en tu celular o en tu computadora.</li>
+        <li>Escribe tu correo y tu contraseña y toca <b>Entrar</b>. Verás solo el panel de <b>tu oficina</b>.</li>
+        <li>Ve a <b>Mi cuenta</b> y <b>cambia tu contraseña</b> por una tuya (mínimo 10 caracteres).</li>
+        <li>En el celular, toca <b>Agregar a pantalla de inicio</b> para tenerla como una app más.</li>
+      </ol>
+      <p class="where" style="margin-top:10px">La pantalla de entrada dice <b>Ariadna · Edalo</b> porque es la misma plataforma: Ariadna es el curso residencial y Edalo el industrial. Si tu oficina tiene los dos, verás las pestañas <b>Todos · Ariadna · Edalo</b>. Los asesores <b>no</b> usan esta entrada: cada uno entra con su enlace personal. ¿Olvidaste tu contraseña? Escríbele a Oscar y te da una nueva.</p>
+    </div>
+  </section>
+
+  <section id="antes">
+    <h2>3. Antes de arrancar (una sola vez)</h2>
+    <div class="card">
+      <ul class="check">
+        <li><input type="checkbox" id="c1"><label for="c1">Entrar y <b>cambiar tu contraseña</b>. <span class="where">Mi cuenta</span></label></li>
+        <li><input type="checkbox" id="c2"><label for="c2">Marcar los <b>días hábiles</b> de la oficina. <span class="where">Configuración</span></label></li>
+        <li><input type="checkbox" id="c3"><label for="c3">Poner el día de <b>capacitación interna</b> (políticas y documentos de la oficina). <span class="where">Configuración</span></label></li>
+        <li><input type="checkbox" id="c4"><label for="c4">Revisar la hora de los <b>avisos</b> a los asesores (9 am y 8 pm). <span class="where">Configuración</span></label></li>
+        <li><input type="checkbox" id="c5"><label for="c5">Tener impresos <b>Mi Mapa Industrial</b> y el <b>Impulsor Industrial</b> para entregarlos.</label></li>
+        <li><input type="checkbox" id="c6"><label for="c6">Elegir quién será el <b>Team Leader</b> de cada asesor: él recibe sus citas y le aplica sus Retos.</label></li>
+      </ul>
+      <p class="where" style="margin-top:6px">En Edalo no hay temas de oficina que programar en Sesiones: todo lo que el asesor necesita viene en sus videos, sus citas con el Team Leader y su capacitación interna.</p>
+    </div>
+  </section>
+
+  <section id="alta">
+    <h2>4. Alta de un asesor</h2>
+    <div class="card">
+      <ol class="list">
+        <li><b>Asesores → Alta de asesor:</b> nombre, celular y fecha de inicio (puede ser hoy). Si tu oficina tiene los dos programas, elige <b>Edalo · Fast Track Industrial</b>.</li>
+        <li>Toca <b>Enviar enlace por WhatsApp</b>. Ese enlace es personal: que no lo comparta.</li>
+        <li>Pídele que lo abra en su celular, lo <b>agregue a su pantalla de inicio</b> y toque <b>Activar avisos de Edalo</b>.</li>
+        <li>Entrégale <b>Mi Mapa Industrial</b> y el <b>Impulsor Industrial</b> impresos.</li>
+        <li>Dile: <i>«Edalo es tu Team Leader estas 4 semanas. Haz tus 10 llamadas cada día y cada noche cuéntale cómo te fue.»</i></li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="numeros">
+    <h2>5. Números del día y metas</h2>
+    <div class="card">
+      <p>Cada día el asesor anota estos 6 números. La meta es la misma para todos: no se la pone el asesor.</p>
+    </div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Número</th><th>Qué cuenta</th><th>S1</th><th>S2</th><th>S3</th><th>S4</th></tr></thead>
+        <tbody>
+          <tr><td><b>Llamadas</b></td><td>Llamadas del Impulsor Industrial (10 al día)</td><td>50</td><td>50</td><td>50</td><td>50</td></tr>
+          <tr><td><b>Recorridos</b></td><td>Recorridos de zona: calles, plazas y parques</td><td>2</td><td>2</td><td>2</td><td>2</td></tr>
+          <tr><td><b>Fichas</b></td><td>Fichas de inmuebles levantadas</td><td>2</td><td>3</td><td>3</td><td>2</td></tr>
+          <tr><td><b>Cadenas</b></td><td>Cadenas de contacto iniciadas</td><td>1</td><td>1</td><td>2</td><td>1</td></tr>
+          <tr><td><b>Leads</b></td><td>Leads válidos: nombre, contacto y una necesidad concreta</td><td>1</td><td>1</td><td>2</td><td>1</td></tr>
+          <tr><td><b>Piezas</b></td><td>Posts o flyers creados</td><td>1</td><td>2</td><td>2</td><td>1</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <p><b>Mis logros:</b> el asesor marca en su pantalla, con fecha, su <b>captación autorizada</b>, su <b>oferta formal por escrito</b>, su <b>inquilino calificado con visita</b> y su <b>renta cerrada</b>. Tú los ves en su detalle.</p>
+    </div>
+  </section>
+
+  <section id="citas">
+    <h2>6. Citas con el Team Leader y Retos</h2>
+    <div class="note" style="margin-bottom:12px"><b>Por qué importan:</b> Edalo acompaña al asesor todos los días, pero <b>quien va a su oficina es quien se queda en el negocio</b>. Por eso cada video termina con una cita contigo.</div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Semana</th><th>Reto, después de ver el video</th><th>Cierre de semana</th></tr></thead>
+        <tbody>
+          <tr><td><b>1</b></td><td>Día 1: bienvenida (conoce la oficina y agenda sus horarios contigo) y Reto de los Videos 1 y 2</td><td>Día 5: revisión semanal (incluye las preguntas del Video 3)</td></tr>
+          <tr><td><b>2</b></td><td>Día 1: Videos 4 y 5<br>Día 3: Video 6</td><td>Día 5: revisen su filtro</td></tr>
+          <tr><td><b>3</b></td><td>Día 1: Video 7<br>Día 2: Videos 8 y 9<br>Día 3: Video 10</td><td>Día 5: punto de control</td></tr>
+          <tr><td><b>4</b></td><td>Día 1: Video 11<br>Día 2: Video 12</td><td>Día 5: evaluación final</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <ol class="list">
+        <li>La hora la <b>acuerdan el asesor y su Team Leader</b>. La oficina no tiene que programarla.</li>
+        <li>El Reto es <b>el mismo día del video</b>: el asesor lo ve y se queda en la oficina. Los días con 2 videos, le aplicas los dos Retos en la misma cita.</li>
+        <li><b>Cómo aplicar el Reto:</b> abre al asesor y toca <b>Aplicar Reto</b> (también aparece en «Hoy vienen a la oficina»). Hazle las 5 preguntas <b>de palabra</b>; cada una trae su <b>respuesta clave</b> y el minuto del video donde está. Marca «La entendió» o «Hay que repasar».</li>
+        <li><b>Cómo cuenta:</b> 4 o 5 de 5 = superado · 3 de 5 = a medias · 2 o menos = repasa el video. En su cierre de semana le vuelves a preguntar las que no supo.</li>
+        <li><b>En Edalo los Retos no suman puntos por sí solos:</b> son tu base para calificar su <b>Conocimiento</b> en la evaluación final (sección 9).</li>
+        <li>Si un asesor falta a una cita, Edalo te lo sugiere; si falta a <b>2</b>, se pone en <b>amarillo</b>.</li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="filtro">
+    <h2>7. Filtro de la Semana 2</h2>
+    <div class="note">Lo industrial empieza en la Semana 3. Para llegar ahí, el asesor primero necesita el <b>ritmo de prospección</b>.</div>
+    <div class="card">
+      <p><b>Al cerrar la Semana 2</b>, sumando las semanas 1 y 2, el asesor necesita:</p>
+      <ul class="list">
+        <li><b>100 llamadas</b> del Impulsor</li>
+        <li><b>4 recorridos</b> de zona</li>
+        <li><b>2 leads</b> válidos</li>
+      </ul>
+    </div>
+    <div class="card">
+      <ol class="list">
+        <li><b>Si cumple,</b> pasa a la Semana 3.</li>
+        <li><b>Si no cumple, repite la Semana 2.</b> En su pantalla ve cuánto le falta. Se pone en <b>amarillo</b> y te llega un correo.</li>
+        <li><b>En cuanto completa lo que le falta</b>, la Semana 3 empieza <b>al día siguiente</b>. No tiene que esperar a que termine la semana.</li>
+        <li><b>Se repite una sola vez.</b> Si al terminar la repetición tampoco cumple, pasa a la Semana 3, te llega otro correo y <b>la oficina decide</b> si continúa.</li>
+      </ol>
+      <p class="where">Mientras repite, acompáñalo: una mañana de llamadas juntos o un recorrido de zona suele destrabarlo.</p>
+    </div>
+  </section>
+
+  <section id="control">
+    <h2>8. Punto de control de la Semana 3</h2>
+    <div class="card">
+      <p><b>Al cerrar la Semana 3</b>, el asesor cumple si tiene <b>50 puntos o más</b> en su evaluación y, además, <b>al menos una</b> de estas tres:</p>
+      <ul class="list">
+        <li><b>5 leads</b> válidos</li>
+        <li><b>1 captación</b> autorizada por el propietario</li>
+        <li><b>1 inquilino calificado</b> con visita</li>
+      </ul>
+    </div>
+    <div class="card">
+      <ol class="list">
+        <li>El asesor ve en su pantalla qué cumplió y qué le faltó. Edalo <b>no lo detiene</b>: la decisión es de la oficina.</li>
+        <li>Te llega el correo del <b>punto de control</b> con su evaluación.</li>
+        <li>Habla con él y registra en su detalle si <b>continúa o no continúa</b> (si no continúa, escribe el motivo).</li>
+        <li>Mientras no lo registres, Edalo te lo <b>recuerda cada día</b>. Si no cumple, se pone en <b>rojo</b> hasta que decidas.</li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="evaluacion">
+    <h2>9. Evaluación (100 puntos)</h2>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Bloque</th><th>Qué mide</th><th>Puntos</th></tr></thead>
+        <tbody>
+          <tr><td><b>Prospección</b></td><td>Llamadas (meta 200), recorridos (8), fichas (10) y cadenas (5): 5 puntos cada uno, proporcional a la meta</td><td>20</td></tr>
+          <tr><td><b>Leads</b></td><td>4 puntos por lead válido, hasta 5 leads</td><td>20</td></tr>
+          <tr><td><b>Conocimiento</b></td><td>Conoce las propiedades que levantó (0 a 7) y las zonas y parques de su ciudad (0 a 7): <b>los calificas tú</b>, con apoyo de sus Retos. Posts o flyers: 6 puntos, proporcional a 6 piezas.</td><td>20</td></tr>
+          <tr><td><b>Resultados</b></td><td>Captación autorizada 15 · oferta formal por escrito 15 · renta cerrada 10</td><td>40</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <p><b>Cómo calificas el Conocimiento:</b> en el detalle del asesor, debajo de su evaluación, escribe del 0 al 7 qué tan bien conoce sus propiedades y sus zonas. Pregúntale por las fichas que levantó y por los parques y avenidas que recorrió; sus Retos te dicen en qué temas está firme.</p>
+      <p><b>Niveles:</b> 90 o más Top · 70 a 89 Va bien · 50 a 69 Necesita apoyo · menos de 50 No continúa, salvo decisión del Team Leader.</p>
+    </div>
+  </section>
+
+  <section id="ritmo">
+    <h2>10. Tu ritmo con Edalo</h2>
+    <div class="rhythm">
+      <div class="when">Cada mañana<small>5 minutos</small></div>
+      <div>Abre tu panel en la pestaña <b>Edalo</b>: revisa quién <b>viene hoy a su cita</b> y lee <b>«Edalo te sugiere atender hoy a»</b>. Llama primero a los rojos y luego a los amarillos.</div>
+      <div class="when">Viernes<small>6 pm</small></div>
+      <div>Llega el <b>reporte semanal de Edalo</b>, separado del de Ariadna. Revísalo con tu gerente y Team Leader.</div>
+      <div class="when">Semana 2<small>cierre</small></div>
+      <div>Revisa su <b>filtro</b> en su cita del día 5. Si repite, acompáñalo hasta que lo complete.</div>
+      <div class="when">Semana 3<small>cierre</small></div>
+      <div>Llega el correo del <b>punto de control</b>. Habla con el asesor y registra su decisión.</div>
+      <div class="when">Semana 4<small>cierre</small></div>
+      <div>Califica su <b>Conocimiento</b> y revisen juntos su <b>evaluación de 100 puntos</b> y su plan de los próximos 30 días.</div>
+    </div>
+  </section>
+
+  <section id="semaforo">
+    <h2>11. El semáforo</h2>
+    <div class="sem">
+      <div class="card"><h3><span class="dot v"></span>Verde</h3><p>Registra y avanza. <b>Reconócelo.</b> Un mensaje de «vas muy bien» vale mucho.</p></div>
+      <div class="card"><h3><span class="dot a"></span>Amarillo</h3><p><b>2 días hábiles sin registrar</b>, faltó a <b>2 citas</b> contigo o <b>repite la Semana 2</b>. Llámale hoy.</p></div>
+      <div class="card"><h3><span class="dot r"></span>Rojo</h3><p>Cerró su Semana 1 <b>sin actividad</b> o <b>no cumple el punto de control</b> de la Semana 3. <b>Reunión hoy.</b></p></div>
+    </div>
+  </section>
+
+  <section id="correos">
+    <h2>12. Correos que vas a recibir</h2>
+    <p class="muted" style="margin:0">Llegan de <b>Edalo · R²CP Elite</b> (edalo@oscarmarquez.com).</p>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Correo</th><th>Cuándo llega</th><th>Qué haces</th></tr></thead>
+        <tbody>
+          <tr><td><b>Reporte semanal</b></td><td>Viernes 6 pm</td><td>Revísalo con tu equipo.</td></tr>
+          <tr><td><b>Repite la Semana 2</b></td><td>Cuando no completa su filtro</td><td>Acompáñalo con llamadas y recorridos.</td></tr>
+          <tr><td><b>No completó su filtro</b></td><td>Al terminar la repetición sin cumplir</td><td>Decide si continúa.</td></tr>
+          <tr><td><b>Asesor en rojo</b></td><td>Al pasar a rojo</td><td>Habla con él hoy.</td></tr>
+          <tr><td><b>Punto de control</b></td><td>Al cerrar su Semana 3</td><td>Decide si continúa.</td></tr>
+          <tr><td><b>Decisión pendiente</b></td><td>Cada día, hasta que registres la decisión</td><td>Regístrala en su detalle.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="reglas">
+    <h2>13. Reglas de oro</h2>
+    <ul class="rules">
+      <li><b>10 llamadas diarias, desde el día 1.</b> Sin prospección no hay leads, y sin leads no hay Semana 3.</li>
+      <li><b>Que vengan a la oficina.</b> Cada video termina con su Reto contigo: no lo canceles ni dejes que se lo salte.</li>
+      <li><b>Una empresa decide con números, no con emoción.</b> Que el asesor domine sus números y sus zonas antes de presentarse con un cliente.</li>
+      <li><b>Acompaña, no vigiles.</b> Edalo te dice a quién ayudar, no a quién regañar.</li>
+      <li><b>Los registros detallados no van en Edalo.</b> Nombres, teléfonos y seguimiento van en la agenda, el celular o el CRM de la oficina.</li>
+      <li><b>Toda baja lleva motivo.</b> Queda en «Movimientos» con tu nombre y fecha.</li>
+    </ul>
+  </section>
+
+  <section id="dudas">
+    <h2>14. Dudas comunes</h2>
+    <div>
+      <details><summary>El asesor perdió su enlace</summary><p>En su detalle toca <b>Enviar enlace por WhatsApp</b>. Si crees que alguien más lo tiene, usa <b>Generar enlace nuevo</b>; el anterior deja de funcionar.</p></details>
+      <details><summary>Se le olvidó su PIN</summary><p>En su detalle toca <b>Restablecer PIN</b>. La próxima vez que entre, Edalo le pide crear uno nuevo. Lo puede hacer el director, el gerente o el team leader.</p></details>
+      <details><summary>Se le olvidó registrar su día</summary><p>A la mañana siguiente, hasta las 12:00, Edalo le propone registrar el día anterior.</p></details>
+      <details><summary>Repite la Semana 2: ¿pierde lo que ya hizo?</summary><p>No. Todo lo que registró cuenta. Solo vuelve a las actividades de la Semana 2 hasta completar su filtro, y la Semana 3 empieza al día siguiente de completarlo.</p></details>
+      <details><summary>Trabaja otros días que la oficina</summary><p>En su detalle marca sus <b>días hábiles</b> propios. Edalo recorre sus actividades a esos días.</p></details>
+      <details><summary>No le llegan los avisos</summary><p>Que abra Edalo desde la pantalla de inicio y toque <b>Activar avisos de Edalo</b>. Si no los activa, le llegan por correo si diste de alta su correo.</p></details>
+      <details><summary>Un video no se reproduce</summary><p>Escríbele a Oscar por WhatsApp (botón de abajo) con el nombre del video y el día en que aparece.</p></details>
+    </div>
+    <div class="note contact">
+      <p><b>¿Tienes una pregunta o un comentario?</b> Escríbele directo a Oscar. Si ves algo que se puede mejorar, cuéntalo: Edalo se actualiza con lo que vivimos en las oficinas.</p>
+      <a class="wa" href="https://wa.me/525562154614" target="_blank" rel="noopener"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.4.1-.6.3-.2.2-.8.8-.8 1.9s.8 2.2.9 2.4c.1.2 1.6 2.5 4 3.5 1.5.6 2.1.7 2.8.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2l-.5-.2z"/></svg>Escríbele a Oscar por WhatsApp</a>
+      <p class="muted">WhatsApp: <span class="phone">+52 55 6215 4614</span></p>
+    </div>
+  </section>
+
+  <p class="foot"><b>Edalo · Construye con método</b><br>Team Leader del curso Fast Track Industrial · R²CP Elite · Oscar Márquez Seminars</p>
+</div>
+
+</body>
+</html>

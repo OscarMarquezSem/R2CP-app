@@ -96,8 +96,10 @@
 1. **Mensaje de bienvenida por WhatsApp nuevo**, uno por programa (Ariadna y Edalo), editable en **Ajustes** con {nombre}, {oficina} y {enlace}. Ya no lleva el emoji del hilo, que WhatsApp Web mostraba como «�».
 2. **Edalo:** en el detalle del asesor, los Retos ya no dicen «valen 10 puntos».
 3. **Correos marcados en español:** Gmail ya no ofrece traducirlos.
+4. **Edalo · correo del filtro de la Semana 2:** la oficina recibe un aviso cuando el asesor repite la Semana 2, y otro si al terminar la repetición tampoco cumple.
+5. **Playbooks:** el de Ariadna actualizado (pestañas, punto de control con recordatorio diario) y el nuevo de Edalo, cada uno con su PDF.
 
-**Archivos (4):** `admin_ajustes.php` y `asesor.php` sueltos en la carpeta de Ariadna; `app.php` y `mailer.php` dentro de `inc`.
+**Archivos (9):** sueltos en la carpeta de Ariadna: `admin_ajustes.php`, `asesor.php`, `playbook.html`, `Playbook_Ariadna.pdf`, `playbook_edalo.html`, `Playbook_Edalo.pdf`. Dentro de `inc`: `app.php`, `mailer.php`, `cron_tasks.php`.
 
 **Cómo aplicarla:** sube el zip a la carpeta de Ariadna → Extract con nombre de carpeta `ariadna`, destino `public_html` y ☑ «Overwrite existing files». No lleva `actualizar_plan.php` ni cambios en `config.php`.
 
