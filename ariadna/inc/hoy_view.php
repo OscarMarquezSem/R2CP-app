@@ -94,7 +94,7 @@ function render_hoy(array $V): void
     }
 
     echo '<form method="post" enctype="multipart/form-data" class="dayform" id="dayform"' . ($preview ? ' data-preview="1"' : '') . '>';
-    echo csrf_field() . '<input type="hidden" name="t" value="' . h($t) . '"><input type="hidden" name="action" value="save">';
+    echo adv_csrf_field($t) . '<input type="hidden" name="t" value="' . h($t) . '"><input type="hidden" name="action" value="save">';
     if (!empty($V['ayer_mode'])) echo '<input type="hidden" name="d" value="ayer">';
 
     if ($ctx['type'] === 'rest') {
@@ -415,7 +415,7 @@ function render_welcome(string $name, string $officeName, string $token, bool $p
     }
     echo '<div class="box"><h3>Aviso de privacidad (resumen)</h3><p>Uso tu nombre, celular, correo, lo que registras cada día y las fotos que subas solo para acompañarte en el curso y para que tu director, gerente y Team Leader de tu oficina vean tu avance. No comparto tus datos con nadie más.</p>'
         . '<p><a href="privacidad.php' . ($token ? '?t=' . h($token) : '') . '">Leer el aviso de privacidad completo</a></p></div>';
-    echo '<form method="post" class="form">' . csrf_field() . '<input type="hidden" name="t" value="' . h($token) . '"><input type="hidden" name="action" value="consent">'
+    echo '<form method="post" class="form">' . adv_csrf_field($token) . '<input type="hidden" name="t" value="' . h($token) . '"><input type="hidden" name="action" value="consent">'
         . '<label class="check big"><input type="checkbox" name="acepto" value="1" required> Leí el aviso de privacidad y acepto que mis datos se usen para mi acompañamiento.</label>'
         . '<button class="btn btn-main btn-block"' . ($preview ? ' type="button" disabled' : '') . '>Empecemos</button></form></div>';
 }

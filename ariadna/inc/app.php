@@ -298,6 +298,29 @@ function csrf_check(): void
     }
 }
 
+/**
+ * Protección de los formularios del asesor sin depender de la sesión del servidor:
+ * la firma sale de su enlace personal, así que no caduca aunque deje la página abierta horas en el celular.
+ */
+function adv_csrf(string $t): string
+{
+    return hash_hmac('sha256', 'hoy|' . $t, (string)cfg('app_secret', 'ariadna'));
+}
+
+function adv_csrf_field(string $t): string
+{
+    return '<input type="hidden" name="csrf" value="' . h(adv_csrf($t)) . '">';
+}
+
+function adv_csrf_check(string $t): void
+{
+    $v = $_POST['csrf'] ?? '';
+    if (!is_string($v) || $t === '' || !hash_equals(adv_csrf($t), $v)) {
+        http_response_code(400);
+        exit('No pudimos guardar. Regresa, recarga la página y vuelve a intentarlo.');
+    }
+}
+
 function new_token(): string
 {
     return bin2hex(random_bytes(32)); // 64 caracteres, 256 bits

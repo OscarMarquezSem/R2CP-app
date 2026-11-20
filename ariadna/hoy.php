@@ -26,7 +26,7 @@ if (!(int)$adv['active'] || $adv['decision'] === 'no_continua') {
 
 // Primera vez: Ariadna se presenta, aviso de privacidad y consentimiento
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && post('action') === 'consent') {
-    csrf_check();
+    adv_csrf_check($t);
     if (!empty($_POST['acepto'])) {
         q('UPDATE advisors SET consent_at = NOW(), consent_ip = ? WHERE id = ?', [client_ip(), $adv['id']]);
         redirect($self);
@@ -45,7 +45,7 @@ if (!$adv['consent_at']) {
 if ((int)$office['pin_enabled'] === 1) {
     $lockKey = 'pin:' . $adv['id'];
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array(post('action'), ['set_pin', 'pin'], true)) {
-        csrf_check();
+        adv_csrf_check($t);
         $pin = preg_replace('/\D/', '', (string)post('pin'));
         if (post('action') === 'set_pin' && !$adv['pin_hash']) {
             if (strlen($pin) !== 4 || $pin !== preg_replace('/\D/', '', (string)post('pin2'))) {
@@ -75,7 +75,7 @@ if ((int)$office['pin_enabled'] === 1) {
         $set = !$adv['pin_hash'];
         echo '<div class="card narrow center">' . brand_mark() . '<h2>' . ($set ? 'Crea tu PIN de 4 dígitos' : 'Escribe tu PIN') . '</h2>'
             . '<p class="muted">' . ($set ? 'Tu oficina pide un PIN para proteger tu información.' : 'Hola, ' . h(first_name($adv['name'])) . '.') . '</p>'
-            . '<form method="post" class="form pinform">' . csrf_field() . '<input type="hidden" name="t" value="' . h($t) . '"><input type="hidden" name="action" value="' . ($set ? 'set_pin' : 'pin') . '">'
+            . '<form method="post" class="form pinform">' . adv_csrf_field($t) . '<input type="hidden" name="t" value="' . h($t) . '"><input type="hidden" name="action" value="' . ($set ? 'set_pin' : 'pin') . '">'
             . '<input class="pin" name="pin" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" autocomplete="off" required placeholder="••••" aria-label="PIN">'
             . ($set ? '<input class="pin" name="pin2" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" autocomplete="off" required placeholder="Repite" aria-label="Repite tu PIN">' : '')
             . '<button class="btn btn-main btn-block">' . ($set ? 'Guardar mi PIN' : 'Entrar') . '</button></form></div>';
@@ -106,7 +106,7 @@ $items = $ctx ? day_items($ctx, [
 // Guardar mi día
 // ---------------------------------------------------------------------------
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && post('action') === 'save' && $ctx) {
-    csrf_check();
+    adv_csrf_check($t);
     $nums = [];
     foreach (result_fields() as $f => $_) $nums[$f] = max(0, min(999, (int)($_POST['n'][$f] ?? 0)));
     $note = mb_substr(trim((string)($_POST['note'] ?? '')), 0, 2000);
