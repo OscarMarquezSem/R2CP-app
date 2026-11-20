@@ -119,4 +119,5 @@
 
 | # | Cambio | Archivo |
 |---|---|---|
+| 8 | Oficinas: «Editar nombre, correo o rol» en cada usuario de la oficina (el correo no puede repetirse; la contraseña no cambia). | Listo: `admin_oficina.php` |
 | 1 | Preguntas del Reto para los 3 videos cortos (conceptos básicos, opinión de valor, perfilamiento), cuando estén grabados y transcritos. | Plan (se agregan desde el panel) |

@@ -35,6 +35,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             create_user($id, post('name'), $email, $pass, $role);
             flash('Usuario creado. Compártele su correo y contraseña; puede cambiarla en «Mi cuenta».');
         }
+    } elseif ($act === 'edit_user') {
+        $uid = (int)post('user_id');
+        $email = mb_strtolower(trim(post('email')));
+        $role = post('role');
+        $name = trim(post('name'));
+        if ($name === '' || !filter_var($email, FILTER_VALIDATE_EMAIL) || !in_array($role, ['director', 'gerente', 'team_leader'], true)) {
+            flash('Revisa el nombre, el correo y el rol.', 'err');
+        } elseif (val('SELECT id FROM users WHERE email = ? AND id <> ?', [$email, $uid])) {
+            flash('Ya existe otro usuario con ese correo.', 'err');
+        } else {
+            q('UPDATE users SET name = ?, email = ?, role = ? WHERE id = ? AND office_id = ?', [$name, $email, $role, $uid, $id]);
+            flash('Usuario actualizado. Si cambiaste el correo, desde ahora entra con el nuevo (la contraseña es la misma).');
+        }
     } elseif ($act === 'reset_pass') {
         $pass = (string)($_POST['password'] ?? '');
         if (mb_strlen($pass) < 10) flash('La contraseña debe tener al menos 10 caracteres.', 'err');
@@ -89,6 +102,16 @@ page_start($office['name'], ['nav' => $u, 'active' => 'admin']);
       <div class="actions" style="margin-top:8px">
         <form method="post" class="inline-form actions"><?= csrf_field() ?><input type="hidden" name="action" value="reset_pass"><input type="hidden" name="id" value="<?= $id ?>"><input type="hidden" name="user_id" value="<?= (int)$x['id'] ?>">
           <input type="text" name="password" placeholder="Nueva contraseña" minlength="10" style="max-width:220px;min-height:38px;margin:0"><button class="btn btn-sm btn-ghost">Restablecer</button></form>
+        <details class="edit-user" style="flex-basis:100%"><summary class="btn btn-sm btn-ghost">Editar nombre, correo o rol</summary>
+          <form method="post" class="form" style="margin-top:10px"><?= csrf_field() ?><input type="hidden" name="action" value="edit_user"><input type="hidden" name="id" value="<?= $id ?>"><input type="hidden" name="user_id" value="<?= (int)$x['id'] ?>">
+            <div class="grid2">
+              <label>Nombre<input name="name" required value="<?= h($x['name']) ?>"></label>
+              <label>Correo<input type="email" name="email" required value="<?= h($x['email']) ?>"></label>
+            </div>
+            <label>Rol<select name="role"><?php foreach (['director', 'gerente', 'team_leader'] as $r): ?><option value="<?= $r ?>" <?= $x['role'] === $r ? 'selected' : '' ?>><?= h(ROLE_LABELS[$r]) ?></option><?php endforeach; ?></select></label>
+            <button class="btn btn-main">Guardar cambios</button>
+          </form>
+        </details>
         <form method="post" class="inline-form"><?= csrf_field() ?><input type="hidden" name="action" value="toggle_user"><input type="hidden" name="id" value="<?= $id ?>"><input type="hidden" name="user_id" value="<?= (int)$x['id'] ?>">
           <button class="btn btn-sm <?= (int)$x['active'] ? 'btn-danger' : 'btn-ghost' ?>"><?= (int)$x['active'] ? 'Desactivar' : 'Activar' ?></button></form>
       </div>
