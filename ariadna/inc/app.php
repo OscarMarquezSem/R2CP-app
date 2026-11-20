@@ -397,6 +397,29 @@ function current_user(): ?array
     return $u;
 }
 
+/**
+ * Quién puede desactivar o borrar a quién en el equipo de la oficina:
+ * director → gerente y team leader · gerente → team leader · administrador → todos. Nadie a sí mismo.
+ */
+function can_manage_user(array $actor, array $target): bool
+{
+    if ((int)$actor['id'] === (int)$target['id'] || $target['role'] === 'admin') return false;
+    if ($actor['role'] === 'admin') return true;
+    if ((int)$actor['office_id'] !== (int)$target['office_id']) return false;
+    $can = ['director' => ['gerente', 'team_leader'], 'gerente' => ['team_leader']];
+    return in_array($target['role'], $can[$actor['role']] ?? [], true);
+}
+
+/** Borra para siempre a un asesor dado de baja, con todos sus registros y sus fotos. */
+function delete_advisor(int $advisorId): void
+{
+    foreach (all('SELECT li.photo FROM log_items li JOIN daily_logs l ON l.id = li.log_id WHERE l.advisor_id = ? AND li.photo IS NOT NULL', [$advisorId]) as $r) {
+        $f = APP_ROOT . '/uploads/' . basename((string)$r['photo']);
+        if (is_file($f)) @unlink($f);
+    }
+    q('DELETE FROM advisors WHERE id = ? AND active = 0', [$advisorId]);
+}
+
 function require_user(array $roles = []): array
 {
     $u = current_user();

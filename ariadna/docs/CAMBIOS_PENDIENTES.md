@@ -115,9 +115,21 @@
 
 **Cómo aplicarla:** sube el zip a la carpeta de Ariadna → Extract con nombre de carpeta `ariadna`, destino `public_html` (sin ninguna carpeta marcada) y ☑ «Overwrite existing files». No lleva `actualizar_plan.php` ni cambios en `config.php`.
 
+## Actualización 10 (`ariadna_actualizacion_10.zip`)
+Oficinas: «Editar nombre, correo o rol» en cada usuario. Archivo: `admin_oficina.php`.
+
+## Actualización 11 (`ariadna_actualizacion_11.zip`) · incluye la 10
+
+**Qué trae:**
+1. **Borrar asesores dados de baja:** en su detalle aparece «Borrar asesor para siempre» (director, gerente y administrador). Se borran su avance, registros, Retos y fotos.
+2. **Equipo de la oficina** (Configuración): el director desactiva y borra gerentes y team leaders; el gerente, team leaders. Primero se desactiva y luego se borra. Nadie puede borrarse a sí mismo ni al director.
+3. **Administrador:** botón «Borrar» para usuarios inactivos en Oficinas. Las oficinas no se borran: las inactivas van al final con su propio título y no cuentan en los totales de arriba.
+4. **Playbooks:** dos preguntas nuevas sobre cómo borrar asesores y personas del equipo.
+
+**Archivos (9):** sueltos en la carpeta de Ariadna: `admin.php`, `admin_oficina.php`, `asesor.php`, `config_oficina.php`, `playbook.html`, `Playbook_Ariadna.pdf`, `playbook_edalo.html`, `Playbook_Edalo.pdf`. Dentro de `inc`: `app.php`.
+
 ## Próxima actualización (se junta con lo que salga de la prueba)
 
 | # | Cambio | Archivo |
 |---|---|---|
-| 8 | Oficinas: «Editar nombre, correo o rol» en cada usuario de la oficina (el correo no puede repetirse; la contraseña no cambia). | Listo: `admin_oficina.php` |
 | 1 | Preguntas del Reto para los 3 videos cortos (conceptos básicos, opinión de valor, perfilamiento), cuando estén grabados y transcritos. | Plan (se agregan desde el panel) |

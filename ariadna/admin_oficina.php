@@ -58,6 +58,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($act === 'send_report') {
         $ok = send_weekly_report($office);
         flash($ok ? 'Reporte enviado a la dirección de la oficina (con copia para ti).' : 'No se pudo enviar. Revisa que la oficina tenga usuarios y los ajustes de correo.', $ok ? 'ok' : 'err');
+    } elseif ($act === 'delete_user') {
+        q('DELETE FROM users WHERE id = ? AND office_id = ? AND active = 0 AND role <> "admin"', [(int)post('user_id'), $id]);
+        flash('Usuario borrado.');
     } elseif ($act === 'toggle_user') {
         q('UPDATE users SET active = 1 - active WHERE id = ? AND office_id = ?', [(int)post('user_id'), $id]);
         flash('Usuario actualizado.');
@@ -114,6 +117,10 @@ page_start($office['name'], ['nav' => $u, 'active' => 'admin']);
         </details>
         <form method="post" class="inline-form"><?= csrf_field() ?><input type="hidden" name="action" value="toggle_user"><input type="hidden" name="id" value="<?= $id ?>"><input type="hidden" name="user_id" value="<?= (int)$x['id'] ?>">
           <button class="btn btn-sm <?= (int)$x['active'] ? 'btn-danger' : 'btn-ghost' ?>"><?= (int)$x['active'] ? 'Desactivar' : 'Activar' ?></button></form>
+        <?php if (!(int)$x['active']): ?>
+        <form method="post" class="inline-form" data-confirm="¿Borrar para siempre a <?= h($x['name']) ?>? No se puede deshacer."><?= csrf_field() ?><input type="hidden" name="action" value="delete_user"><input type="hidden" name="id" value="<?= $id ?>"><input type="hidden" name="user_id" value="<?= (int)$x['id'] ?>">
+          <button class="btn btn-sm btn-danger">Borrar</button></form>
+        <?php endif; ?>
       </div>
     </div>
   <?php endforeach; ?>

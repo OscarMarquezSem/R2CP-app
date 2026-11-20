@@ -62,6 +62,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             advisor_event((int)$adv['id'], $u, (int)$adv['active'] ? 'baja' : 'reactivacion', $note);
             flash((int)$adv['active'] ? 'Asesor dado de baja. Su enlace deja de funcionar.' : 'Asesor reactivado.');
         }
+    } elseif ($act === 'delete' && $canDecide && !(int)$adv['active']) {
+        $name = $adv['name'];
+        delete_advisor((int)$adv['id']);
+        flash($name . ' se borró por completo. Si regresa, dalo de alta otra vez.');
+        redirect('oficina.php' . ($qs ? '?' . $qs : ''));
     } elseif ($act === 'decision') {
         $d = post('decision');
         $note = mb_substr(post('decision_note'), 0, 500);
@@ -319,6 +324,14 @@ page_start($adv['name'], ['nav' => $u, 'office' => $office, 'active' => 'oficina
         <textarea name="note" rows="2" maxlength="1000"<?= (int)$adv['active'] ? ' required' : '' ?> placeholder="<?= (int)$adv['active'] ? 'Ej. Dejó la oficina; no registró actividad en 2 semanas…' : '' ?>"></textarea></label>
       <button class="btn btn-sm <?= (int)$adv['active'] ? 'btn-danger' : 'btn-ghost' ?>"><?= (int)$adv['active'] ? 'Dar de baja' : 'Reactivar' ?></button>
     </form>
+    <?php if (!(int)$adv['active']): ?>
+    <form method="post" class="form" style="margin-top:16px;border-top:1px solid var(--line);padding-top:14px" data-confirm="¿Borrar para siempre a <?= h($adv['name']) ?>? Se borran su avance, sus registros, sus Retos y sus fotos. No se puede deshacer.">
+      <?= csrf_field() ?><input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="<?= (int)$adv['id'] ?>">
+      <?php if (is_admin($u)): ?><input type="hidden" name="office" value="<?= (int)$office['id'] ?>"><?php endif; ?>
+      <p class="small muted">Está dado de baja. Si ya no va a regresar, puedes borrarlo por completo para que no aparezca en tu panel ni en las búsquedas. Si después regresa, se le da de alta otra vez.</p>
+      <button class="btn btn-sm btn-danger">Borrar asesor para siempre</button>
+    </form>
+    <?php endif; ?>
   <?php endif; ?>
 </div>
 

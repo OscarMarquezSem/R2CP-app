@@ -27,11 +27,11 @@ $global = ['asesores' => 0, 'verde' => 0, 'amarillo' => 0, 'rojo' => 0];
 foreach ($offices as $o) {
     $rows = office_advisors_stats($o);
     $c = ['verde' => 0, 'amarillo' => 0, 'rojo' => 0];
-    $t = array_fill_keys(array_keys(result_fields()), 0);
+    $t = array_fill_keys(array_keys(result_fields('residencial')), 0);
     $pct = 0; $score = 0; $inProgram = 0;
     foreach ($rows as $r) {
         $c[$r['stats']['status']['color']]++;
-        foreach ($t as $f => $_) $t[$f] += $r['stats']['totals'][$f];
+        foreach ($t as $f => $_) $t[$f] += (int)($r['stats']['totals'][$f] ?? 0);
         $pct += $r['stats']['pct'];
         $score += $r['stats']['evaluation']['total'];
         if (!$r['stats']['finished']) $inProgram++;
@@ -41,8 +41,10 @@ foreach ($offices as $o) {
         'pct' => $n ? (int)round($pct / $n) : 0, 'score' => $n ? (int)round($score / $n) : 0,
         'users' => (int)val('SELECT COUNT(*) FROM users WHERE office_id = ? AND active = 1', [$o['id']]),
         'notraining' => advisors_without_training($o)];
-    $global['asesores'] += $n;
-    foreach ($c as $k => $v) $global[$k] += $v;
+    if ((int)$o['active'] === 1) {   // las oficinas inactivas no cuentan en los totales de arriba
+        $global['asesores'] += $n;
+        foreach ($c as $k => $v) $global[$k] += $v;
+    }
 }
 
 page_start('Oficinas', ['nav' => $u, 'active' => 'admin', 'wide' => true]);
@@ -57,7 +59,7 @@ page_start('Oficinas', ['nav' => $u, 'active' => 'admin', 'wide' => true]);
 </div>
 
 <div class="summary">
-  <div class="kpi"><span class="kpi-v"><?= count($offices) ?></span><span class="kpi-l">Oficinas</span></div>
+  <div class="kpi"><span class="kpi-v"><?= count(array_filter($offices, fn($o) => (int)$o['active'] === 1)) ?></span><span class="kpi-l">Oficinas activas</span></div>
   <div class="kpi"><span class="kpi-v"><?= $global['asesores'] ?></span><span class="kpi-l">Asesores activos</span></div>
   <div class="kpi"><span class="kpi-v"><?= $global['verde'] ?></span><span class="kpi-l"><?= status_badge('verde') ?></span></div>
   <div class="kpi"><span class="kpi-v"><?= $global['amarillo'] ?></span><span class="kpi-l"><?= status_badge('amarillo') ?></span></div>
@@ -70,12 +72,15 @@ page_start('Oficinas', ['nav' => $u, 'active' => 'admin', 'wide' => true]);
     <th>Contactos</th><th>Citas</th><th>Captaciones</th><th>Evaluación prom.</th><th></th></tr></thead>
   <tbody>
   <?php if (!$cmp): ?><tr><td colspan="11" class="muted">Aún no hay oficinas.</td></tr><?php endif; ?>
-  <?php foreach ($cmp as $r): $o = $r['office']; ?>
-    <tr>
+  <?php $sep = false; foreach ($cmp as $r): $o = $r['office']; ?>
+    <?php if (!(int)$o['active'] && !$sep): $sep = true; ?>
+    <tr><td colspan="11" style="background:var(--cream);font-weight:700;font-size:.85rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)">Oficinas inactivas</td></tr>
+    <?php endif; ?>
+    <tr<?= !(int)$o['active'] ? ' style="opacity:.6"' : '' ?>>
       <td class="first"><a href="oficina.php?office=<?= (int)$o['id'] ?>"><b><?= h($o['name']) ?></b></a>
         <?= !(int)$o['active'] ? '<span class="action-hint">Inactiva</span>' : '' ?>
-        <?= $r['users'] === 0 ? '<span class="action-hint">Sin usuarios de dirección</span>' : '' ?>
-        <?= $r['notraining'] ? '<span class="action-hint">' . $r['notraining'] . ' sin capacitación interna</span>' : '' ?></td>
+        <?= (int)$o['active'] && $r['users'] === 0 ? '<span class="action-hint">Sin usuarios de dirección</span>' : '' ?>
+        <?= (int)$o['active'] && $r['notraining'] ? '<span class="action-hint">' . $r['notraining'] . ' sin capacitación interna</span>' : '' ?></td>
       <td data-l="Asesores" class="n"><?= $r['n'] ?></td>
       <td data-l="Verde" class="n"><?= $r['c']['verde'] ?></td>
       <td data-l="Amarillo" class="n"><?= $r['c']['amarillo'] ?></td>

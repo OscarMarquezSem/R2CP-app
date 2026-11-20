@@ -30,6 +30,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             q('INSERT IGNORE INTO office_training_dates (office_id, tdate) VALUES (?, ?)', [$office['id'], $d]);
             flash('Fecha agregada.');
         }
+    } elseif (in_array($act, ['team_toggle', 'team_delete'], true)) {
+        $t = one('SELECT * FROM users WHERE id = ? AND office_id = ?', [(int)post('user_id'), $office['id']]);
+        if (!$t || !can_manage_user($u, $t)) {
+            flash('No tienes permiso para cambiar a esa persona.', 'err');
+        } elseif ($act === 'team_toggle') {
+            q('UPDATE users SET active = 1 - active WHERE id = ?', [$t['id']]);
+            flash((int)$t['active'] ? $t['name'] . ' quedó inactivo: ya no puede entrar.' : $t['name'] . ' puede volver a entrar.');
+        } elseif (!(int)$t['active']) {
+            q('DELETE FROM users WHERE id = ? AND active = 0', [$t['id']]);
+            flash($t['name'] . ' se borró. Si regresa, el administrador lo da de alta otra vez.');
+        }
+        redirect($self);
     } elseif ($act === 'del_date') {
         q('DELETE FROM office_training_dates WHERE id = ? AND office_id = ?', [(int)post('date_id'), $office['id']]);
         flash('Fecha eliminada.');
@@ -42,6 +54,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $wd = parse_workdays($office['workdays']);
 $dates = all('SELECT * FROM office_training_dates WHERE office_id = ? AND tdate >= ? ORDER BY tdate', [$office['id'], office_today($office)]);
 $noTraining = advisors_without_training($office);
+$team = all('SELECT * FROM users WHERE office_id = ? ORDER BY active DESC, FIELD(role, "director", "gerente", "team_leader"), name', [$office['id']]);
+$canTeam = in_array($u['role'], ['admin', 'director', 'gerente'], true);
 page_start('Configuración', ['nav' => $u, 'office' => $office, 'active' => 'config']);
 $hidden = is_admin($u) ? '<input type="hidden" name="office" value="' . (int)$office['id'] . '">' : '';
 ?>
@@ -97,4 +111,27 @@ $hidden = is_admin($u) ? '<input type="hidden" name="office" value="' . (int)$of
     <div style="align-self:end;margin-bottom:14px"><button class="btn">Agregar fecha</button></div>
   </form>
 </div>
+<?php if ($canTeam): ?>
+<div class="card" id="equipo">
+  <h2>Equipo de la oficina</h2>
+  <p class="small muted">El director puede desactivar y borrar a gerentes y team leaders; el gerente, a team leaders. Primero se desactiva (ya no puede entrar) y después, si no va a regresar, se borra. Para agregar a alguien nuevo o cambiar su correo, escríbele a Oscar.</p>
+  <?php foreach ($team as $x): $can = can_manage_user($u, $x); ?>
+    <div class="plan-act">
+      <b><?= h($x['name']) ?></b> · <?= h(ROLE_LABELS[$x['role']] ?? $x['role']) ?> · <span class="muted"><?= h($x['email']) ?></span>
+      <?= !(int)$x['active'] ? ' · <b style="color:var(--red)">Inactivo</b>' : '' ?>
+      <?php if ((int)$x['id'] === (int)$u['id']): ?><span class="muted small"> · eres tú</span><?php endif; ?>
+      <?php if ($can): ?>
+      <div class="actions" style="margin-top:8px">
+        <form method="post" class="inline-form" data-confirm="<?= (int)$x['active'] ? '¿Desactivar a ' . h($x['name']) . '? Ya no podrá entrar.' : '¿Activar otra vez a ' . h($x['name']) . '?' ?>"><?= csrf_field() . $hidden ?><input type="hidden" name="action" value="team_toggle"><input type="hidden" name="user_id" value="<?= (int)$x['id'] ?>">
+          <button class="btn btn-sm <?= (int)$x['active'] ? 'btn-danger' : 'btn-ghost' ?>"><?= (int)$x['active'] ? 'Desactivar' : 'Activar' ?></button></form>
+        <?php if (!(int)$x['active']): ?>
+        <form method="post" class="inline-form" data-confirm="¿Borrar para siempre a <?= h($x['name']) ?>? No se puede deshacer."><?= csrf_field() . $hidden ?><input type="hidden" name="action" value="team_delete"><input type="hidden" name="user_id" value="<?= (int)$x['id'] ?>">
+          <button class="btn btn-sm btn-danger">Borrar</button></form>
+        <?php endif; ?>
+      </div>
+      <?php endif; ?>
+    </div>
+  <?php endforeach; ?>
+</div>
+<?php endif; ?>
 <?php page_end();
