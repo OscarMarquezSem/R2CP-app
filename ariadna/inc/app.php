@@ -245,9 +245,20 @@ function is_https(): bool
         || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
 }
 
+const SESSION_HOURS = 8;   // el panel de la oficina sigue abierto hasta 8 horas sin moverse
+
 function start_session(): void
 {
     if (session_status() === PHP_SESSION_ACTIVE) return;
+    // Las sesiones se guardan en storage/sessions para que el hosting no las borre a los 24 minutos.
+    $dir = APP_ROOT . '/storage/sessions';
+    if (!is_dir($dir)) @mkdir($dir, 0700, true);
+    if (is_dir($dir) && is_writable($dir)) {
+        session_save_path($dir);
+        ini_set('session.gc_maxlifetime', (string)(SESSION_HOURS * 3600));
+        ini_set('session.gc_probability', '1');
+        ini_set('session.gc_divisor', '100');
+    }
     session_name('ariadna_s');
     session_set_cookie_params([
         'lifetime' => 0,
@@ -257,6 +268,13 @@ function start_session(): void
         'samesite' => 'Lax',
     ]);
     session_start();
+    // Si pasaron más de 8 horas sin actividad, la sesión empieza de nuevo (hay que volver a entrar).
+    $now = time();
+    if (!empty($_SESSION['last_seen']) && $now - (int)$_SESSION['last_seen'] > SESSION_HOURS * 3600) {
+        $_SESSION = [];
+        session_regenerate_id(true);
+    }
+    $_SESSION['last_seen'] = $now;
 }
 
 function security_headers(): void

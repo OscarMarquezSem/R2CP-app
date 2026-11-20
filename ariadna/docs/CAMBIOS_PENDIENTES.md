@@ -109,6 +109,8 @@
 1. **Corrección importante (Ariadna y Edalo):** si el asesor dejaba su pantalla abierta en el celular más de unos 24 minutos, al guardar salía «La sesión expiró» y su día no se guardaba. Ahora la pantalla del asesor se protege con su enlace personal y no caduca.
 2. **Plan:** los botones Ariadna · Edalo se ven separados de las semanas, y Edalo tiene su propio texto de ayuda. La versión de la app sube a 1.4.0 para que todos los navegadores carguen los estilos nuevos.
 
+3. **Panel de la oficina:** la sesión de director, gerente y team leader dura hasta 8 horas sin actividad (antes, unos 24 minutos). Las sesiones se guardan en `storage/sessions`, que la app crea sola.
+
 **Archivos (5):** sueltos en la carpeta de Ariadna: `hoy.php`, `admin_plan.php`, `sw.js`. Dentro de `inc`: `app.php`, `hoy_view.php`.
 
 **Cómo aplicarla:** sube el zip a la carpeta de Ariadna → Extract con nombre de carpeta `ariadna`, destino `public_html` (sin ninguna carpeta marcada) y ☑ «Overwrite existing files». No lleva `actualizar_plan.php` ni cambios en `config.php`.
