@@ -9,14 +9,16 @@ if (current_user()) redirect(is_admin() ? 'admin.php' : 'oficina.php');
 $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
-    $email = mb_strtolower(post('email'));
+    $email = mb_strtolower(trim(post('email')));
     $pass = (string)($_POST['password'] ?? '');
+    $passTrim = trim($pass);   // al copiar de WhatsApp a veces se cuela un espacio
     $key = 'login:' . $email . '|' . client_ip();
     if (too_many_attempts($key, 6, 15)) {
         $error = 'Demasiados intentos. Espera 15 minutos y vuelve a intentar.';
     } else {
         $u = one('SELECT * FROM users WHERE email = ? AND active = 1', [$email]);
-        if ($u && password_verify($pass, $u['password_hash'])) {
+        if ($u && (password_verify($pass, $u['password_hash']) || ($passTrim !== $pass && password_verify($passTrim, $u['password_hash'])))) {
+            $pass = password_verify($pass, $u['password_hash']) ? $pass : $passTrim;
             clear_attempts($key);
             session_regenerate_id(true);
             $_SESSION['uid'] = (int)$u['id'];
@@ -39,8 +41,8 @@ page_start('Entrar', ['body' => 'auth', 'brand' => 'Ariadna · Edalo']);
   <?php if ($error): ?><div class="flash flash-err"><?= h($error) ?></div><?php endif; ?>
   <form method="post" class="form">
     <?= csrf_field() ?>
-    <label>Correo<input type="email" name="email" required autocomplete="username" value="<?= h(post('email')) ?>"></label>
-    <label>Contraseña<input type="password" name="password" required autocomplete="current-password"></label>
+    <label>Correo<input type="email" name="email" required autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" value="<?= h(post('email')) ?>"></label>
+    <label>Contraseña<input type="password" name="password" required autocomplete="current-password" autocapitalize="none" autocorrect="off" spellcheck="false"></label>
     <button class="btn btn-main btn-block">Entrar</button>
   </form>
   <p class="small muted center">¿Olvidaste tu contraseña? Pídele al administrador del programa que la restablezca.</p>

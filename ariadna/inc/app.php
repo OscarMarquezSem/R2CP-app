@@ -410,6 +410,31 @@ function can_manage_user(array $actor, array $target): bool
     return in_array($target['role'], $can[$actor['role']] ?? [], true);
 }
 
+/** Contraseña inicial fácil de dictar: sin letras que se confunden (0/O, 1/l/I). Ej.: Kx7m-Pq4r-Tz9w */
+function readable_password(): string
+{
+    $abc = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+    $out = '';
+    for ($g = 0; $g < 3; $g++) {
+        if ($g) $out .= '-';
+        for ($i = 0; $i < 4; $i++) $out .= $abc[random_int(0, strlen($abc) - 1)];
+    }
+    return $out;
+}
+
+/** Borra para siempre una oficina inactiva: sus usuarios, asesores, registros y fotos. */
+function delete_office(int $officeId): bool
+{
+    $o = one('SELECT * FROM offices WHERE id = ? AND active = 0', [$officeId]);
+    if (!$o) return false;
+    foreach (all('SELECT li.photo FROM log_items li JOIN daily_logs l ON l.id = li.log_id JOIN advisors a ON a.id = l.advisor_id WHERE a.office_id = ? AND li.photo IS NOT NULL', [$officeId]) as $r) {
+        $f = APP_ROOT . '/uploads/' . basename((string)$r['photo']);
+        if (is_file($f)) @unlink($f);
+    }
+    q('DELETE FROM offices WHERE id = ? AND active = 0', [$officeId]);
+    return true;
+}
+
 /** Borra para siempre a un asesor dado de baja, con todos sus registros y sus fotos. */
 function delete_advisor(int $advisorId): void
 {

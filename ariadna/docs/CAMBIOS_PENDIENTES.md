@@ -128,6 +128,17 @@ Oficinas: «Editar nombre, correo o rol» en cada usuario. Archivo: `admin_ofici
 
 **Archivos (9):** sueltos en la carpeta de Ariadna: `admin.php`, `admin_oficina.php`, `asesor.php`, `config_oficina.php`, `playbook.html`, `Playbook_Ariadna.pdf`, `playbook_edalo.html`, `Playbook_Edalo.pdf`. Dentro de `inc`: `app.php`.
 
+## Actualización 12 (`ariadna_actualizacion_12.zip`)
+
+**Qué trae:**
+1. **Borrar oficina** (solo el administrador): en «Editar y usuarios», al final. Primero hay que desactivarla y escribir su nombre para confirmar. Se borra con sus usuarios, asesores, registros y fotos.
+2. **Entrar sin tropiezos:** el inicio de sesión ya no falla por un espacio que se cuela al copiar de WhatsApp ni por la mayúscula automática del celular en el correo.
+3. **Contraseñas fáciles de dictar** (ej. Kx7m-Pq4r-Tz9w), sin letras que se confunden como 0/O o 1/l/I.
+4. **Restablecer contraseña:** ya trae una sugerida, la muestra al guardar para que la copies, reactiva al usuario si estaba inactivo y quita el bloqueo de «Demasiados intentos».
+5. Cada usuario muestra su **último acceso** o «Todavía no ha entrado».
+
+**Archivos (3):** sueltos en la carpeta de Ariadna: `admin_oficina.php`, `login.php`. Dentro de `inc`: `app.php`.
+
 ## Próxima actualización (se junta con lo que salga de la prueba)
 
 | # | Cambio | Archivo |

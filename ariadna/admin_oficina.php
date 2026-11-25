@@ -25,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         flash('Oficina actualizada.');
     } elseif ($act === 'add_user') {
         $email = mb_strtolower(post('email'));
-        $pass = (string)($_POST['password'] ?? '');
+        $pass = trim((string)($_POST['password'] ?? ''));
         $role = post('role');
         if (post('name') === '' || !filter_var($email, FILTER_VALIDATE_EMAIL) || mb_strlen($pass) < 10 || !in_array($role, ['director', 'gerente', 'team_leader'], true)) {
             flash('Revisa nombre, correo, rol y que la contraseña tenga al menos 10 caracteres.', 'err');
@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             flash('Ya existe un usuario con ese correo.', 'err');
         } else {
             create_user($id, post('name'), $email, $pass, $role);
-            flash('Usuario creado. Compártele su correo y contraseña; puede cambiarla en «Mi cuenta».');
+            flash('Usuario creado. Mándale su correo (' . $email . ') y su contraseña: ' . $pass . ' · Puede cambiarla en «Mi cuenta».');
         }
     } elseif ($act === 'edit_user') {
         $uid = (int)post('user_id');
@@ -49,11 +49,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             flash('Usuario actualizado. Si cambiaste el correo, desde ahora entra con el nuevo (la contraseña es la misma).');
         }
     } elseif ($act === 'reset_pass') {
-        $pass = (string)($_POST['password'] ?? '');
+        $pass = trim((string)($_POST['password'] ?? ''));
+        $who = one('SELECT * FROM users WHERE id = ? AND office_id = ?', [(int)post('user_id'), $id]);
         if (mb_strlen($pass) < 10) flash('La contraseña debe tener al menos 10 caracteres.', 'err');
-        else {
-            q('UPDATE users SET password_hash = ? WHERE id = ? AND office_id = ?', [password_hash($pass, PASSWORD_DEFAULT), (int)post('user_id'), $id]);
-            flash('Contraseña restablecida.');
+        elseif ($who) {
+            q('UPDATE users SET password_hash = ?, active = 1 WHERE id = ?', [password_hash($pass, PASSWORD_DEFAULT), $who['id']]);
+            q('DELETE FROM login_attempts WHERE k LIKE ?', ['login:' . $who['email'] . '|%']);
+            flash('Contraseña nueva de ' . $who['name'] . ': ' . $pass . ' · Mándasela junto con su correo (' . $who['email'] . ').');
+        }
+    } elseif ($act === 'delete_office') {
+        if ((int)$office['active'] === 1) {
+            flash('Primero desactiva la oficina.', 'err');
+        } elseif (trim(post('confirm_name')) !== $office['name']) {
+            flash('Para borrarla escribe el nombre de la oficina exactamente igual.', 'err');
+        } else {
+            delete_office($id);
+            flash('La oficina ' . $office['name'] . ' se borró con sus usuarios, asesores y registros.');
+            redirect('admin.php');
         }
     } elseif ($act === 'send_report') {
         $ok = send_weekly_report($office);
@@ -102,9 +114,10 @@ page_start($office['name'], ['nav' => $u, 'active' => 'admin']);
     <div class="plan-act">
       <b><?= h($x['name']) ?></b> · <?= h(ROLE_LABELS[$x['role']]) ?> · <span class="muted"><?= h($x['email']) ?></span>
       <?= !(int)$x['active'] ? ' · <b style="color:var(--red)">Inactivo</b>' : '' ?>
+      <br><span class="small muted"><?= $x['last_login_at'] ? 'Último acceso: ' . h(date('d/m/Y H:i', strtotime($x['last_login_at']))) : 'Todavía no ha entrado' ?></span>
       <div class="actions" style="margin-top:8px">
         <form method="post" class="inline-form actions"><?= csrf_field() ?><input type="hidden" name="action" value="reset_pass"><input type="hidden" name="id" value="<?= $id ?>"><input type="hidden" name="user_id" value="<?= (int)$x['id'] ?>">
-          <input type="text" name="password" placeholder="Nueva contraseña" minlength="10" style="max-width:220px;min-height:38px;margin:0"><button class="btn btn-sm btn-ghost">Restablecer</button></form>
+          <input type="text" name="password" value="<?= h(readable_password()) ?>" minlength="10" style="max-width:220px;min-height:38px;margin:0" aria-label="Contraseña nueva"><button class="btn btn-sm btn-ghost">Restablecer contraseña</button></form>
         <details class="edit-user" style="flex-basis:100%"><summary class="btn btn-sm btn-ghost">Editar nombre, correo o rol</summary>
           <form method="post" class="form" style="margin-top:10px"><?= csrf_field() ?><input type="hidden" name="action" value="edit_user"><input type="hidden" name="id" value="<?= $id ?>"><input type="hidden" name="user_id" value="<?= (int)$x['id'] ?>">
             <div class="grid2">
@@ -131,9 +144,23 @@ page_start($office['name'], ['nav' => $u, 'active' => 'admin']);
       <label>Nombre<input name="name" required></label>
       <label>Rol<select name="role"><option value="director">Director (dueño de oficina)</option><option value="gerente">Gerente</option><option value="team_leader">Team Leader</option></select></label>
       <label>Correo<input type="email" name="email" required></label>
-      <label>Contraseña inicial<input type="text" name="password" required minlength="10" value="<?= h(substr(str_replace(['+', '/', '='], '', base64_encode(random_bytes(12))), 0, 12)) ?>"></label>
+      <label>Contraseña inicial<input type="text" name="password" required minlength="10" value="<?= h(readable_password()) ?>"></label>
     </div>
     <button class="btn btn-main">Crear usuario</button>
   </form>
+</div>
+<div class="card" id="borrar">
+  <h2>Borrar oficina</h2>
+  <?php if ((int)$office['active'] === 1): ?>
+    <p class="small muted">Para borrar una oficina, primero desactívala arriba (quita la marca de «Oficina activa» y guarda). Así nadie la borra por error.</p>
+  <?php else: ?>
+    <p>Se borra para siempre <b><?= h($office['name']) ?></b> con todos sus usuarios, asesores, registros, Retos y fotos. <b>No se puede deshacer.</b></p>
+    <form method="post" class="form" data-confirm="¿Borrar para siempre la oficina <?= h($office['name']) ?>?">
+      <?= csrf_field() ?><input type="hidden" name="action" value="delete_office"><input type="hidden" name="id" value="<?= $id ?>">
+      <label>Para confirmar, escribe el nombre de la oficina: <b><?= h($office['name']) ?></b>
+        <input name="confirm_name" required autocomplete="off"></label>
+      <button class="btn btn-danger">Borrar oficina para siempre</button>
+    </form>
+  <?php endif; ?>
 </div>
 <?php page_end();
