@@ -23,3 +23,7 @@ chatbot que elijas (web, WhatsApp, Instagram).
 ## Pendiente
 En `.claude/skills/harvey/references/r2cp-modelo.md`, agrega tus casos de éxito reales
 (solo los usa el copiloto; el chatbot nunca los menciona).
+
+## 3. Harvey en WhatsApp con Make
+Diseño de la automatización, prompt para construirla con IA y plan de pruebas:
+`harvey/make-whatsapp-harvey.md`.
