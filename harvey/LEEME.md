@@ -20,11 +20,6 @@ Los leads se guardan en `harvey/leads.csv`, que funciona como un mini CRM.
 Las instrucciones están en `harvey/harvey-chatbot-prompt.md`. Las pegas en la plataforma de
 chatbot que elijas (web, WhatsApp, Instagram).
 
-## Antes de usarlo, completa:
-En `.claude/skills/harvey/references/r2cp-modelo.md` y en `harvey/harvey-chatbot-prompt.md`,
-reemplaza los `[COMPLETAR]`:
-- Moneda de los precios (MXN o USD)
-- Casos de éxito reales
-- Número de WhatsApp para agendar
-- Enlace a tus cursos gratuitos
-- Tu biografía
+## Pendiente
+En `.claude/skills/harvey/references/r2cp-modelo.md`, agrega tus casos de éxito reales
+(solo los usa el copiloto; el chatbot nunca los menciona).
