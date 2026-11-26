@@ -7,7 +7,7 @@ Es un skill de Claude Code que está en `.claude/skills/harvey/`. Se carga solo 
 en este repositorio. Ejemplos de lo que le puedes pedir:
 
 - "Harvey, califica este lead: [pega el mensaje del prospecto]"
-- "Harvey, prepárame la llamada de diagnóstico con Juan, director de una oficina con 35 asesores en Monterrey"
+- "Harvey, prepárame la asesoría de 20 minutos con Juan, director de una oficina con 35 asesores en Monterrey"
 - "Harvey, me dijeron 'está muy caro', ¿qué respondo?"
 - "Harvey, escríbeme el seguimiento por WhatsApp para Ana, la llamada fue ayer"
 - "Harvey, arma la propuesta para Inmobiliaria X"
@@ -23,8 +23,8 @@ chatbot que elijas (web, WhatsApp, Instagram).
 ## Antes de usarlo, completa:
 En `.claude/skills/harvey/references/r2cp-modelo.md` y en `harvey/harvey-chatbot-prompt.md`,
 reemplaza los `[COMPLETAR]`:
-- Formato, duración, qué incluye y precio de R2CP
+- Moneda de los precios (MXN o USD)
 - Casos de éxito reales
-- Enlace de agenda, WhatsApp y web
-- Contenido gratuito para quienes no califican
+- Número de WhatsApp para agendar
+- Enlace a tus cursos gratuitos
 - Tu biografía

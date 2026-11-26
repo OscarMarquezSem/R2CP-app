@@ -39,7 +39,7 @@ y producir sin retener es entrenar asesores para la competencia.
 
 ### No es cliente ideal
 - Asesores independientes o agentes individuales.
-- Oficinas con menos de 20 asesores (se les puede ofrecer contenido gratuito o un programa menor, si existe `[COMPLETAR]`).
+- Oficinas con menos de 20 asesores (se les ofrecen todos los cursos gratuitos de Oscar).
 - Alguien que busca solo una conferencia motivacional sin intención de implementar.
 
 ## Los números que duelen (para el diagnóstico)
@@ -64,19 +64,51 @@ cartera que se lleva y meses sin producir del reemplazo.
 ## La oferta
 
 - **Nombre:** R2CP – Modelo de Escalamiento para Oficinas Inmobiliarias
-- **Formato:** `[COMPLETAR: mentoría grupal / consultoría 1 a 1 / programa en vivo / implementación en oficina]`
-- **Duración:** `[COMPLETAR]`
-- **Qué incluye:** `[COMPLETAR: sesiones, plantillas, capacitación para asesores, seguimiento, comunidad]`
-- **Inversión:** `[COMPLETAR]` (Harvey **no** da precio por chat sin antes calificar; lo da en la llamada.)
-- **Garantía:** `[COMPLETAR o eliminar]`
-- **Casos de éxito:** `[COMPLETAR: oficina, ciudad, # asesores antes/después, resultado medible]`
+- **Formato:** **membresía**.
+- **Qué incluye:**
+  1. **Asesoría 1 a 1** con Oscar.
+  2. **Implementación de sistemas** de reclutamiento, capacitación, producción y retención dentro de la oficina.
+  3. **Coach digital** de acompañamiento continuo.
+  4. **Webinars**.
+- **Estructura de contratos (2 etapas):**
+
+  | Etapa | Duración | Inversión |
+  |---|---|---|
+  | Contrato 1 – Arranque | 3 meses | $54,000 + IVA |
+  | Contrato 2 – Escalamiento | 12 meses | $108,000 + IVA |
+
+  Moneda: `[COMPLETAR: MXN / USD]`.
+  - El contrato 1 implementa la base del sistema; el contrato 2 da continuidad para escalar y consolidar.
+  - Referencia para el reencuadre: el contrato 1 equivale a $18,000 + IVA al mes; el 2, a $9,000 + IVA al mes.
+
+- **Política de precios:**
+  - **El chatbot de clientes NUNCA da precios ni rangos.**
+  - El Harvey copiloto sí usa los precios para preparar propuestas, cierres y cálculos de retorno,
+    pero solo para Oscar. La inversión se presenta en la asesoría o en la propuesta.
+- **Casos de éxito:** Oscar tiene casos reales. Pídeselos para usarlos; nunca los inventes.
+  `[COMPLETAR: oficina, ciudad/país, # asesores antes → después, resultado medible, tiempo]`
 
 ## Siguiente paso (llamada a la acción)
 
-- **Llamada de diagnóstico R2CP** (gratuita, 30–45 min) con Oscar o su equipo.
-- Enlace de agenda: `[COMPLETAR: Calendly / Google Calendar]`
-- WhatsApp: `[COMPLETAR]`
-- Web / landing: `[COMPLETAR]`
+- **Asesoría de 20 minutos** con Oscar, gratuita, **agendada por WhatsApp**.
+- WhatsApp: `[COMPLETAR: número con código de país]`
+- Enlace directo sugerido: `https://wa.me/[NÚMERO]?text=Hola%20Oscar,%20quiero%20agendar%20mi%20asesoría%20R2CP`
+
+## Para quien no califica (menos de 20 asesores)
+
+- Ofrecer **todos los cursos gratuitos de Oscar**: `[COMPLETAR: enlace]`.
+- Mantener el contacto: si la oficina crece a 20+ asesores, vuelve a ser prospecto.
+
+## Mercado e idioma
+
+Se vende en **cualquier país de habla hispana**. Adapta el vocabulario al país del prospecto
+cuando lo sepas, y si no, usa términos neutros:
+- México: asesor inmobiliario, comisión, cierre, captación.
+- Colombia / Venezuela: asesor, agente inmobiliario, captación, cierre de negocio.
+- Argentina / Uruguay: corredor, martillero, agente; usa "vos" solo si el prospecto lo usa.
+- Chile: corredor de propiedades, corretaje.
+- España: agente inmobiliario, agencia, comercial, captación.
+- Si mencionan precios, considera que el IVA y la moneda cambian según el país.
 
 ## Sobre Oscar Márquez
 

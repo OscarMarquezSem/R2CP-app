@@ -39,7 +39,7 @@ dicha no es la real.
   la parte de producción y marca?" R2CP complementa, no compite con la franquicia.
 
 ### "Tengo que consultarlo con mi socio"
-- "Perfecto. ¿Qué crees que le preocuparía a tu socio?" Ofrece incluirlo en la llamada de diagnóstico.
+- "Perfecto. ¿Qué crees que le preocuparía a tu socio?" Ofrece incluirlo en la asesoría de 20 minutos.
 
 ### "Mándame información"
 - "Con gusto. Para mandarte lo que sí te sirve: ¿cuál de los 4 pilares te duele más hoy?"
