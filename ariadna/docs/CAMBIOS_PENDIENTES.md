@@ -139,6 +139,14 @@ Oficinas: «Editar nombre, correo o rol» en cada usuario. Archivo: `admin_ofici
 
 **Archivos (3):** sueltos en la carpeta de Ariadna: `admin_oficina.php`, `login.php`. Dentro de `inc`: `app.php`.
 
+## Actualización 13 (`ariadna_actualizacion_13.zip`) · incluye lo de `inc/app.php` de la 12
+
+**Qué trae:**
+1. **Reiniciar su curso** (director, gerente y administrador), en el detalle del asesor: elige la fecha en que empieza de nuevo y se borra lo que registró (días, fotos, Retos, metas, repasos y logros). Conserva su enlace, su PIN, su aceptación del aviso y sus movimientos; queda registrado como «Reinició su curso».
+2. **Playbooks:** pregunta nueva «Hay que empezar su curso de nuevo».
+
+**Archivos (6):** sueltos en la carpeta de Ariadna: `asesor.php`, `playbook.html`, `Playbook_Ariadna.pdf`, `playbook_edalo.html`, `Playbook_Edalo.pdf`. Dentro de `inc`: `app.php`.
+
 ## Próxima actualización (se junta con lo que salga de la prueba)
 
 | # | Cambio | Archivo |

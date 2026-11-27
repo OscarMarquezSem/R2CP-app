@@ -62,6 +62,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             advisor_event((int)$adv['id'], $u, (int)$adv['active'] ? 'baja' : 'reactivacion', $note);
             flash((int)$adv['active'] ? 'Asesor dado de baja. Su enlace deja de funcionar.' : 'Asesor reactivado.');
         }
+    } elseif ($act === 'restart' && $canDecide) {
+        $start = post('restart_date');
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $start)) {
+            flash('Elige la fecha en que empieza de nuevo.', 'err');
+        } else {
+            restart_advisor($adv, $office, $start);
+            advisor_event((int)$adv['id'], $u, 'reinicio', 'Empieza de nuevo el ' . fecha_larga($start) . (post('note') !== '' ? '. ' . mb_substr(post('note'), 0, 500) : ''));
+            flash('Listo: ' . first_name($adv['name']) . ' empieza su curso desde el Día 1 el ' . fecha_larga($start) . '. Su enlace y su PIN siguen igual.');
+        }
     } elseif ($act === 'delete' && $canDecide && !(int)$adv['active']) {
         $name = $adv['name'];
         delete_advisor((int)$adv['id']);
@@ -324,6 +333,17 @@ page_start($adv['name'], ['nav' => $u, 'office' => $office, 'active' => 'oficina
         <textarea name="note" rows="2" maxlength="1000"<?= (int)$adv['active'] ? ' required' : '' ?> placeholder="<?= (int)$adv['active'] ? 'Ej. Dejó la oficina; no registró actividad en 2 semanas…' : '' ?>"></textarea></label>
       <button class="btn btn-sm <?= (int)$adv['active'] ? 'btn-danger' : 'btn-ghost' ?>"><?= (int)$adv['active'] ? 'Dar de baja' : 'Reactivar' ?></button>
     </form>
+    <form method="post" class="form" style="margin-top:16px;border-top:1px solid var(--line);padding-top:14px" data-confirm="¿Reiniciar el curso de <?= h($adv['name']) ?>? Se borra todo lo que registró (días, fotos, Retos, metas y logros) y empieza desde el Día 1. No se puede deshacer.">
+      <?= csrf_field() ?><input type="hidden" name="action" value="restart"><input type="hidden" name="id" value="<?= (int)$adv['id'] ?>">
+      <?php if (is_admin($u)): ?><input type="hidden" name="office" value="<?= (int)$office['id'] ?>"><?php endif; ?>
+      <h3 style="margin:0">Reiniciar su curso</h3>
+      <p class="small muted">Para que empiece desde el Día 1, por ejemplo si se dio de alta antes de tiempo o hizo pruebas. Se borra lo que registró: días, fotos, Retos, metas, repasos y logros. Su enlace, su PIN y sus movimientos se quedan igual. Si solo quieres mover su fecha sin borrar nada, cámbiala arriba en «Datos del asesor».</p>
+      <div class="grid2">
+        <label>Empieza de nuevo el<input type="date" name="restart_date" required value="<?= h(office_today($office)) ?>"></label>
+        <label>Motivo (opcional)<input name="note" maxlength="500" placeholder="Ej. Se dio de alta antes de su fecha"></label>
+      </div>
+      <button class="btn btn-sm btn-danger">Reiniciar su curso</button>
+    </form>
     <?php if (!(int)$adv['active']): ?>
     <form method="post" class="form" style="margin-top:16px;border-top:1px solid var(--line);padding-top:14px" data-confirm="¿Borrar para siempre a <?= h($adv['name']) ?>? Se borran su avance, sus registros, sus Retos y sus fotos. No se puede deshacer.">
       <?= csrf_field() ?><input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="<?= (int)$adv['id'] ?>">
@@ -338,7 +358,7 @@ page_start($adv['name'], ['nav' => $u, 'office' => $office, 'active' => 'oficina
 <?php
 ensure_schema();
 $events = all('SELECT * FROM advisor_events WHERE advisor_id = ? ORDER BY created_at DESC, id DESC', [$adv['id']]);
-$evLabels = ['baja' => 'Dio de baja', 'reactivacion' => 'Reactivó', 'decision_continua' => 'Punto de control: sí continúa',
+$evLabels = ['baja' => 'Dio de baja', 'reactivacion' => 'Reactivó', 'reinicio' => 'Reinició su curso', 'decision_continua' => 'Punto de control: sí continúa',
     'decision_no_continua' => 'Punto de control: no continúa', 'decision_pendiente' => 'Punto de control: pendiente de decidir'];
 ?>
 <h2 class="sec">Movimientos</h2>

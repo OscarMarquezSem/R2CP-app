@@ -435,6 +435,32 @@ function delete_office(int $officeId): bool
     return true;
 }
 
+/**
+ * Reinicia el curso de un asesor desde el Día 1 con una fecha nueva: borra sus días registrados, fotos, Retos,
+ * metas, repasos y logros. Conserva su enlace, su PIN, su aceptación del aviso de privacidad y sus movimientos.
+ */
+function restart_advisor(array $adv, array $office, string $start): void
+{
+    $id = (int)$adv['id'];
+    foreach (all('SELECT li.photo FROM log_items li JOIN daily_logs l ON l.id = li.log_id WHERE l.advisor_id = ? AND li.photo IS NOT NULL', [$id]) as $r) {
+        $f = APP_ROOT . '/uploads/' . basename((string)$r['photo']);
+        if (is_file($f)) @unlink($f);
+    }
+    q('DELETE FROM daily_logs WHERE advisor_id = ?', [$id]);
+    q('DELETE FROM advisor_retos WHERE advisor_id = ?', [$id]);
+    q('DELETE FROM advisor_goals WHERE advisor_id = ?', [$id]);
+    q('DELETE FROM week_reviews WHERE advisor_id = ?', [$id]);
+    foreach (['filtro_repite:' . $id, 'filtro_falla:' . $id] as $k) q('DELETE FROM notices WHERE k = ?', [$k]);
+    foreach (['cp_pendiente:' . $id . ':%', 'sesion_sin_fecha:' . $id . ':%'] as $k) q('DELETE FROM notices WHERE k LIKE ?', [$k]);
+    q('UPDATE advisors SET start_date = ?, oh_done = 0, oh_date = NULL, oh_attendees = 0, cap_precio = 0, cap_docs = 0, cap_disp = 0,
+        renta_closed = 0, renta_date = NULL, ind_cap_done = 0, ind_cap_date = NULL, ind_oferta_done = 0, ind_oferta_date = NULL,
+        ind_inq_done = 0, ind_inq_date = NULL, know_props = NULL, know_zones = NULL, status_color = "verde", status_reason = NULL,
+        closed_weeks = 0, last_morning_reminder = NULL, last_night_reminder = NULL,
+        decision = NULL, decision_note = NULL, decision_by = NULL, decision_at = NULL, training_manual = 0 WHERE id = ?', [$start, $id]);
+    $a2 = one('SELECT * FROM advisors WHERE id = ?', [$id]);
+    q('UPDATE advisors SET training_date = ? WHERE id = ?', [find_training_date($office, $a2), $id]);
+}
+
 /** Borra para siempre a un asesor dado de baja, con todos sus registros y sus fotos. */
 function delete_advisor(int $advisorId): void
 {
