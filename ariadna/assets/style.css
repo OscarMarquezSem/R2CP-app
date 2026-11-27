@@ -249,6 +249,10 @@ details.card[open] > summary::after { content: "－"; }
 .act-video { padding: 0 16px 12px; }
 .video-wrap { position: relative; padding-top: 56.25%; border-radius: 12px; overflow: hidden; background: var(--navy); }
 .video-wrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.video-office { background: var(--cream); border-left: 4px solid var(--gold); border-radius: 12px; padding: 14px 16px; color: var(--navy); font-size: .95rem; }
+.vid-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); gap: 16px; }
+.vid-card { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.vid-card h3 { margin: 0; font-size: 1rem; }
 .video-soon { background: var(--cream); border-radius: 12px; padding: 14px; text-align: center; color: var(--navy-2); font-weight: 600; }
 .help-links { border: 1px solid var(--gold-l); border-radius: 12px; padding: 12px 14px; margin: 0 0 12px; display: flex; flex-direction: column; gap: 8px; }
 .help-links a { display: flex; gap: 10px; align-items: center; font-weight: 600; font-size: .95rem; text-decoration: none; }

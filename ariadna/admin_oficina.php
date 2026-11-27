@@ -20,8 +20,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($act === 'office') {
         $tz = array_key_exists(post('timezone'), $tzs) ? post('timezone') : 'America/Cancun';
         $progs = array_values(array_intersect(array_keys(PROGRAMS), (array)($_POST['programs'] ?? [])));
-        q('UPDATE offices SET name = ?, city = ?, timezone = ?, active = ?, programs = ? WHERE id = ?',
-            [post('name') ?: $office['name'], post('city'), $tz, !empty($_POST['active']) ? 1 : 0, implode(',', $progs ?: ['residencial']), $id]);
+        $vo = array_values(array_intersect(array_keys(PROGRAMS), (array)($_POST['videos_office'] ?? [])));
+        q('UPDATE offices SET name = ?, city = ?, timezone = ?, active = ?, programs = ?, videos_office = ? WHERE id = ?',
+            [post('name') ?: $office['name'], post('city'), $tz, !empty($_POST['active']) ? 1 : 0, implode(',', $progs ?: ['residencial']), implode(',', $vo), $id]);
         flash('Oficina actualizada.');
     } elseif ($act === 'add_user') {
         $email = mb_strtolower(post('email'));
@@ -101,6 +102,12 @@ page_start($office['name'], ['nav' => $u, 'active' => 'admin']);
         <label class="check"><input type="checkbox" name="programs[]" value="<?= h($pk) ?>" <?= in_array($pk, office_programs($office), true) ? 'checked' : '' ?>> <span><b><?= h($pd['name'] . ' · ' . $pd['area']) ?></b><br><span class="small muted"><?= h($pd['course'] . ', ' . $pd['weeks'] . ' semanas') ?></span></span></label>
       <?php endforeach; ?>
       <p class="small muted">Si una oficina no tiene un programa, no le aparece en ningún lado. Sus directores, gerentes y TL usan el mismo usuario para los dos.</p>
+    </fieldset>
+    <fieldset class="progs"><legend><b>¿Dónde ven los videos sus asesores?</b></legend>
+      <?php foreach (PROGRAMS as $pk => $pd): ?>
+        <label class="check"><input type="checkbox" name="videos_office[]" value="<?= h($pk) ?>" <?= videos_office_only($office, $pk) ? 'checked' : '' ?>> <span><b><?= h($pd['name']) ?>: solo en la oficina</b><br><span class="small muted">El asesor ve la actividad del video, pero sin reproductor: lo ve en la oficina, en la página «Videos» del panel.</span></span></label>
+      <?php endforeach; ?>
+      <p class="small muted">Sin marcar, los asesores ven los videos en su app, como siempre.</p>
     </fieldset>
     <label class="check"><input type="checkbox" name="active" value="1" <?= (int)$office['active'] ? 'checked' : '' ?>> Oficina activa (si la desactivas, nadie de la oficina puede entrar)</label>
     <button class="btn btn-main">Guardar</button>

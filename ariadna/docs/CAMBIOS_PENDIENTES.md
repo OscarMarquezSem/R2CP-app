@@ -147,6 +147,16 @@ Oficinas: «Editar nombre, correo o rol» en cada usuario. Archivo: `admin_ofici
 
 **Archivos (6):** sueltos en la carpeta de Ariadna: `asesor.php`, `playbook.html`, `Playbook_Ariadna.pdf`, `playbook_edalo.html`, `Playbook_Edalo.pdf`. Dentro de `inc`: `app.php`.
 
+## Actualización 14 (`ariadna_actualizacion_14.zip`)
+
+**Qué trae:**
+1. **Videos solo en la oficina** (por oficina y por programa): el administrador lo marca en Oficinas → Editar y usuarios → «¿Dónde ven los videos sus asesores?». El asesor ve la actividad del video con el aviso «Este video lo ves en tu oficina», sin reproductor ni enlace. Sin marcar, todo sigue como siempre.
+2. **Página «Videos»** en el panel de la oficina: los videos de cada programa por semana, para ponerlos en la oficina o repasarlos.
+3. **Base de datos v5:** la columna nueva se agrega sola la primera vez que se abre la app (no hay `actualizar_plan.php`).
+4. **Playbooks:** pregunta nueva «Queremos que vean los videos solo en la oficina». La versión de la app sube a 1.5.0.
+
+**Archivos (10):** sueltos en la carpeta de Ariadna: `videos.php` (nuevo), `admin_oficina.php`, `playbook.html`, `Playbook_Ariadna.pdf`, `playbook_edalo.html`, `Playbook_Edalo.pdf`. Dentro de `inc`: `app.php`, `hoy_view.php`, `layout.php`. Dentro de `assets`: `style.css`.
+
 ## Próxima actualización (se junta con lo que salga de la prueba)
 
 | # | Cambio | Archivo |

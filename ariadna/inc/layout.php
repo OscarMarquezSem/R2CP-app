@@ -59,6 +59,7 @@ function panel_nav(array $u, ?array $office, string $active): void
     if ($office) {
         echo '<a class="' . ($active === 'oficina' ? 'on' : '') . '" href="oficina.php' . $qs . '">Asesores</a>';
         echo '<a class="' . ($active === 'sesiones' ? 'on' : '') . '" href="sesiones.php' . $qs . '">Sesiones</a>';
+        echo '<a class="' . ($active === 'videos' ? 'on' : '') . '" href="videos.php' . $qs . '">Videos</a>';
         echo '<a class="' . ($active === 'config' ? 'on' : '') . '" href="config_oficina.php' . $qs . '">Configuración</a>';
     }
     if (is_admin($u)) {

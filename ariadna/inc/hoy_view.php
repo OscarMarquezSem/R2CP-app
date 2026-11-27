@@ -207,7 +207,9 @@ function render_item(array $it, array $V): void
     if ($it['kind'] === 'video') {
         $src = video_embed_url($it['video_url']);
         echo '<div class="act-video">';
-        if ($src) {
+        if ($office && videos_office_only($office)) {
+            echo '<div class="video-office"><b>Este video lo ves en tu oficina.</b> Tu oficina lo pone para ti; después de verlo, tu Team Leader te hace las preguntas de tu Reto. Márcalo cuando lo veas.</div>';
+        } elseif ($src) {
             echo '<div class="video-wrap"><iframe src="' . h($src) . '" loading="lazy" allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen title="' . h($it['title']) . '"></iframe></div>';
         } else {
             echo '<div class="video-soon">Este video estará listo muy pronto.</div>';

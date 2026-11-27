@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS offices (
   remind_night_hour TINYINT NOT NULL DEFAULT 20,
   last_report_date DATE NULL,
   programs VARCHAR(40) NOT NULL DEFAULT 'residencial',
+  videos_office VARCHAR(40) NOT NULL DEFAULT '',
   active TINYINT(1) NOT NULL DEFAULT 1,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

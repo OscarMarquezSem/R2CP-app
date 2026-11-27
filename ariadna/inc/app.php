@@ -6,7 +6,7 @@
 declare(strict_types=1);
 
 define('APP_ROOT', dirname(__DIR__));
-define('APP_VERSION', '1.4.0');
+define('APP_VERSION', '1.5.0');
 
 if (!is_file(APP_ROOT . '/config.php')) {
     if (PHP_SAPI !== 'cli' && basename($_SERVER['SCRIPT_NAME'] ?? '') !== 'install.php') {
@@ -167,8 +167,9 @@ function ensure_schema(): void
     if ($done) return;
     $done = true;
     $v = (int)setting('schema_version');
-    if ($v >= 4) return;
-    if ($v >= 3) { ensure_schema_v4(); return; }
+    if ($v >= 5) return;
+    if ($v >= 4) { ensure_schema_v5(); return; }
+    if ($v >= 3) { ensure_schema_v4(); ensure_schema_v5(); return; }
     if ($v < 2) db()->exec("CREATE TABLE IF NOT EXISTS advisor_events (
         id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
         advisor_id INT UNSIGNED NOT NULL,
@@ -200,6 +201,7 @@ function ensure_schema(): void
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
     set_setting('schema_version', '3');
     ensure_schema_v4();
+    ensure_schema_v5();
 }
 
 /** Versión 4: dos programas (Ariadna · Residencial y Edalo · Comercial e Industrial). */
@@ -226,6 +228,20 @@ function ensure_schema_v4(): void
         db()->exec('ALTER TABLE plan_weeks DROP PRIMARY KEY, ADD PRIMARY KEY (program, week_no)');
     }
     set_setting('schema_version', '4');
+}
+
+/** v5: oficinas donde los videos de un programa se ven solo en la oficina (no en la app del asesor). */
+function ensure_schema_v5(): void
+{
+    if (!all("SHOW COLUMNS FROM `offices` LIKE 'videos_office'")) db()->exec("ALTER TABLE offices ADD COLUMN videos_office VARCHAR(40) NOT NULL DEFAULT ''");
+    set_setting('schema_version', '5');
+}
+
+/** ¿En esta oficina los videos de este programa se ven solo en la oficina? */
+function videos_office_only(array $office, ?string $prog = null): bool
+{
+    $list = array_filter(explode(',', (string)($office['videos_office'] ?? '')));
+    return in_array($prog ?? prog(), $list, true);
 }
 
 /** Registra un movimiento del asesor (baja, reactivación, decisión del punto de control). */
